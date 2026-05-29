@@ -1,0 +1,1579 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title id="seo-title">vaptdoc | Converta arquivos sem complicacao</title>
+    <meta
+      id="seo-description"
+      name="description"
+      content="Converta PDF, DOCX, imagens e video em poucos toques, com visual limpo, rapido e seguro em qualquer dispositivo."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="vaptdoc" />
+    <meta property="og:title" id="seo-og-title" content="vaptdoc | Converta arquivos sem complicacao" />
+    <meta
+      property="og:description"
+      id="seo-og-description"
+      content="Converta PDF, DOCX, imagens e video em poucos toques, com visual limpo, rapido e seguro em qualquer dispositivo."
+    />
+    <meta property="og:url" id="seo-og-url" content="https://transmutalab.up.railway.app/" />
+    <meta property="og:image" id="seo-og-image" content="https://transmutalab.up.railway.app/assets/vaptdoc-logo-transparent.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" id="seo-twitter-title" content="vaptdoc | Converta arquivos sem complicacao" />
+    <meta
+      name="twitter:description"
+      id="seo-twitter-description"
+      content="Converta PDF, DOCX, imagens e video em poucos toques, com visual limpo, rapido e seguro em qualquer dispositivo."
+    />
+    <meta
+      name="twitter:image"
+      id="seo-twitter-image"
+      content="https://transmutalab.up.railway.app/assets/vaptdoc-logo-transparent.png"
+    />
+    <meta name="vaptdoc:tool-id" id="seo-tool-id" content="" />
+    <meta name="theme-color" content="#7d38ff" id="theme-color-meta" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="canonical" id="seo-canonical" href="https://transmutalab.up.railway.app/" />
+    <link rel="icon" href="/assets/vaptdoc-logo-transparent.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (() => {
+        const themeCookie = document.cookie
+          .split(";")
+          .map((part) => part.trim())
+          .find((part) => part.startsWith("vaptdoc-theme=") || part.startsWith("transmuta-theme="))
+          ?.split("=")[1];
+        const fallback = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        const theme = themeCookie || fallback;
+        const themeColor = theme === "dark" ? "#5d31c7" : "#7d38ff";
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor);
+      })();
+    </script>
+    <script type="application/ld+json" id="seo-software-schema">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"vaptdoc","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://transmutalab.up.railway.app/","image":"https://transmutalab.up.railway.app/assets/vaptdoc-logo-transparent.png","description":"Converta PDF, DOCX, imagens, audio, video e modelos 3D com rapidez, seguranca e uma experiencia limpa em qualquer dispositivo.","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"}}</script>
+    <script type="application/ld+json" id="seo-howto-schema">{"@context":"https://schema.org","@type":"HowTo","name":"Como converter arquivos no vaptdoc","description":"Converta PDF, DOCX, imagens, audio, video e modelos 3D com rapidez, seguranca e uma experiencia limpa em qualquer dispositivo.","url":"https://transmutalab.up.railway.app/","step":[{"@type":"HowToStep","position":1,"name":"Escolha a conversao ideal na grade principal.","text":"Escolha a conversao ideal na grade principal."},{"@type":"HowToStep","position":2,"name":"Envie seu arquivo e organize a ordem quando necessario.","text":"Envie seu arquivo e organize a ordem quando necessario."},{"@type":"HowToStep","position":3,"name":"Revise os ajustes visiveis e inicie a conversao.","text":"Revise os ajustes visiveis e inicie a conversao."},{"@type":"HowToStep","position":4,"name":"Baixe o resultado assim que o processamento terminar.","text":"Baixe o resultado assim que o processamento terminar."}]}</script>
+    <script type="application/json" id="vaptdoc-page-data">{"toolId":"","canonicalUrl":"https://transmutalab.up.railway.app/","pagePath":"/","siteUrl":"https://transmutalab.up.railway.app"}</script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#workbench">Pular para o conversor</a>
+    <div class="background-orb orb-a"></div>
+    <div class="background-orb orb-b"></div>
+    <div class="grid-overlay"></div>
+    <div class="top-corner-bar">
+      <div class="account-corner">
+        <button
+          type="button"
+          class="account-launcher is-guest"
+          id="account-launcher"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-label="Entrar ou criar conta"
+        >
+          <span class="account-launcher-avatar" aria-hidden="true">
+            <img id="account-launcher-image" alt="" hidden />
+            <span id="account-launcher-initials">V</span>
+          </span>
+          <span class="account-launcher-copy" id="account-launcher-copy">Entrar ou criar conta</span>
+          <span class="account-launcher-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m7 10 5 5 5-5"></path>
+            </svg>
+          </span>
+        </button>
+
+        <div class="account-popover" id="account-popover" role="menu" aria-label="Opcoes da conta" hidden>
+          <div class="account-popover-head">
+            <button type="button" class="account-launcher-avatar account-popover-avatar account-avatar-trigger" id="account-popover-avatar-button" aria-label="Trocar foto de perfil">
+              <img id="account-popover-image" alt="" hidden />
+              <span id="account-popover-initials">V</span>
+            </button>
+            <div class="account-popover-copy">
+              <strong id="account-popover-name">Sua conta vaptdoc</strong>
+              <span id="account-popover-email">Entre para salvar seu plano</span>
+            </div>
+          </div>
+
+          <section class="account-popover-plan-card" aria-live="polite">
+            <div class="account-popover-plan-topline">
+              <div class="account-popover-plan-topline-copy">
+                <span class="account-popover-plan-badge" id="account-popover-plan-badge">Gratis</span>
+                <span class="account-popover-plan-meta" id="account-popover-plan-meta">Uso rapido no navegador</span>
+              </div>
+              <button type="button" class="ghost-action account-popover-plan-button" id="account-popover-plan-button">Planos</button>
+            </div>
+            <div class="account-popover-plan-copy">
+              <strong id="account-popover-plan-title">Seu acesso esta pronto para converter</strong>
+              <p id="account-popover-plan-copy">Veja seu plano, acompanhe seu uso e desbloqueie ferramentas premium quando quiser.</p>
+            </div>
+            <div class="account-popover-progress">
+              <div class="account-popover-progress-track" aria-hidden="true">
+                <span class="account-popover-progress-fill" id="account-popover-progress-fill"></span>
+              </div>
+              <div class="account-popover-progress-copy">
+                <strong id="account-popover-progress-label">8 livres hoje</strong>
+                <span id="account-popover-progress-meta">0 de 8 conversoes usadas</span>
+              </div>
+            </div>
+          </section>
+
+          <div class="account-popover-actions">
+            <button type="button" class="account-popover-action" id="account-menu-overview" role="menuitem">
+              <span class="menu-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4.5 7.5h15"></path>
+                  <path d="M4.5 12h15"></path>
+                  <path d="M4.5 16.5h9"></path>
+                </svg>
+              </span>
+              <span class="menu-action-label" id="account-menu-overview-label">Minha conta</span>
+            </button>
+            <button type="button" class="account-popover-action" id="account-menu-profile" role="menuitem">
+              <span class="menu-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7.5 6.75h9"></path>
+                  <path d="M7.5 11.25h9"></path>
+                  <path d="M7.5 15.75h5.25"></path>
+                </svg>
+              </span>
+              <span class="menu-action-label">Dados</span>
+            </button>
+            <button type="button" class="account-popover-action" id="account-menu-settings" role="menuitem">
+              <span class="menu-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 4.75v2.1"></path>
+                  <path d="M12 17.15v2.1"></path>
+                  <path d="m6.2 7.15 1.5 1.5"></path>
+                  <path d="m16.3 17.25 1.5 1.5"></path>
+                  <path d="M4.75 12h2.1"></path>
+                  <path d="M17.15 12h2.1"></path>
+                  <path d="m6.2 16.85 1.5-1.5"></path>
+                  <path d="m16.3 6.75 1.5-1.5"></path>
+                  <circle cx="12" cy="12" r="3.1"></circle>
+                </svg>
+              </span>
+              <span class="menu-action-label">Ajustes</span>
+            </button>
+            <button type="button" class="account-popover-action" id="account-menu-admin" role="menuitem" hidden>
+              <span class="menu-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 7.25h14"></path>
+                  <path d="M5 12h14"></path>
+                  <path d="M5 16.75h8"></path>
+                  <circle cx="17.25" cy="16.75" r="1.75"></circle>
+                </svg>
+              </span>
+              <span class="menu-action-label">Admin</span>
+            </button>
+            <button type="button" class="account-popover-action danger" id="account-menu-logout" role="menuitem">
+              <span class="menu-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 7.25H7.25A2.25 2.25 0 0 0 5 9.5v5A2.25 2.25 0 0 0 7.25 16.75H10"></path>
+                  <path d="m13.5 8.5 4 3.5-4 3.5"></path>
+                  <path d="M17.5 12h-8"></path>
+                </svg>
+              </span>
+              <span class="menu-action-label">Sair</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="theme-toggle"
+        id="theme-toggle"
+        aria-pressed="false"
+        aria-label="Alternar tema"
+      >
+        <span class="theme-toggle-track" aria-hidden="true">
+          <span class="theme-toggle-thumb"></span>
+          <span class="theme-toggle-icon theme-toggle-icon-sun">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2.5v2.2"></path>
+              <path d="M12 19.3v2.2"></path>
+              <path d="m4.93 4.93 1.56 1.56"></path>
+              <path d="m17.51 17.51 1.56 1.56"></path>
+              <path d="M2.5 12h2.2"></path>
+              <path d="M19.3 12h2.2"></path>
+              <path d="m4.93 19.07 1.56-1.56"></path>
+              <path d="m17.51 6.49 1.56-1.56"></path>
+            </svg>
+          </span>
+          <span class="theme-toggle-icon theme-toggle-icon-moon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7.2 7.2 0 0 0 9.8 9.8z"></path>
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+
+    <main class="shell shell-compact">
+      <section class="hero-panel" aria-labelledby="hero-title">
+        <a class="hero-brand" href="#workbench" aria-label="Ir para o conversor vaptdoc">
+          <span class="hero-brand-mark" aria-hidden="true">
+            <picture>
+              <source
+                srcset="/assets/vaptdoc-symbol-clean-320.webp 320w, /assets/vaptdoc-symbol-clean-640.webp 640w, /assets/vaptdoc-symbol-clean.webp 960w"
+                sizes="(max-width: 720px) 48vw, 12rem"
+                type="image/webp"
+              />
+              <img src="/assets/vaptdoc-symbol-clean.png" alt="" class="hero-brand-image" width="640" height="640" decoding="async" />
+            </picture>
+          </span>
+          <strong class="brand-wordmark hero-brand-wordmark" aria-label="vaptdoc">
+            <span class="brand-word-vapt">vapt</span><span class="brand-word-doc">doc</span>
+          </strong>
+        </a>
+
+        <div class="search-shell hero-search-shell">
+          <label class="search-field" for="tool-search">
+            <span class="search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </span>
+            <input
+              id="tool-search"
+              name="toolSearch"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Pesquisar conversao"
+              aria-label="Pesquisar conversao"
+            />
+            <button type="button" class="search-clear" id="search-clear" hidden aria-label="Limpar busca">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m18 6-12 12"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </label>
+
+          <div class="search-results" id="search-results" role="listbox" aria-label="Resultados de busca" hidden></div>
+        </div>
+
+        <p class="eyebrow">Conversor online rapido e leve</p>
+        <h1 id="hero-title">Converta arquivos em poucos toques</h1>
+        <p class="section-copy">
+          Escolha o formato, envie o arquivo e baixe o resultado sem complicacao.
+        </p>
+
+        <h2 class="section-subtitle">Como funciona</h2>
+        <div class="quick-flow" aria-label="Como funciona">
+          <div class="quick-flow-step">
+            <span class="quick-flow-number">1</span>
+            <strong>Escolha</strong>
+            <span>Toque na conversao</span>
+          </div>
+          <div class="quick-flow-step">
+            <span class="quick-flow-number">2</span>
+            <strong>Envie</strong>
+            <span>Selecione seu arquivo</span>
+          </div>
+          <div class="quick-flow-step">
+            <span class="quick-flow-number">3</span>
+            <strong>Baixe</strong>
+            <span>Receba o resultado</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="workbench" id="workbench">
+        <div class="section-heading centered compact-heading">
+          <p class="eyebrow">Escolha a conversao</p>
+          <h2 class="section-subtitle">Ferramentas prontas para converter</h2>
+        </div>
+
+        <div class="tool-toolbar">
+          <div class="tool-tabs" role="tablist" aria-label="Filtrar conversoes">
+            <button
+              type="button"
+              class="tool-tab active"
+              id="tab-all"
+              data-filter="all"
+              aria-selected="true"
+            >
+              Todas
+            </button>
+            <button
+              type="button"
+              class="tool-tab"
+              id="tab-favorites"
+              data-filter="favorites"
+              aria-selected="false"
+            >
+              Favoritas
+            </button>
+            <button
+              type="button"
+              class="tool-tab"
+              id="tab-3d"
+              data-filter="3d"
+              aria-selected="false"
+            >
+              Impressao 3D
+            </button>
+          </div>
+
+          <p class="tool-toolbar-copy" id="tool-toolbar-copy">Conversoes prontas para voce</p>
+        </div>
+
+        <div class="tool-grid-wrap">
+          <div class="tool-grid-skeleton" id="tool-grid-skeleton" aria-hidden="true">
+            <span class="tool-skeleton-card"></span>
+            <span class="tool-skeleton-card"></span>
+            <span class="tool-skeleton-card"></span>
+            <span class="tool-skeleton-card"></span>
+            <span class="tool-skeleton-card"></span>
+            <span class="tool-skeleton-card"></span>
+            <span class="tool-skeleton-card"></span>
+            <span class="tool-skeleton-card"></span>
+          </div>
+          <div class="tool-grid" id="tool-grid" aria-live="polite" hidden></div>
+          <p class="tool-empty" id="tool-empty" hidden>Nenhuma conversao encontrada.</p>
+        </div>
+
+        <form class="convert-panel" id="convert-form" aria-busy="false">
+          <input id="toolId" name="toolId" type="hidden" required />
+
+          <div class="convert-layout">
+            <aside class="convert-sidebar">
+              <section class="selection-card workspace-guide-card" aria-label="Fluxo do workspace">
+                <div class="workspace-guide-head">
+                  <span class="selection-kicker">Workspace</span>
+                  <strong>Um fluxo por vez</strong>
+                  <p id="workspace-guide-copy">Escolha uma ferramenta, monte sua grade e converta sem se perder em campos.</p>
+                </div>
+
+                <div class="workspace-guide-steps">
+                  <article class="workspace-guide-step" data-workspace-step="tool" data-state="active">
+                    <span class="workspace-guide-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="5" y="6" width="14" height="12" rx="3"></rect>
+                        <path d="M8.5 10h7"></path>
+                        <path d="M8.5 14h4"></path>
+                      </svg>
+                    </span>
+                    <div class="workspace-guide-step-copy">
+                      <strong>Ferramenta</strong>
+                      <span>Escolha a conversao</span>
+                    </div>
+                  </article>
+
+                  <article class="workspace-guide-step" data-workspace-step="files" data-state="idle">
+                    <span class="workspace-guide-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 18a4 4 0 1 1 .8-7.92A5 5 0 0 1 17.5 12H18a3 3 0 1 1 0 6"></path>
+                        <path d="M12 12v6"></path>
+                        <path d="m9.5 14.5 2.5-2.5 2.5 2.5"></path>
+                      </svg>
+                    </span>
+                    <div class="workspace-guide-step-copy">
+                      <strong>Arquivos</strong>
+                      <span>Envie e organize</span>
+                    </div>
+                  </article>
+
+                  <article class="workspace-guide-step" data-workspace-step="adjust" data-state="idle">
+                    <span class="workspace-guide-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 4.75v2.1"></path>
+                        <path d="M12 17.15v2.1"></path>
+                        <path d="m6.2 7.15 1.5 1.5"></path>
+                        <path d="m16.3 17.25 1.5 1.5"></path>
+                        <path d="M4.75 12h2.1"></path>
+                        <path d="M17.15 12h2.1"></path>
+                        <path d="m6.2 16.85 1.5-1.5"></path>
+                        <path d="m16.3 6.75 1.5-1.5"></path>
+                        <circle cx="12" cy="12" r="3.1"></circle>
+                      </svg>
+                    </span>
+                    <div class="workspace-guide-step-copy">
+                      <strong>Ajustes</strong>
+                      <span>So o que for necessario</span>
+                    </div>
+                  </article>
+
+                  <article class="workspace-guide-step" data-workspace-step="convert" data-state="idle">
+                    <span class="workspace-guide-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="m13 6 6 6-6 6"></path>
+                      </svg>
+                    </span>
+                    <div class="workspace-guide-step-copy">
+                      <strong>Resultado</strong>
+                      <span>Converta e baixe</span>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <section class="access-strip access-strip-compact" id="access-strip" aria-live="polite" hidden>
+                <div class="access-summary">
+                  <span class="selection-kicker">Seu plano</span>
+                  <strong id="access-plan-label">Gratis</strong>
+                  <p id="access-usage-copy">8 conversoes gratis por dia.</p>
+                </div>
+
+                <div class="access-actions">
+                  <button type="button" class="ghost-action ghost-action-rich" id="open-billing">
+                    <span class="ghost-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4.5" y="6.5" width="15" height="11" rx="2.5"></rect>
+                        <path d="M8.25 11.5h7.5"></path>
+                      </svg>
+                    </span>
+                    <span>Planos</span>
+                  </button>
+                  <button type="button" class="ghost-action ghost-action-rich" id="open-redeem">
+                    <span class="ghost-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m8.5 6.5 7 7"></path>
+                        <path d="M14.1 5.2h3.3a1.4 1.4 0 0 1 1.4 1.4v3.3a2 2 0 0 1-.58 1.42l-5.78 5.78a2 2 0 0 1-2.83 0l-3.2-3.2a2 2 0 0 1 0-2.83l5.78-5.78a2 2 0 0 1 1.41-.58Z"></path>
+                        <circle cx="15.7" cy="8.3" r="0.85"></circle>
+                      </svg>
+                    </span>
+                    <span>Codigo</span>
+                  </button>
+                  <button type="button" class="ghost-action ghost-action-rich" id="access-logout" hidden>
+                    <span class="ghost-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 7.25H7.25A2.25 2.25 0 0 0 5 9.5v5A2.25 2.25 0 0 0 7.25 16.75H10"></path>
+                        <path d="m13.5 8.5 4 3.5-4 3.5"></path>
+                        <path d="M17.5 12h-8"></path>
+                      </svg>
+                    </span>
+                    <span>Sair</span>
+                  </button>
+                </div>
+              </section>
+
+              <section class="premium-lock premium-lock-compact" id="premium-lock" hidden aria-live="polite">
+                <div class="premium-lock-copy">
+                  <span class="selection-kicker">Ferramenta Pro</span>
+                  <strong id="premium-lock-title">Desbloqueie para usar esta conversao.</strong>
+                  <p id="premium-lock-copy">
+                    O plano Pro libera OCR, ferramentas PDF avancadas e conversoes 3D com prioridade.
+                  </p>
+                </div>
+
+                <div class="premium-lock-actions">
+                  <button type="button" class="button primary" id="unlock-tool">Desbloquear agora</button>
+                </div>
+              </section>
+            </aside>
+
+            <div class="convert-main">
+              <section class="selection-card selection-card-primary workspace-tool-card" aria-live="polite">
+                <div class="selection-head">
+                  <div class="selection-heading-block">
+                    <span class="selection-kicker">Ferramenta ativa</span>
+                    <strong id="active-tool-title">Selecione uma conversao</strong>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="favorite-toggle"
+                    id="favorite-toggle"
+                    aria-pressed="false"
+                    aria-label="Favoritar conversao"
+                  >
+                    <span class="favorite-toggle-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 3.5 2.8 5.67 6.27.91-4.53 4.42 1.07 6.25L12 17.8l-5.62 2.95 1.07-6.25L2.92 10.08l6.27-.91L12 3.5z"></path>
+                      </svg>
+                    </span>
+                    <span class="favorite-toggle-copy" id="favorite-toggle-copy">Favoritar</span>
+                  </button>
+                </div>
+
+                <p id="active-tool-description">Escolha uma pilula acima para comecar.</p>
+
+                <div class="workspace-tool-badges" aria-label="Resumo da ferramenta">
+                  <span class="workspace-tool-badge" id="workspace-from-badge">Entrada</span>
+                  <span class="workspace-tool-badge" id="workspace-to-badge">Saida</span>
+                  <span class="workspace-tool-badge" id="workspace-mode-badge">1 arquivo</span>
+                </div>
+              </section>
+
+              <div class="workspace-main-grid">
+                <section class="convert-stage-card workspace-canvas-card">
+                  <div class="workspace-panel-head">
+                    <div class="workspace-panel-copy">
+                      <span class="selection-kicker">Arquivos e previa</span>
+                      <strong id="workspace-canvas-title">Monte sua mesa de conversao</strong>
+                      <p id="workspace-canvas-copy">Envie, arraste, revise e troque arquivos sem sair desta area.</p>
+                    </div>
+
+                    <div class="workspace-panel-chips" aria-live="polite">
+                      <span class="workspace-stage-chip" id="workspace-files-badge">Sem arquivos</span>
+                      <span class="workspace-stage-chip workspace-stage-chip-soft" id="workspace-flow-badge">Pronto para enviar</span>
+                    </div>
+                  </div>
+
+                  <div class="workspace-canvas-stack">
+                    <label class="dropzone" id="dropzone" tabindex="0" role="button" aria-describedby="dropzone-copy" aria-label="Enviar arquivos para a conversao">
+                      <input id="file" name="file" type="file" />
+                      <span class="dropzone-kicker">Envio do arquivo</span>
+                      <span class="dropzone-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M7 18a4 4 0 1 1 .8-7.92A5 5 0 0 1 17.5 12H18a3 3 0 1 1 0 6"></path>
+                          <path d="M12 12v6"></path>
+                          <path d="m9.5 14.5 2.5-2.5 2.5 2.5"></path>
+                        </svg>
+                      </span>
+                      <strong id="dropzone-title">Arraste e solte aqui</strong>
+                      <span id="dropzone-copy">Ou toque para escolher seu arquivo</span>
+                    </label>
+
+                    <section class="file-stage" id="file-stage" hidden aria-live="polite"></section>
+                  </div>
+                </section>
+
+                <aside class="workspace-inspector">
+                  <section class="workspace-options-card workspace-special-card" id="workspace-special-card" hidden>
+                    <div class="workspace-panel-head workspace-panel-head-compact">
+                      <div class="workspace-panel-copy">
+                        <span class="selection-kicker" id="workspace-special-kicker">Fluxo guiado</span>
+                        <strong id="workspace-special-title">Workspace especializado</strong>
+                        <p id="workspace-special-copy">Mostramos aqui os atalhos e ajustes que mais importam para esta operacao.</p>
+                      </div>
+                    </div>
+
+                    <div class="workspace-special-stack" id="workspace-special-stack"></div>
+                  </section>
+
+                  <section class="workspace-options-card" id="workspace-options-card" hidden>
+                    <div class="workspace-panel-head workspace-panel-head-compact">
+                      <div class="workspace-panel-copy">
+                        <span class="selection-kicker">Ajustes</span>
+                        <strong id="workspace-options-title">Ajustes desta conversao</strong>
+                        <p id="workspace-options-copy">Mostramos apenas os controles que fazem sentido para esta ferramenta.</p>
+                      </div>
+                    </div>
+
+                    <div class="workspace-options-stack">
+                      <fieldset class="field text-layout-field" id="text-layout-field" hidden>
+                        <legend>Como deseja o texto?</legend>
+                        <div class="segmented-control" role="radiogroup" aria-label="Como organizar o texto">
+                          <label class="segment-option">
+                            <input type="radio" name="textLayout" value="blocks" checked />
+                            <span>Em blocos</span>
+                          </label>
+                          <label class="segment-option">
+                            <input type="radio" name="textLayout" value="lines" />
+                            <span>Linha por linha</span>
+                          </label>
+                        </div>
+                        <p class="field-hint" id="text-layout-hint">
+                          Blocos deixa o documento mais organizado. Linhas mantem cada quebra de texto.
+                        </p>
+                      </fieldset>
+
+                      <section class="tool-options" id="tool-options" hidden aria-live="polite"></section>
+                    </div>
+                  </section>
+
+                  <section class="workspace-options-card workspace-help-card" id="workspace-help-card" hidden aria-live="polite">
+                    <div class="workspace-panel-head workspace-panel-head-compact">
+                      <div class="workspace-panel-copy">
+                        <span class="selection-kicker">Ajuda rapida</span>
+                        <strong id="workspace-help-title">Dicas desta ferramenta</strong>
+                        <p id="workspace-help-copy">Mostramos atalhos e observacoes para voce usar esta conversao com mais clareza.</p>
+                      </div>
+                    </div>
+
+                    <div class="workspace-help-list" id="workspace-help-list"></div>
+                  </section>
+
+                  <section class="convert-submit-card workspace-submit-card">
+                    <div class="workspace-panel-head workspace-panel-head-compact">
+                      <div class="workspace-panel-copy">
+                        <span class="selection-kicker">Resultado</span>
+                        <strong id="workspace-submit-title">Converter e baixar</strong>
+                        <p id="workspace-submit-copy">Acompanhe o progresso e baixe o arquivo assim que ele estiver pronto.</p>
+                      </div>
+                    </div>
+
+                    <div class="status-strip" role="status" aria-live="polite" aria-atomic="true">
+                      <div class="pulse"></div>
+                      <span id="status-text">Pronto para converter.</span>
+                    </div>
+
+                    <div class="progress-panel" aria-live="polite" aria-atomic="true">
+                      <div class="progress-track" aria-hidden="true">
+                        <div class="progress-fill" id="progress-fill"></div>
+                      </div>
+                      <div class="progress-meta">
+                        <span id="progress-label">Aguardando arquivo</span>
+                        <strong id="progress-value">0%</strong>
+                      </div>
+                    </div>
+
+                    <button type="submit" class="button primary wide" id="convert-button">Converter arquivo</button>
+                  </section>
+                </aside>
+              </div>
+            </div>
+
+            <div class="workspace-loading" id="workspace-loading" hidden aria-hidden="true">
+              <div class="workspace-loading-card">
+                <span class="workspace-loading-badge">Processando</span>
+                <div class="workspace-loading-grid">
+                  <span class="workspace-loading-block workspace-loading-block-wide"></span>
+                  <span class="workspace-loading-block"></span>
+                  <span class="workspace-loading-block"></span>
+                  <span class="workspace-loading-block workspace-loading-block-tall"></span>
+                  <span class="workspace-loading-block workspace-loading-block-tall"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer" aria-label="Informacoes do site">
+      <div class="site-footer-inner">
+        <p class="site-footer-copy">Arquivos processados com foco em rapidez, privacidade e limpeza automatica.</p>
+        <nav class="site-footer-links" aria-label="Links legais">
+          <a href="/privacy.html">Privacidade</a>
+          <a href="/terms.html">Termos</a>
+          <a href="/health">Status</a>
+        </nav>
+      </div>
+    </footer>
+
+    <button
+      type="button"
+      class="back-to-top"
+      id="back-to-top"
+      aria-label="Voltar ao topo da pagina"
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m6 14 6-6 6 6"></path>
+        <path d="M12 9v8"></path>
+      </svg>
+    </button>
+
+    <template id="tool-card-template">
+      <button type="button" class="tool-card">
+        <span class="tool-icon tool-icon-from" aria-hidden="true"></span>
+        <span class="tool-pill-label"></span>
+        <span class="tool-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="m13 6 6 6-6 6"></path>
+          </svg>
+        </span>
+        <span class="tool-icon tool-icon-to" aria-hidden="true"></span>
+        <span class="tool-favorite-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="m12 3.5 2.8 5.67 6.27.91-4.53 4.42 1.07 6.25L12 17.8l-5.62 2.95 1.07-6.25L2.92 10.08l6.27-.91L12 3.5z"></path>
+          </svg>
+        </span>
+      </button>
+    </template>
+
+    <div class="billing-modal" id="billing-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar planos" data-close-billing="true"></button>
+
+      <section class="billing-dialog" role="dialog" aria-modal="true" aria-labelledby="billing-title">
+        <button type="button" class="billing-close" id="billing-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header billing-header-premium">
+          <span class="selection-kicker">Monetizacao pronta</span>
+          <h2 id="billing-title">Escolha seu acesso premium</h2>
+          <p>Veja o valor, escolha o formato ideal e volte com o acesso liberado automaticamente.</p>
+          <div class="billing-feature-row" aria-label="Vantagens do checkout">
+            <span class="billing-feature-chip">
+              <span class="billing-feature-dot" aria-hidden="true"></span>
+              Checkout seguro
+            </span>
+            <span class="billing-feature-chip">
+              <span class="billing-feature-dot" aria-hidden="true"></span>
+              Ativacao automatica
+            </span>
+            <span class="billing-feature-chip">
+              <span class="billing-feature-dot" aria-hidden="true"></span>
+              Suporte rapido
+            </span>
+          </div>
+        </div>
+
+        <div class="billing-grid">
+          <article class="billing-card billing-card-featured">
+            <span class="billing-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5.5" y="6" width="13" height="12" rx="3"></rect>
+                <path d="M9 10.5h6"></path>
+                <path d="M9 14h4"></path>
+              </svg>
+            </span>
+            <span class="billing-card-kicker">Mais escolhido</span>
+            <strong>Pro mensal</strong>
+            <div class="billing-price-wrap">
+              <strong class="billing-price" id="billing-monthly-price">R$ 19,90</strong>
+              <span class="billing-price-meta" id="billing-monthly-meta">30 dias de acesso</span>
+            </div>
+            <p>Ferramentas PDF avancadas, OCR, Office e conversoes 3D.</p>
+            <button type="button" class="button primary wide" id="billing-monthly-button">Abrir plano mensal</button>
+          </article>
+
+          <article class="billing-card">
+            <span class="billing-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5.5v13"></path>
+                <path d="M7.5 9.25h9"></path>
+                <path d="M7.5 14.75h9"></path>
+              </svg>
+            </span>
+            <strong>Pro anual</strong>
+            <div class="billing-price-wrap">
+              <strong class="billing-price" id="billing-yearly-price">R$ 149,90</strong>
+              <span class="billing-price-meta" id="billing-yearly-meta">365 dias de acesso</span>
+            </div>
+            <p>Mesmo acesso premium com melhor custo para uso continuo.</p>
+            <button type="button" class="button secondary wide" id="billing-yearly-button">Abrir plano anual</button>
+          </article>
+
+          <article class="billing-card">
+            <span class="billing-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m8.5 6.5 7 7"></path>
+                <path d="M14.1 5.2h3.3a1.4 1.4 0 0 1 1.4 1.4v3.3a2 2 0 0 1-.58 1.42l-5.78 5.78a2 2 0 0 1-2.83 0l-3.2-3.2a2 2 0 0 1 0-2.83l5.78-5.78a2 2 0 0 1 1.41-.58Z"></path>
+                <circle cx="15.7" cy="8.3" r="0.85"></circle>
+              </svg>
+            </span>
+            <strong>Pacote inicial</strong>
+            <div class="billing-price-wrap">
+              <strong class="billing-price" id="billing-starter-price">R$ 9,90</strong>
+              <span class="billing-price-meta" id="billing-starter-meta">Acesso rapido por alguns dias</span>
+            </div>
+            <p>Ideal para vender acessos manuais, campanhas ou suporte direto.</p>
+            <button type="button" class="button secondary wide" id="billing-starter-button">Abrir pacote</button>
+          </article>
+        </div>
+
+        <form class="billing-redeem" id="redeem-form">
+          <div class="billing-redeem-head">
+            <span class="selection-kicker">Ja comprou</span>
+            <strong>Ative seu codigo</strong>
+          </div>
+          <label class="field" for="redeem-code">
+            <span>Codigo de acesso</span>
+            <input
+              id="redeem-code"
+              name="redeemCode"
+              type="text"
+              autocomplete="one-time-code"
+              spellcheck="false"
+              placeholder="Cole seu codigo aqui"
+            />
+          </label>
+          <div class="billing-actions">
+            <button type="submit" class="button primary" id="redeem-submit">Ativar codigo</button>
+            <button type="button" class="button secondary" id="billing-support-button">Suporte</button>
+          </div>
+          <p class="billing-status" id="billing-status">Escolha um plano para abrir o checkout seguro ou ative um codigo.</p>
+        </form>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="account-register-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar cadastro" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="account-register-title">
+        <button type="button" class="billing-close" id="account-register-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker">Criar conta</span>
+          <h2 id="account-register-title">Seu acesso salvo em uma conta</h2>
+          <p>Crie sua conta para manter plano, historico de acesso e foto de perfil organizados.</p>
+        </div>
+
+        <form class="account-card account-form account-pane-form" id="account-register-form">
+          <label class="field" for="register-display-name">
+            <span>Nome</span>
+            <input id="register-display-name" name="displayName" type="text" autocomplete="name" maxlength="80" required />
+          </label>
+          <label class="field" for="register-email">
+            <span>Email</span>
+            <input id="register-email" name="email" type="email" autocomplete="email" maxlength="160" required />
+          </label>
+          <label class="field" for="register-password">
+            <span>Senha</span>
+            <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
+          </label>
+          <button type="submit" class="button primary wide" id="account-register-submit">Criar conta</button>
+        </form>
+
+        <div class="account-inline-actions">
+          <span class="account-copy">Ja tem conta?</span>
+          <button type="button" class="ghost-action" id="account-switch-to-login">Entrar</button>
+        </div>
+
+        <p class="billing-status account-status-output" data-account-status>Preencha seus dados para criar sua conta com seguranca.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="account-login-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar login" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="account-login-title">
+        <button type="button" class="billing-close" id="account-login-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker">Entrar</span>
+          <h2 id="account-login-title">Acesse sua conta vaptdoc</h2>
+          <p>Entre para ver seu plano atual, atualizar seus dados e continuar de onde parou.</p>
+        </div>
+
+        <form class="account-card account-form account-pane-form" id="account-login-form">
+          <label class="field" for="login-email">
+            <span>Email</span>
+            <input id="login-email" name="email" type="email" autocomplete="email" maxlength="160" required />
+          </label>
+          <label class="field" for="login-password">
+            <span>Senha</span>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required />
+          </label>
+          <button type="submit" class="button secondary wide" id="account-login-submit">Entrar na conta</button>
+        </form>
+
+        <div class="account-inline-actions">
+          <span class="account-copy">Primeiro acesso?</span>
+          <button type="button" class="ghost-action" id="account-switch-to-register">Criar conta</button>
+        </div>
+
+        <p class="billing-status account-status-output" data-account-status>Entre para abrir seu painel pessoal do vaptdoc.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="account-overview-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar painel da conta" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog account-pane-wide" role="dialog" aria-modal="true" aria-labelledby="account-overview-title">
+        <button type="button" class="billing-close" id="account-overview-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker">Minha conta</span>
+          <h2 id="account-overview-title">Seu painel rapido</h2>
+          <p>Veja seu plano, seus dados principais e acesse cada ajuste sem uma pagina longa.</p>
+        </div>
+
+        <div class="account-shell">
+          <aside class="account-shell-sidebar">
+            <article class="account-card account-hero-card">
+              <div class="account-plan-card-topline">
+                <div class="account-plan-card-copy">
+                  <span class="selection-kicker">Plano atual</span>
+                  <strong id="account-plan-value">Gratis</strong>
+                </div>
+                <button type="button" class="ghost-action account-plan-manage-button" id="account-upgrade-button">Gerenciar</button>
+              </div>
+              <p id="account-plan-copy" class="account-copy">Crie ou ative um plano para desbloquear recursos premium.</p>
+            </article>
+
+            <article class="account-card account-wallet-card">
+              <span class="selection-kicker">Creditos e descontos</span>
+              <strong id="account-credits-display">0 creditos</strong>
+              <p id="account-discount-display" class="account-copy">Nenhum desconto ativo no momento.</p>
+            </article>
+          </aside>
+
+          <div class="account-shell-main">
+            <div class="account-summary-grid account-summary-grid-compact account-summary-grid-tight">
+              <article class="account-card account-info-card">
+                <span class="selection-kicker">Conta</span>
+                <strong id="account-name-display">Sua conta</strong>
+                <p id="account-email-display" class="account-copy">Seu email aparece aqui.</p>
+                <p id="account-created-display" class="account-copy">Criada agora ha pouco.</p>
+              </article>
+
+              <article class="account-card account-info-card">
+                <span class="selection-kicker">Acesso</span>
+                <strong>Atalhos rapidos</strong>
+                <p class="account-copy">Abra cada ajuste em um painel proprio, sem telas longas ou confusas.</p>
+              </article>
+            </div>
+
+            <div class="account-action-grid">
+              <button type="button" class="account-shortcut-card" id="account-shortcut-profile">
+                <span class="account-shortcut-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7.5 7.25h9"></path>
+                    <path d="M7.5 11.75h9"></path>
+                    <path d="M7.5 16.25h5.5"></path>
+                  </svg>
+                </span>
+                <span class="account-shortcut-copy">
+                  <strong>Dados e credenciais</strong>
+                  <span>Atualize nome, email e senha</span>
+                </span>
+              </button>
+              <button type="button" class="account-shortcut-card" id="account-shortcut-settings">
+                <span class="account-shortcut-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 4.8v1.8"></path>
+                    <path d="M12 17.4v1.8"></path>
+                    <path d="m6.45 6.45 1.3 1.3"></path>
+                    <path d="m16.25 16.25 1.3 1.3"></path>
+                    <path d="M4.8 12h1.8"></path>
+                    <path d="M17.4 12h1.8"></path>
+                    <path d="m6.45 17.55 1.3-1.3"></path>
+                    <path d="m16.25 7.75 1.3-1.3"></path>
+                  </svg>
+                </span>
+                <span class="account-shortcut-copy">
+                  <strong>Configuracoes</strong>
+                  <span>Controle tema e preferencias</span>
+                </span>
+              </button>
+              <button type="button" class="account-shortcut-card" id="account-shortcut-admin" hidden>
+                <span class="account-shortcut-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 7.25h14"></path>
+                    <path d="M5 12h14"></path>
+                    <path d="M5 16.75h8"></path>
+                    <circle cx="17.25" cy="16.75" r="1.75"></circle>
+                  </svg>
+                </span>
+                <span class="account-shortcut-copy">
+                  <strong>Painel do dono</strong>
+                  <span>Usuarios, planos, creditos e cupons</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p class="billing-status account-status-output" data-account-status>Sua conta esta protegida. Use os atalhos para abrir cada ajuste em seu proprio modal.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="account-profile-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar dados da conta" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog account-pane-wide" role="dialog" aria-modal="true" aria-labelledby="account-profile-title">
+        <button type="button" class="billing-close" id="account-profile-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker">Dados e credenciais</span>
+          <h2 id="account-profile-title">Atualize seu acesso</h2>
+          <p>Edite seus dados pessoais e troque sua senha em um fluxo separado e sem cortes na tela.</p>
+        </div>
+
+        <article class="account-card account-avatar-inline-card">
+          <div class="account-avatar-inline-layout">
+            <button type="button" class="account-avatar-preview account-avatar-preview-large account-avatar-trigger" id="account-avatar-preview" aria-label="Trocar foto de perfil">
+              <img id="account-avatar-image" alt="" hidden />
+              <span id="account-avatar-initials">V</span>
+            </button>
+            <div class="account-avatar-copy">
+              <strong>Sua foto de perfil</strong>
+              <p class="account-copy">Clique na foto para trocar. PNG, JPG e WEBP funcionam melhor.</p>
+            </div>
+          </div>
+          <input id="account-avatar-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+          <div class="account-inline-actions account-avatar-inline-actions" id="account-avatar-actions" hidden>
+            <button type="button" class="ghost-action" id="account-avatar-remove-button" hidden>Remover foto</button>
+          </div>
+        </article>
+
+        <div class="account-forms-grid account-editor-grid">
+          <form class="account-card account-form account-editor-card" id="account-profile-form">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7.5 7.25h9"></path>
+                  <path d="M7.5 11.75h9"></path>
+                  <path d="M7.5 16.25h5.5"></path>
+                </svg>
+              </span>
+              <div class="account-card-copy">
+                <strong>Alterar dados</strong>
+                <span>Edite como sua conta aparece no app.</span>
+              </div>
+            </div>
+            <label class="field" for="account-display-name">
+              <span>Nome</span>
+              <input id="account-display-name" name="displayName" type="text" autocomplete="name" maxlength="80" required />
+            </label>
+            <label class="field" for="account-email">
+              <span>Email</span>
+              <input id="account-email" name="email" type="email" autocomplete="email" maxlength="160" required />
+            </label>
+            <label class="field" for="account-current-password-email">
+              <span>Senha atual para trocar email</span>
+              <input id="account-current-password-email" name="currentPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" />
+            </label>
+            <button type="submit" class="button secondary wide" id="account-profile-submit">Salvar dados</button>
+          </form>
+
+          <form class="account-card account-form account-editor-card" id="account-password-form">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="6.5" y="10" width="11" height="8" rx="2"></rect>
+                  <path d="M9 10V8.5a3 3 0 0 1 6 0V10"></path>
+                </svg>
+              </span>
+              <div class="account-card-copy">
+                <strong>Alterar senha</strong>
+                <span>Proteja o acesso com uma nova credencial.</span>
+              </div>
+            </div>
+            <label class="field" for="account-password-current">
+              <span>Senha atual</span>
+              <input id="account-password-current" name="currentPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" required />
+            </label>
+            <label class="field" for="account-password-new">
+              <span>Nova senha</span>
+              <input id="account-password-new" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
+            </label>
+            <button type="submit" class="button secondary wide" id="account-password-submit">Atualizar senha</button>
+          </form>
+        </div>
+
+        <p class="billing-status account-status-output" data-account-status>Atualize seus dados ou sua senha com seguranca.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="account-settings-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar configuracoes" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="account-settings-modal-title">
+        <button type="button" class="billing-close" id="account-settings-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker">Configuracoes</span>
+          <h2 id="account-settings-modal-title">Preferencias e seguranca</h2>
+          <p>Controle o tema e finalize sua sessao de forma simples, em um modal proprio.</p>
+        </div>
+
+        <div class="account-forms-grid account-settings-grid">
+          <article class="account-card account-setting-card" id="account-settings-card">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M12 4.8v1.8"></path>
+                  <path d="M12 17.4v1.8"></path>
+                  <path d="m6.45 6.45 1.3 1.3"></path>
+                  <path d="m16.25 16.25 1.3 1.3"></path>
+                  <path d="M4.8 12h1.8"></path>
+                  <path d="M17.4 12h1.8"></path>
+                  <path d="m6.45 17.55 1.3-1.3"></path>
+                  <path d="m16.25 7.75 1.3-1.3"></path>
+                </svg>
+              </span>
+              <div class="account-card-copy">
+                <strong id="account-settings-title">Preferencias e seguranca</strong>
+                <span id="account-settings-copy">Controle seu tema, seus dados e como sua conta aparece no app.</span>
+              </div>
+            </div>
+            <button type="button" class="button secondary wide" id="account-theme-button">Alternar tema</button>
+          </article>
+
+          <article class="account-card account-setting-card">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 7.25H7.25A2.25 2.25 0 0 0 5 9.5v5A2.25 2.25 0 0 0 7.25 16.75H10"></path>
+                  <path d="m13.5 8.5 4 3.5-4 3.5"></path>
+                  <path d="M17.5 12h-8"></path>
+                </svg>
+              </span>
+              <div class="account-card-copy">
+                <strong>Sessao da conta</strong>
+                <span>Saia deste navegador quando precisar.</span>
+              </div>
+            </div>
+            <button type="button" class="ghost-action wide" id="account-logout">Sair da conta</button>
+          </article>
+        </div>
+
+        <p class="billing-status account-status-output" data-account-status>Suas preferencias ficam salvas com seguranca.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="account-verification-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar verificacao" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="account-verification-title">
+        <button type="button" class="billing-close" id="account-verification-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker" id="account-verification-kicker">Codigo de seguranca</span>
+          <h2 id="account-verification-title">Confirme sua conta</h2>
+          <p id="account-verification-copy">Enviamos um codigo numerico para o seu e-mail.</p>
+        </div>
+
+        <article class="account-card account-verification-card">
+          <div class="account-verification-target">
+            <span class="selection-kicker">Destino</span>
+            <strong id="account-verification-destination">vo**@exemplo.com</strong>
+            <span class="account-copy" id="account-verification-expiry">Valido por 10 minutos.</span>
+          </div>
+
+          <form class="account-form account-pane-form" id="account-verification-form">
+            <label class="field" for="account-verification-code">
+              <span>Codigo numerico</span>
+              <input
+                id="account-verification-code"
+                name="code"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                placeholder="000000"
+                required
+              />
+            </label>
+            <button type="submit" class="button primary wide" id="account-verification-submit">Confirmar codigo</button>
+          </form>
+
+          <div class="account-inline-actions">
+            <span class="account-copy">Nao recebeu?</span>
+            <button type="button" class="ghost-action" id="account-verification-resend">Reenviar codigo</button>
+          </div>
+        </article>
+
+        <p class="billing-status account-status-output" data-account-status>Digite o codigo enviado para continuar com seguranca.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="admin-panel-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar painel administrativo" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog admin-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-panel-title">
+        <button type="button" class="billing-close" id="admin-panel-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker">Painel do dono</span>
+          <h2 id="admin-panel-title">Controle total do vaptdoc</h2>
+          <p>Gerencie usuarios, planos, creditos, descontos e codigos promocionais com um painel seguro e direto.</p>
+        </div>
+
+        <section class="admin-stats-grid" id="admin-stats-grid" aria-live="polite">
+          <article class="account-card admin-stat-card">
+            <span class="selection-kicker">Usuarios</span>
+            <strong id="admin-stat-users">0</strong>
+            <p class="account-copy">Total de contas cadastradas.</p>
+          </article>
+          <article class="account-card admin-stat-card">
+            <span class="selection-kicker">Premium</span>
+            <strong id="admin-stat-premium">0</strong>
+            <p class="account-copy">Usuarios com acesso ativo.</p>
+          </article>
+          <article class="account-card admin-stat-card">
+            <span class="selection-kicker">Creditos</span>
+            <strong id="admin-stat-credits">0</strong>
+            <p class="account-copy">Creditos distribuídos pela plataforma.</p>
+          </article>
+          <article class="account-card admin-stat-card">
+            <span class="selection-kicker">Receita</span>
+            <strong id="admin-stat-revenue">R$ 0,00</strong>
+            <p class="account-copy" id="admin-stat-payments">0 pagamentos aprovados.</p>
+          </article>
+        </section>
+
+        <section class="admin-workspace">
+          <aside class="account-card admin-sidebar admin-section">
+            <div class="admin-section-head">
+              <div>
+                <span class="selection-kicker">Usuarios</span>
+                <strong>Busque e abra qualquer conta</strong>
+              </div>
+              <button type="button" class="ghost-action" id="admin-refresh-users">Atualizar</button>
+            </div>
+
+            <label class="field" for="admin-user-search">
+              <span>Buscar usuario</span>
+              <input id="admin-user-search" type="search" autocomplete="off" placeholder="Nome ou email" />
+            </label>
+
+            <div class="admin-user-list" id="admin-user-list" aria-live="polite"></div>
+            <p class="account-copy" id="admin-user-empty" hidden>Nenhum usuario encontrado.</p>
+          </aside>
+
+          <div class="admin-main">
+            <article class="account-card admin-selected-panel">
+              <div class="admin-selected-topline">
+                <div class="admin-selected-copy">
+                  <span class="selection-kicker">Usuario selecionado</span>
+                  <strong id="admin-selected-user-title">Selecione uma conta</strong>
+                  <p class="account-copy" id="admin-selected-user-meta">Abra um usuario para ver seus detalhes completos.</p>
+                </div>
+                <div class="admin-badge-row admin-badge-row-large">
+                  <span class="admin-badge admin-badge-large" data-tone="muted" id="admin-selected-user-plan">Sem plano</span>
+                  <span class="admin-badge admin-badge-large" data-tone="muted" id="admin-selected-user-wallet">0 creditos</span>
+                </div>
+              </div>
+              <div class="admin-summary-strip">
+                <article class="admin-summary-card">
+                  <span class="selection-kicker">Beneficio ativo</span>
+                  <strong id="admin-selected-user-discount">Sem desconto ativo.</strong>
+                </article>
+              </div>
+            </article>
+
+            <div class="admin-tabbar" role="tablist" aria-label="Areas do painel administrativo">
+              <button type="button" class="admin-tab is-active" id="admin-tab-account" data-admin-pane-target="account" aria-selected="true">
+                <span class="admin-tab-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7.5 7.25h9"></path>
+                    <path d="M7.5 11.75h9"></path>
+                    <path d="M7.5 16.25h5.5"></path>
+                  </svg>
+                </span>
+                <span>Conta</span>
+              </button>
+              <button type="button" class="admin-tab" id="admin-tab-access" data-admin-pane-target="access" aria-selected="false">
+                <span class="admin-tab-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6.5" y="10" width="11" height="8" rx="2"></rect>
+                    <path d="M9 10V8.5a3 3 0 0 1 6 0V10"></path>
+                  </svg>
+                </span>
+                <span>Plano e creditos</span>
+              </button>
+              <button type="button" class="admin-tab" id="admin-tab-promos" data-admin-pane-target="promos" aria-selected="false">
+                <span class="admin-tab-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m8.5 6.5 7 7"></path>
+                    <path d="M14.1 5.2h3.3a1.4 1.4 0 0 1 1.4 1.4v3.3a2 2 0 0 1-.58 1.42l-5.78 5.78a2 2 0 0 1-2.83 0l-3.2-3.2a2 2 0 0 1 0-2.83l5.78-5.78a2 2 0 0 1 1.41-.58Z"></path>
+                    <circle cx="15.7" cy="8.3" r="0.85"></circle>
+                  </svg>
+                </span>
+                <span>Promocoes</span>
+              </button>
+            </div>
+
+            <section class="admin-pane-grid" data-admin-pane="account">
+              <div class="account-forms-grid admin-forms-grid">
+                <form class="account-card account-form admin-form-card" id="admin-user-profile-form">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7.5 7.25h9"></path>
+                        <path d="M7.5 11.75h9"></path>
+                        <path d="M7.5 16.25h5.5"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Perfil da conta</strong>
+                      <span>Revise nome e email em um painel curto.</span>
+                    </div>
+                  </div>
+                  <label class="field" for="admin-user-display-name">
+                    <span>Nome</span>
+                    <input id="admin-user-display-name" name="displayName" type="text" maxlength="80" required />
+                  </label>
+                  <label class="field" for="admin-user-email">
+                    <span>Email</span>
+                    <input id="admin-user-email" name="email" type="email" maxlength="160" required />
+                  </label>
+                  <button type="submit" class="button secondary wide" id="admin-user-profile-submit">Salvar dados</button>
+                </form>
+              </div>
+
+              <div class="admin-history-grid">
+                <article class="account-card admin-feed-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 7.5h11"></path>
+                        <path d="M6.5 12h11"></path>
+                        <path d="M6.5 16.5h7"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Pagamentos recentes</strong>
+                      <span>Veja rapidamente o historico aprovado.</span>
+                    </div>
+                  </div>
+                  <div class="admin-mini-list" id="admin-user-payments"></div>
+                </article>
+                <article class="account-card admin-feed-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m8.5 6.5 7 7"></path>
+                        <path d="M14.1 5.2h3.3a1.4 1.4 0 0 1 1.4 1.4v3.3a2 2 0 0 1-.58 1.42l-5.78 5.78a2 2 0 0 1-2.83 0l-3.2-3.2a2 2 0 0 1 0-2.83l5.78-5.78a2 2 0 0 1 1.41-.58Z"></path>
+                        <circle cx="15.7" cy="8.3" r="0.85"></circle>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Codigos usados</strong>
+                      <span>Beneficios resgatados por esta conta.</span>
+                    </div>
+                  </div>
+                  <div class="admin-mini-list" id="admin-user-promos"></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="admin-pane-grid" data-admin-pane="access" hidden>
+              <div class="account-forms-grid admin-forms-grid admin-forms-grid-compact">
+                <form class="account-card account-form admin-form-card" id="admin-user-plan-form">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6.5" y="10" width="11" height="8" rx="2"></rect>
+                        <path d="M9 10V8.5a3 3 0 0 1 6 0V10"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Plano premium</strong>
+                      <span>Adicione ou troque o acesso principal.</span>
+                    </div>
+                  </div>
+                  <label class="field" for="admin-user-plan">
+                    <span>Plano</span>
+                    <select id="admin-user-plan" name="plan">
+                      <option value="free">Sem plano</option>
+                      <option value="pro">Pro</option>
+                      <option value="team">Team</option>
+                    </select>
+                  </label>
+                  <label class="field" for="admin-user-plan-days">
+                    <span>Dias para adicionar</span>
+                    <input id="admin-user-plan-days" name="accessDays" type="number" min="1" max="3650" value="30" />
+                  </label>
+                  <button type="submit" class="button secondary wide" id="admin-user-plan-submit">Atualizar plano</button>
+                </form>
+
+                <form class="account-card account-form admin-form-card" id="admin-user-credits-form">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5.5"></circle>
+                        <path d="M12 8.7v6.6"></path>
+                        <path d="M9.9 10.3c.5-.9 1.28-1.35 2.35-1.35 1.08 0 1.82.42 2.23 1.24.4.82.17 1.58-.7 2.27l-2.86 2.19"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Creditos</strong>
+                      <span>Some, retire ou defina o saldo da conta.</span>
+                    </div>
+                  </div>
+                  <label class="field" for="admin-user-credits-mode">
+                    <span>Modo</span>
+                    <select id="admin-user-credits-mode" name="mode">
+                      <option value="add">Adicionar ou remover</option>
+                      <option value="set">Definir saldo</option>
+                    </select>
+                  </label>
+                  <label class="field" for="admin-user-credits-amount">
+                    <span>Quantidade</span>
+                    <input id="admin-user-credits-amount" name="amount" type="number" step="0.01" min="-100000" max="100000" value="10" />
+                  </label>
+                  <button type="submit" class="button secondary wide" id="admin-user-credits-submit">Salvar creditos</button>
+                </form>
+
+                <form class="account-card account-form admin-form-card" id="admin-user-discount-form">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m8.5 6.5 7 7"></path>
+                        <path d="M14.1 5.2h3.3a1.4 1.4 0 0 1 1.4 1.4v3.3a2 2 0 0 1-.58 1.42l-5.78 5.78a2 2 0 0 1-2.83 0l-3.2-3.2a2 2 0 0 1 0-2.83l5.78-5.78a2 2 0 0 1 1.41-.58Z"></path>
+                        <circle cx="15.7" cy="8.3" r="0.85"></circle>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Desconto</strong>
+                      <span>Aplique percentual e duracao de forma visual.</span>
+                    </div>
+                  </div>
+                  <label class="field" for="admin-user-discount-percent">
+                    <span>Percentual</span>
+                    <input id="admin-user-discount-percent" name="percent" type="number" min="0" max="100" step="1" value="15" />
+                  </label>
+                  <label class="field" for="admin-user-discount-days">
+                    <span>Dias</span>
+                    <input id="admin-user-discount-days" name="days" type="number" min="0" max="3650" value="30" />
+                  </label>
+                  <button type="submit" class="button secondary wide" id="admin-user-discount-submit">Salvar desconto</button>
+                </form>
+
+                <article class="account-card admin-danger-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.75 7.25h10.5"></path>
+                        <path d="M9.25 7.25V5.75h5.5v1.5"></path>
+                        <path d="m8.25 9.25.6 8.25h6.3l.6-8.25"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Zona de risco</strong>
+                      <span>Remova a conta selecionada apenas quando necessario.</span>
+                    </div>
+                  </div>
+                  <div class="admin-danger-row">
+                    <button type="button" class="ghost-action danger wide" id="admin-user-delete">Remover conta</button>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="admin-pane-grid" data-admin-pane="promos" hidden>
+              <div class="account-forms-grid admin-promo-stack">
+                <article class="account-card admin-section admin-form-card">
+                  <div class="admin-section-head">
+                    <div>
+                      <span class="selection-kicker">Criar promocao</span>
+                      <strong>Novo codigo</strong>
+                    </div>
+                  </div>
+
+                  <form class="admin-promo-form" id="admin-promo-form">
+                    <div class="account-inline-grid admin-promo-grid">
+                      <label class="field" for="admin-promo-code">
+                        <span>Codigo</span>
+                        <input id="admin-promo-code" name="code" type="text" maxlength="80" placeholder="Opcional, gerado automaticamente" />
+                      </label>
+                      <label class="field" for="admin-promo-label">
+                        <span>Nome interno</span>
+                        <input id="admin-promo-label" name="label" type="text" maxlength="80" required />
+                      </label>
+                    </div>
+
+                    <label class="field" for="admin-promo-description">
+                      <span>Descricao</span>
+                      <input id="admin-promo-description" name="description" type="text" maxlength="160" placeholder="Ex.: campanha de boas-vindas" />
+                    </label>
+
+                    <div class="account-inline-grid admin-promo-grid">
+                      <label class="field" for="admin-promo-credits">
+                        <span>Creditos</span>
+                        <input id="admin-promo-credits" name="creditAmount" type="number" step="0.01" min="0" max="100000" value="0" />
+                      </label>
+                      <label class="field" for="admin-promo-discount">
+                        <span>Desconto (%)</span>
+                        <input id="admin-promo-discount" name="discountPercent" type="number" min="0" max="100" step="1" value="0" />
+                      </label>
+                    </div>
+
+                    <div class="account-inline-grid admin-promo-grid">
+                      <label class="field" for="admin-promo-discount-days">
+                        <span>Dias de desconto</span>
+                        <input id="admin-promo-discount-days" name="discountDays" type="number" min="0" max="3650" value="0" />
+                      </label>
+                      <label class="field" for="admin-promo-access-days">
+                        <span>Dias premium</span>
+                        <input id="admin-promo-access-days" name="accessDays" type="number" min="0" max="3650" value="0" />
+                      </label>
+                    </div>
+
+                    <div class="account-inline-grid admin-promo-grid">
+                      <label class="field" for="admin-promo-access-plan">
+                        <span>Plano premium</span>
+                        <select id="admin-promo-access-plan" name="accessPlan">
+                          <option value="pro">Pro</option>
+                          <option value="team">Team</option>
+                        </select>
+                      </label>
+                      <label class="field" for="admin-promo-max-redemptions">
+                        <span>Limite total</span>
+                        <input id="admin-promo-max-redemptions" name="maxRedemptions" type="number" min="1" max="100000" placeholder="Sem limite" />
+                      </label>
+                    </div>
+
+                    <div class="account-inline-grid admin-promo-grid">
+                      <label class="field" for="admin-promo-per-user">
+                        <span>Limite por usuario</span>
+                        <input id="admin-promo-per-user" name="perUserLimit" type="number" min="1" max="1000" value="1" />
+                      </label>
+                      <label class="field" for="admin-promo-expires-at">
+                        <span>Expira em</span>
+                        <input id="admin-promo-expires-at" name="expiresAt" type="datetime-local" />
+                      </label>
+                    </div>
+
+                    <button type="submit" class="button primary wide" id="admin-promo-submit">Criar codigo promocional</button>
+                  </form>
+                </article>
+
+                <article class="account-card admin-section">
+                  <div class="admin-section-head">
+                    <div>
+                      <span class="selection-kicker">Codigos ativos</span>
+                      <strong>Lista de promocoes</strong>
+                    </div>
+                    <button type="button" class="ghost-action" id="admin-refresh-promos">Atualizar</button>
+                  </div>
+
+                  <div class="admin-promo-list" id="admin-promo-list" aria-live="polite"></div>
+                  <p class="account-copy" id="admin-promo-empty" hidden>Nenhum codigo promocional criado ainda.</p>
+                </article>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <p class="billing-status account-status-output" id="admin-status">Seu painel do dono esta pronto para gerenciar o vaptdoc.</p>
+      </section>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
