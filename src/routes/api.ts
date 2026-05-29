@@ -4,6 +4,7 @@ import sanitizeFilename from "sanitize-filename";
 import { z } from "zod";
 import { toolCatalog, toolList, type ToolDefinition, type ToolId } from "../catalog.js";
 import { env } from "../env.js";
+import { getToolPath } from "../tool-paths.js";
 import type { ConversionRequest, ConversionResult, UploadedAsset } from "../types.js";
 import type { AccessService, AccessSession } from "../services/access-service.js";
 import type { BillingOfferId, BillingService } from "../services/billing-service.js";
@@ -353,7 +354,10 @@ function sanitizeOptionsForLogs(rawOptions: Record<string, string>) {
 
 export async function registerApiRoutes(app: FastifyInstance, conversionService: ConversionHandler, options: RegisterApiOptions = {}) {
   app.get("/api/tools", async () => ({
-    tools: toolList,
+    tools: toolList.map((tool) => ({
+      ...tool,
+      routePath: getToolPath(tool.id as ToolId)
+    })),
     limits: {
       maxFileSizeMB: env.MAX_FILE_SIZE_MB
     }

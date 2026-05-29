@@ -1,5 +1,6 @@
 import { env } from "./env.js";
 import { toolCatalog, toolList, type ToolDefinition, type ToolId } from "./catalog.js";
+import { getToolPath } from "./tool-paths.js";
 
 const siteName = "vaptdoc";
 const defaultTitle = "vaptdoc | Converta arquivos sem complicacao";
@@ -16,6 +17,7 @@ export interface SeoViewModel {
   ogImageUrl: string;
   pageToolId: string;
   pagePath: string;
+  pageMode: "home" | "tool";
   softwareApplicationJson: string;
   howToJson: string;
 }
@@ -50,7 +52,7 @@ function formatToolDescription(tool: ToolDefinition) {
 }
 
 function formatToolPagePath(toolId: ToolId) {
-  return `/ferramenta/${encodeURIComponent(toolId)}`;
+  return getToolPath(toolId);
 }
 
 function getReadableFormats(tool: ToolDefinition) {
@@ -146,6 +148,7 @@ export function getSeoViewModel(baseUrlInput?: string, toolId?: string): SeoView
     ogImageUrl: absoluteUrl(baseUrl, defaultOgImagePath),
     pageToolId: tool?.id ?? "",
     pagePath,
+    pageMode: tool ? "tool" : "home",
     softwareApplicationJson: JSON.stringify(buildSoftwareApplicationSchema(baseUrl, seo)),
     howToJson: JSON.stringify(buildHowToSchema(seo, tool))
   };
@@ -202,6 +205,7 @@ export function renderSeoHtml(template: string, seo: SeoViewModel) {
       toolId: seo.pageToolId,
       canonicalUrl: seo.canonicalUrl,
       pagePath: seo.pagePath,
+      pageMode: seo.pageMode,
       siteUrl: normalizeBaseUrl(seo.canonicalUrl)
     })
   );
