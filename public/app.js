@@ -7,8 +7,6 @@ const fileInput = document.getElementById("file");
 const dropzone = document.getElementById("dropzone");
 const workbench = document.getElementById("workbench");
 const themeToggle = document.getElementById("theme-toggle");
-const headerOpenBillingButton = document.getElementById("header-open-billing");
-const headerCurrentTool = document.getElementById("site-header-current-tool");
 const searchInput = document.getElementById("tool-search");
 const searchClear = document.getElementById("search-clear");
 const searchResults = document.getElementById("search-results");
@@ -184,18 +182,8 @@ const adminRefreshPromosButton = document.getElementById("admin-refresh-promos")
 const adminTabButtons = Array.from(document.querySelectorAll("[data-admin-pane-target]"));
 const adminPanes = Array.from(document.querySelectorAll("[data-admin-pane]"));
 const toolToolbarCopy = document.getElementById("tool-toolbar-copy");
-const toolToolbar = document.getElementById("tool-toolbar");
 const toolEmpty = document.getElementById("tool-empty");
 const toolTabs = Array.from(document.querySelectorAll(".tool-tab"));
-const directoryHeading = document.getElementById("directory-heading");
-const homeHeroContent = document.getElementById("home-hero-content");
-const routeHero = document.getElementById("route-hero");
-const routeHeroTitle = document.getElementById("route-hero-title");
-const routeHeroCopy = document.getElementById("route-hero-copy");
-const routeHeroKicker = document.getElementById("route-hero-kicker");
-const convertSidebar = document.getElementById("convert-sidebar");
-const workspaceToolCard = document.getElementById("workspace-tool-card");
-const workspaceSubmitCard = document.getElementById("workspace-submit-card");
 const workspaceGuideCopy = document.getElementById("workspace-guide-copy");
 const workspaceFromBadge = document.getElementById("workspace-from-badge");
 const workspaceToBadge = document.getElementById("workspace-to-badge");
@@ -311,10 +299,6 @@ const runtimeConfig = {
   siteUrl: String(initialPageData.siteUrl ?? defaultSiteUrl).trim() || defaultSiteUrl,
   maxFileSizeMB: 0
 };
-const pageMode = String(initialPageData.pageMode ?? (initialPageData.toolId ? "tool" : "home")).trim() === "tool" ? "tool" : "home";
-const isToolPage = pageMode === "tool";
-document.body.dataset.pageMode = pageMode;
-document.body.dataset.flowStage = isToolPage ? "upload" : "home";
 const lazyIconObserver =
   "IntersectionObserver" in window
     ? new IntersectionObserver((entries) => {
@@ -704,35 +688,7 @@ function getToolMetaDescription(tool) {
 }
 
 function getToolPagePath(tool) {
-  return String(tool?.routePath ?? `/ferramenta/${encodeURIComponent(tool.id)}`);
-}
-
-function getRouteToolIdFromLocation() {
-  const currentPath = window.location.pathname || "/";
-  const exactTool = tools.find((tool) => getToolPagePath(tool) === currentPath);
-  if (exactTool) {
-    return exactTool.id;
-  }
-
-  if (currentPath.startsWith("/ferramenta/")) {
-    return decodeURIComponent(currentPath.slice("/ferramenta/".length));
-  }
-
-  return "";
-}
-
-function navigateToTool(tool) {
-  if (!tool) {
-    return;
-  }
-
-  const targetPath = getToolPagePath(tool);
-  if (window.location.pathname === targetPath) {
-    applyActiveTool(tool.id, { moveToUpload: true, resetFiles: false, syncHistory: false, syncSeo: true });
-    return;
-  }
-
-  window.location.assign(targetPath);
+  return `/ferramenta/${encodeURIComponent(tool.id)}`;
 }
 
 function setMetaContent(element, value) {
@@ -756,7 +712,6 @@ function updatePageData(tool) {
     toolId: tool?.id ?? "",
     canonicalUrl: buildAbsoluteSiteUrl(tool ? getToolPagePath(tool) : "/"),
     pagePath: tool ? getToolPagePath(tool) : "/",
-    pageMode: tool ? "tool" : "home",
     siteUrl: runtimeConfig.siteUrl
   });
 }
@@ -847,96 +802,6 @@ function syncToolHistory(tool, options = {}) {
 
   const method = replace ? "replaceState" : "pushState";
   window.history[method]({}, "", targetPath);
-}
-
-function updatePageModeUi(tool = getToolById()) {
-  document.body.dataset.pageMode = pageMode;
-  document.body.dataset.flowStage = !isToolPage ? "home" : stagedFiles.length > 0 ? "configure" : "upload";
-
-  if (homeHeroContent) {
-    homeHeroContent.hidden = isToolPage;
-  }
-
-  if (routeHero) {
-    routeHero.hidden = !isToolPage;
-  }
-
-  if (directoryHeading) {
-    directoryHeading.hidden = isToolPage;
-  }
-
-  if (toolToolbar) {
-    toolToolbar.hidden = isToolPage;
-  }
-
-  if (toolGrid?.parentElement) {
-    toolGrid.parentElement.hidden = isToolPage;
-  }
-
-  if (form) {
-    form.hidden = !isToolPage;
-  }
-
-  if (!isToolPage || !tool) {
-    if (headerCurrentTool) {
-      headerCurrentTool.hidden = true;
-      headerCurrentTool.textContent = "Ferramenta ativa";
-    }
-    return;
-  }
-
-  if (routeHeroTitle) {
-    routeHeroTitle.textContent = tool.label;
-  }
-
-  if (routeHeroCopy) {
-    routeHeroCopy.textContent = getToolDescription(tool);
-  }
-
-  if (routeHeroKicker) {
-    routeHeroKicker.textContent = tool.access === "pro" ? "Ferramenta Pro dedicada" : "Ferramenta dedicada";
-  }
-
-  if (headerCurrentTool) {
-    headerCurrentTool.hidden = false;
-    headerCurrentTool.textContent = tool.label;
-  }
-}
-
-function updateToolFlowStageUi(tool = getToolById()) {
-  const hasFiles = stagedFiles.length > 0;
-  const currentStage = !isToolPage ? "home" : hasFiles ? "configure" : "upload";
-  document.body.dataset.flowStage = currentStage;
-
-  if (!isToolPage) {
-    return;
-  }
-
-  if (convertSidebar) {
-    convertSidebar.hidden = true;
-  }
-
-  if (workspaceToolCard) {
-    workspaceToolCard.hidden = !hasFiles;
-  }
-
-  if (workspaceSubmitCard) {
-    workspaceSubmitCard.hidden = !hasFiles;
-  }
-
-  if (!hasFiles) {
-    if (workspaceOptionsCard) {
-      workspaceOptionsCard.hidden = true;
-    }
-
-    if (workspaceSpecialCard) {
-      workspaceSpecialCard.hidden = true;
-    }
-
-    if (workspaceHelpCard) {
-      workspaceHelpCard.hidden = true;
-    }
-  }
 }
 
 function hydrateFormatBadge(element) {
@@ -3525,7 +3390,6 @@ function updateWorkspaceGuide(tool) {
 
 function updateWorkspacePanels(tool = getToolById()) {
   const blueprint = getWorkspaceBlueprint(tool);
-  const hasFiles = stagedFiles.length > 0;
 
   if (workspaceGuideCopy) {
     workspaceGuideCopy.textContent = getWorkspaceGuideCopy(tool);
@@ -3604,17 +3468,12 @@ function updateWorkspacePanels(tool = getToolById()) {
   if (workspaceOptionsCopy) {
     workspaceOptionsCopy.textContent = getWorkspaceOptionsCopy(tool);
   }
-  if (hasFiles) {
-    renderSpecializedWorkspace(tool);
-  } else if (workspaceSpecialCard) {
-    workspaceSpecialCard.hidden = true;
-  }
+  renderSpecializedWorkspace(tool);
   if (workspaceOptionsCard) {
-    workspaceOptionsCard.hidden = !hasFiles || !shouldShowWorkspaceOptionsCard(tool);
+    workspaceOptionsCard.hidden = !shouldShowWorkspaceOptionsCard(tool);
   }
 
   updateWorkspaceGuide(tool);
-  updateToolFlowStageUi(tool);
 }
 
 function getDropzoneTitleForTool(tool) {
@@ -5345,11 +5204,20 @@ function renderToolOptions(tool) {
 }
 
 function selectToolFromSearch(tool) {
+  if (activeFilter === "favorites" && !isFavorite(tool.id)) {
+    activeFilter = "all";
+  }
+
+  if (activeFilter === "3d" && tool.category !== "3d") {
+    activeFilter = "all";
+  }
+
   searchInput.value = tool.label;
   searchQuery = tool.label;
   updateSearchClearButton();
+  renderTools();
   hideSearchResults();
-  navigateToTool(tool);
+  applyActiveTool(tool.id, { moveToUpload: true, resetFiles: true, syncHistory: true, syncSeo: true });
 }
 
 function renderSearchResults() {
@@ -5454,7 +5322,6 @@ function applyActiveTool(toolId, options = {}) {
 
   activeToolTitle.textContent = tool.label;
   activeToolDescription.textContent = getToolDescription(tool);
-  updatePageModeUi(tool);
   applyToolTheme(tool);
   updateFavoriteButton(tool.id);
   updateFileInputConfig(tool, { reset: resetFiles });
@@ -5509,9 +5376,9 @@ function renderTools() {
   updateToolbarCopy(visibleTools.length);
   toolEmpty.hidden = visibleTools.length > 0;
 
-  if (isToolPage && !activeToolId && visibleTools[0]) {
+  if (!activeToolId && visibleTools[0]) {
     activeToolId = visibleTools[0].id;
-  } else if (isToolPage && visibleTools.length > 0 && !visibleTools.some((tool) => tool.id === activeToolId)) {
+  } else if (visibleTools.length > 0 && !visibleTools.some((tool) => tool.id === activeToolId)) {
     activeToolId = visibleTools[0].id;
   }
 
@@ -5532,11 +5399,13 @@ function renderTools() {
     renderFormatBadge(formats.to, toIcon, "tool-icon-to");
     applyToolTheme(tool, card);
 
-    card.addEventListener("click", () => navigateToTool(tool));
+    card.addEventListener("click", () =>
+      applyActiveTool(tool.id, { moveToUpload: true, resetFiles: true, syncHistory: true, syncSeo: true })
+    );
     toolGrid.append(fragment);
   });
 
-  if (isToolPage && activeToolId) {
+  if (activeToolId) {
     applyActiveTool(activeToolId, { syncSeo: false });
   }
 }
@@ -5552,7 +5421,11 @@ async function loadTools() {
       order: index
     }));
 
-    const routeToolId = String(initialPageData.toolId ?? "").trim() || getRouteToolIdFromLocation();
+    const routeToolId =
+      String(initialPageData.toolId ?? "").trim() ||
+      (window.location.pathname.startsWith("/ferramenta/")
+        ? decodeURIComponent(window.location.pathname.slice("/ferramenta/".length))
+        : "");
 
     if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
       activeToolId = routeToolId;
@@ -5561,7 +5434,6 @@ async function loadTools() {
     renderTools();
     renderSearchResults();
     hasLoadedTools = true;
-    updatePageModeUi(getToolById(activeToolId));
 
     if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
       applyActiveTool(routeToolId, { resetFiles: false, syncSeo: true, syncHistory: false });
@@ -5704,7 +5576,9 @@ window.addEventListener("popstate", () => {
     return;
   }
 
-  const routeToolId = getRouteToolIdFromLocation();
+  const routeToolId = window.location.pathname.startsWith("/ferramenta/")
+    ? decodeURIComponent(window.location.pathname.slice("/ferramenta/".length))
+    : "";
 
   if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
     applyActiveTool(routeToolId, {
@@ -5717,7 +5591,6 @@ window.addEventListener("popstate", () => {
   }
 
   syncSeoForTool(null);
-  updatePageModeUi(null);
 });
 
 window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
@@ -5730,10 +5603,6 @@ backToTopButton?.addEventListener("click", () => {
 });
 
 openBillingButton?.addEventListener("click", () => {
-  showBillingModal({ tool: getToolById() });
-});
-
-headerOpenBillingButton?.addEventListener("click", () => {
   showBillingModal({ tool: getToolById() });
 });
 

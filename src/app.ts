@@ -19,7 +19,6 @@ import { ConversionGate } from "./utils/conversion-gate.js";
 import { AppError, isAppError } from "./utils/errors.js";
 import { resolveServerSecret } from "./utils/secrets.js";
 import { buildRobotsTxt, buildSitemapXml, getSeoViewModel, renderSeoHtml } from "./seo.js";
-import { getToolPath, getToolPathEntries } from "./tool-paths.js";
 
 interface AppOptions {
   conversionService?: ReturnType<typeof createConversionService>;
@@ -168,24 +167,18 @@ export async function createApp(options: AppOptions = {}) {
     return reply.send(renderIndexPage(request.protocol && request.headers.host ? `${request.protocol}://${request.headers.host}` : resolvePublicBaseUrl()));
   });
 
-  for (const [toolId, routePath] of getToolPathEntries()) {
-    app.get(routePath, async (request, reply) => {
-      const origin = request.protocol && request.headers.host ? `${request.protocol}://${request.headers.host}` : resolvePublicBaseUrl();
-      reply
-        .header("Cache-Control", "public, max-age=0, must-revalidate")
-        .type("text/html; charset=utf-8");
-      return reply.send(renderIndexPage(origin, toolId));
-    });
-  }
-
   app.get("/ferramenta/:toolId", async (request, reply) => {
     const toolId = String((request.params as { toolId?: string }).toolId ?? "");
 
     if (!(toolId in toolCatalog)) {
-      return reply.redirect("/", 302);
+      return reply.code(404).type("text/html; charset=utf-8").send(renderIndexPage(resolvePublicBaseUrl()));
     }
 
-    return reply.redirect(getToolPath(toolId as keyof typeof toolCatalog), 301);
+    const origin = request.protocol && request.headers.host ? `${request.protocol}://${request.headers.host}` : resolvePublicBaseUrl();
+    reply
+      .header("Cache-Control", "public, max-age=0, must-revalidate")
+      .type("text/html; charset=utf-8");
+    return reply.send(renderIndexPage(origin, toolId));
   });
 
   app.get("/sitemap.xml", async (request, reply) => {

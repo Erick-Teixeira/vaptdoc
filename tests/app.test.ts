@@ -79,7 +79,6 @@ describe("app routes", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json().tools.length).toBeGreaterThan(1);
     expect(response.json().limits.maxFileSizeMB).toBeGreaterThan(0);
-    expect(response.json().tools[0].routePath).toMatch(/^\//u);
   });
 
   it("returns the current access session", async () => {
@@ -142,10 +141,6 @@ describe("app routes", () => {
 
     const toolPage = await app.inject({
       method: "GET",
-      url: "/pdf-para-docx"
-    });
-    const legacyToolRoute = await app.inject({
-      method: "GET",
       url: "/ferramenta/pdf-to-docx"
     });
     const sitemap = await app.inject({
@@ -160,11 +155,9 @@ describe("app routes", () => {
     expect(toolPage.statusCode).toBe(200);
     expect(toolPage.body).toContain("Converter PDF para DOCX online | vaptdoc");
     expect(toolPage.body).toContain("application/ld+json");
-    expect(toolPage.body).toContain("/pdf-para-docx");
-    expect(legacyToolRoute.statusCode).toBe(301);
-    expect(legacyToolRoute.headers.location).toBe("/pdf-para-docx");
+    expect(toolPage.body).toContain("/ferramenta/pdf-to-docx");
     expect(sitemap.statusCode).toBe(200);
-    expect(sitemap.body).toContain("/pdf-para-docx");
+    expect(sitemap.body).toContain("/ferramenta/pdf-to-docx");
     expect(sitemap.body).toContain("/privacy.html");
     expect(robots.statusCode).toBe(200);
     expect(robots.body).toContain("Disallow: /api/");

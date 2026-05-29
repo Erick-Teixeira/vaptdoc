@@ -59,7 +59,7 @@
     </script>
     <script type="application/ld+json" id="seo-software-schema">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"vaptdoc","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://transmutalab.up.railway.app/","image":"https://transmutalab.up.railway.app/assets/vaptdoc-logo-transparent.png","description":"Converta PDF, DOCX, imagens, audio, video e modelos 3D com rapidez, seguranca e uma experiencia limpa em qualquer dispositivo.","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"}}</script>
     <script type="application/ld+json" id="seo-howto-schema">{"@context":"https://schema.org","@type":"HowTo","name":"Como converter arquivos no vaptdoc","description":"Converta PDF, DOCX, imagens, audio, video e modelos 3D com rapidez, seguranca e uma experiencia limpa em qualquer dispositivo.","url":"https://transmutalab.up.railway.app/","step":[{"@type":"HowToStep","position":1,"name":"Escolha a conversao ideal na grade principal.","text":"Escolha a conversao ideal na grade principal."},{"@type":"HowToStep","position":2,"name":"Envie seu arquivo e organize a ordem quando necessario.","text":"Envie seu arquivo e organize a ordem quando necessario."},{"@type":"HowToStep","position":3,"name":"Revise os ajustes visiveis e inicie a conversao.","text":"Revise os ajustes visiveis e inicie a conversao."},{"@type":"HowToStep","position":4,"name":"Baixe o resultado assim que o processamento terminar.","text":"Baixe o resultado assim que o processamento terminar."}]}</script>
-    <script type="application/json" id="vaptdoc-page-data">{"toolId":"","canonicalUrl":"https://transmutalab.up.railway.app/","pagePath":"/","pageMode":"home","siteUrl":"https://transmutalab.up.railway.app"}</script>
+    <script type="application/json" id="vaptdoc-page-data">{"toolId":"","canonicalUrl":"https://transmutalab.up.railway.app/","pagePath":"/","siteUrl":"https://transmutalab.up.railway.app"}</script>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -67,30 +67,7 @@
     <div class="background-orb orb-a"></div>
     <div class="background-orb orb-b"></div>
     <div class="grid-overlay"></div>
-    <header class="site-header">
-      <a class="site-header-brand" href="/" aria-label="Ir para a pagina inicial do vaptdoc">
-        <span class="site-header-brand-mark" aria-hidden="true">
-          <picture>
-            <source
-              srcset="/assets/vaptdoc-symbol-clean-320.webp 320w, /assets/vaptdoc-symbol-clean-640.webp 640w, /assets/vaptdoc-symbol-clean.webp 960w"
-              sizes="3rem"
-              type="image/webp"
-            />
-            <img src="/assets/vaptdoc-symbol-clean.png" alt="" width="640" height="640" decoding="async" />
-          </picture>
-        </span>
-        <strong class="brand-wordmark site-header-wordmark" aria-label="vaptdoc">
-          <span class="brand-word-vapt">vapt</span><span class="brand-word-doc">doc</span>
-        </strong>
-      </a>
-
-      <nav class="site-header-nav" aria-label="Navegacao principal">
-        <a class="site-header-link" href="/">Ferramentas</a>
-        <button type="button" class="site-header-link site-header-link-button" id="header-open-billing">Planos</button>
-        <span class="site-header-current-tool" id="site-header-current-tool" hidden>Ferramenta ativa</span>
-      </nav>
-
-      <div class="site-header-actions">
+    <div class="top-corner-bar">
       <div class="account-corner">
         <button
           type="button"
@@ -238,23 +215,26 @@
           </span>
         </span>
       </button>
-      </div>
-    </header>
+    </div>
 
     <main class="shell shell-compact">
       <section class="hero-panel" aria-labelledby="hero-title">
-        <div class="route-hero" id="route-hero" hidden>
-          <a class="route-hero-back" href="/">Voltar para todas as ferramentas</a>
-          <div class="route-hero-copy">
-            <p class="eyebrow" id="route-hero-kicker">Ferramenta dedicada</p>
-            <h1 id="route-hero-title">Converta seu arquivo</h1>
-            <p class="section-copy" id="route-hero-copy">
-              Envie o arquivo, revise apenas os ajustes desta operacao e baixe o resultado sem distracoes.
-            </p>
-          </div>
-        </div>
+        <a class="hero-brand" href="#workbench" aria-label="Ir para o conversor vaptdoc">
+          <span class="hero-brand-mark" aria-hidden="true">
+            <picture>
+              <source
+                srcset="/assets/vaptdoc-symbol-clean-320.webp 320w, /assets/vaptdoc-symbol-clean-640.webp 640w, /assets/vaptdoc-symbol-clean.webp 960w"
+                sizes="(max-width: 720px) 48vw, 12rem"
+                type="image/webp"
+              />
+              <img src="/assets/vaptdoc-symbol-clean.png" alt="" class="hero-brand-image" width="640" height="640" decoding="async" />
+            </picture>
+          </span>
+          <strong class="brand-wordmark hero-brand-wordmark" aria-label="vaptdoc">
+            <span class="brand-word-vapt">vapt</span><span class="brand-word-doc">doc</span>
+          </strong>
+        </a>
 
-        <div class="home-hero-content" id="home-hero-content">
         <div class="search-shell hero-search-shell">
           <label class="search-field" for="tool-search">
             <span class="search-icon" aria-hidden="true">
@@ -307,16 +287,15 @@
             <span>Receba o resultado</span>
           </div>
         </div>
-        </div>
       </section>
 
       <section class="workbench" id="workbench">
-        <div class="section-heading centered compact-heading" id="directory-heading">
+        <div class="section-heading centered compact-heading">
           <p class="eyebrow">Escolha a conversao</p>
           <h2 class="section-subtitle">Ferramentas prontas para converter</h2>
         </div>
 
-        <div class="tool-toolbar" id="tool-toolbar">
+        <div class="tool-toolbar">
           <div class="tool-tabs" role="tablist" aria-label="Filtrar conversoes">
             <button
               type="button"
@@ -369,7 +348,7 @@
           <input id="toolId" name="toolId" type="hidden" required />
 
           <div class="convert-layout">
-            <aside class="convert-sidebar" id="convert-sidebar">
+            <aside class="convert-sidebar">
               <section class="selection-card workspace-guide-card" aria-label="Fluxo do workspace">
                 <div class="workspace-guide-head">
                   <span class="selection-kicker">Workspace</span>
@@ -497,7 +476,7 @@
             </aside>
 
             <div class="convert-main">
-              <section class="selection-card selection-card-primary workspace-tool-card" id="workspace-tool-card" aria-live="polite">
+              <section class="selection-card selection-card-primary workspace-tool-card" aria-live="polite">
                 <div class="selection-head">
                   <div class="selection-heading-block">
                     <span class="selection-kicker">Ferramenta ativa</span>
@@ -619,7 +598,7 @@
                     <div class="workspace-help-list" id="workspace-help-list"></div>
                   </section>
 
-                  <section class="convert-submit-card workspace-submit-card" id="workspace-submit-card">
+                  <section class="convert-submit-card workspace-submit-card">
                     <div class="workspace-panel-head workspace-panel-head-compact">
                       <div class="workspace-panel-copy">
                         <span class="selection-kicker">Resultado</span>
