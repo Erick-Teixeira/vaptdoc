@@ -2645,16 +2645,21 @@ body[data-page-mode="tool"] .convert-panel::before {
 body[data-page-mode="tool"] .convert-layout {
   grid-template-columns: minmax(0, 1fr);
   gap: 0.85rem;
+  justify-items: center;
 }
 
 body[data-page-mode="tool"] .convert-sidebar {
-  position: static;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  display: none;
 }
 
 .convert-main {
   gap: 1rem;
+}
+
+body[data-page-mode="tool"] .convert-main {
+  width: min(100%, 58rem);
+  margin: 0 auto;
+  justify-items: stretch;
 }
 
 .workspace-main-grid {
@@ -2669,8 +2674,9 @@ body[data-page-mode="tool"] .convert-sidebar {
 }
 
 body[data-page-mode="tool"] .workspace-main-grid {
-  grid-template-columns: minmax(0, 1.34fr) minmax(18.5rem, 0.9fr);
-  gap: 0.85rem;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
 }
 
 body[data-page-mode="tool"] .workspace-guide-card {
@@ -2695,73 +2701,24 @@ body[data-page-mode="tool"] .convert-panel.is-upload-stage .convert-layout {
 
 body[data-page-mode="tool"] .convert-panel.is-upload-stage .convert-main {
   display: grid;
-  justify-items: center;
+  justify-items: stretch;
   gap: 0.82rem;
 }
 
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-tool-card {
-  width: min(100%, 42rem);
-  margin: 0 auto;
-  padding-bottom: 0;
-  text-align: center;
-}
-
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .selection-head,
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .selection-heading-block,
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-panel-copy,
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-canvas-stack {
-  justify-items: center;
-  text-align: center;
-}
-
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .selection-head,
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-panel-head {
-  flex-direction: column;
-  align-items: center;
-}
-
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-tool-badges,
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-panel-chips {
-  justify-content: center;
-}
-
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-panel-chips {
-  display: none;
-}
-
 body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-main-grid {
+  width: 100%;
   grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-  gap: 0;
+  gap: 1rem;
 }
 
 body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-canvas-card {
-  width: min(100%, 38rem);
+  width: 100%;
   margin: 0 auto;
-  padding: 0.4rem 0 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  padding: 1rem;
 }
 
 body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-canvas-card.is-upload-focus {
-  align-self: center;
-}
-
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-panel-head {
-  gap: 0.55rem;
-}
-
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-action-stack {
-  width: min(100%, 30rem);
-  margin: 0 auto;
-  justify-items: center;
-}
-
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-action-stack #convert-button,
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-inline-status,
-body[data-page-mode="tool"] .convert-panel.is-upload-stage .upload-progress-inline {
-  width: 100%;
+  align-self: start;
 }
 
 body[data-page-mode="tool"] .workspace-options-card,
@@ -2772,6 +2729,51 @@ body[data-page-mode="tool"] .access-strip-compact,
 body[data-page-mode="tool"] .premium-lock-compact {
   border-radius: 1.25rem;
   box-shadow: none;
+}
+
+body[data-page-mode="tool"] .workspace-panel-head,
+body[data-page-mode="tool"] .workspace-panel-copy,
+body[data-page-mode="tool"] .workspace-canvas-stack,
+body[data-page-mode="tool"] .workspace-action-stack {
+  justify-items: center;
+  text-align: center;
+}
+
+body[data-page-mode="tool"] .workspace-panel-head {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+body[data-page-mode="tool"] .workspace-panel-chips {
+  display: none;
+}
+
+body[data-page-mode="tool"] .workspace-canvas-card,
+body[data-page-mode="tool"] .workspace-options-card,
+body[data-page-mode="tool"] .workspace-help-card,
+body[data-page-mode="tool"] .premium-lock-compact {
+  width: 100%;
+}
+
+body[data-page-mode="tool"] .workspace-inspector {
+  position: static;
+  width: 100%;
+  display: grid;
+  gap: 1rem;
+}
+
+body[data-page-mode="tool"] .dropzone,
+body[data-page-mode="tool"] .file-stage,
+body[data-page-mode="tool"] .workspace-action-stack {
+  width: min(100%, 42rem);
+  margin-inline: auto;
+}
+
+body[data-page-mode="tool"] .workspace-action-stack #convert-button,
+body[data-page-mode="tool"] .workspace-inline-status,
+body[data-page-mode="tool"] .upload-progress-inline {
+  width: 100%;
 }
 
 .workspace-guide-card {

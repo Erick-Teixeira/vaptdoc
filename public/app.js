@@ -3562,6 +3562,9 @@ function updateWorkspacePanels(tool = getToolById()) {
     if (workspaceOptionsCard) {
       workspaceOptionsCard.hidden = true;
     }
+    if (workspaceHelpCard) {
+      workspaceHelpCard.hidden = true;
+    }
     updateWorkspaceGuide(null);
     return;
   }
@@ -3605,7 +3608,10 @@ function updateWorkspacePanels(tool = getToolById()) {
   }
   renderSpecializedWorkspace(tool);
   if (workspaceOptionsCard) {
-    workspaceOptionsCard.hidden = !shouldShowWorkspaceOptionsCard(tool);
+    workspaceOptionsCard.hidden = !(hasFiles && shouldShowWorkspaceOptionsCard(tool));
+  }
+  if (workspaceHelpCard) {
+    workspaceHelpCard.hidden = !(hasFiles && workspaceHelpList?.childElementCount);
   }
 
   updateWorkspaceGuide(tool);
@@ -3621,8 +3627,13 @@ function updateToolFlowLayout(tool = getToolById()) {
   const hasFiles = stagedFiles.length > 0;
   const revealUpgrade = Boolean(tool && isToolLocked(tool) && shouldRevealUpgradeContext(accessSession));
   const isUploadStage = Boolean(isToolPage && tool && !hasFiles && !revealUpgrade);
-  const showSidebar = Boolean(tool && (hasFiles || revealUpgrade));
-  const showInspector = Boolean(tool && hasFiles);
+  const showSidebar = false;
+  const showInspector = Boolean(
+    tool &&
+      ((workspaceSpecialCard && !workspaceSpecialCard.hidden) ||
+        (workspaceOptionsCard && !workspaceOptionsCard.hidden) ||
+        (workspaceHelpCard && !workspaceHelpCard.hidden))
+  );
   const showConvertAction = Boolean(tool && hasFiles && !revealUpgrade);
 
   form.classList.toggle("is-upload-stage", isUploadStage);
@@ -4092,8 +4103,8 @@ function renderStagedFiles() {
   fileStage.innerHTML = "";
   fileStage.hidden = files.length === 0;
   if (dropzone) {
-    dropzone.hidden = files.length > 0;
-    dropzone.setAttribute("aria-hidden", String(files.length > 0));
+    dropzone.hidden = false;
+    dropzone.setAttribute("aria-hidden", "false");
   }
   syncPreviewUrlCache(files);
 
@@ -5223,7 +5234,7 @@ function renderSpecializedWorkspace(tool) {
 
   workspaceSpecialStack.innerHTML = "";
 
-  if (!tool || !isSpecializedWorkspaceTool(tool)) {
+  if (!tool || !isSpecializedWorkspaceTool(tool) || stagedFiles.length === 0) {
     workspaceSpecialCard.hidden = true;
     return;
   }

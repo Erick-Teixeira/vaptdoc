@@ -361,93 +361,6 @@
           <input id="toolId" name="toolId" type="hidden" required />
 
           <div class="convert-layout">
-            <aside class="convert-sidebar" id="convert-sidebar">
-              <section class="selection-card workspace-guide-card" aria-label="Fluxo do workspace">
-                <div class="workspace-guide-head">
-                  <span class="selection-kicker">Workspace</span>
-                  <strong>Um fluxo por vez</strong>
-                  <p id="workspace-guide-copy">Escolha uma ferramenta, monte sua grade e converta sem se perder em campos.</p>
-                </div>
-
-                <div class="workspace-guide-steps">
-                  <article class="workspace-guide-step" data-workspace-step="tool" data-state="active">
-                    <span class="workspace-guide-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="5" y="6" width="14" height="12" rx="3"></rect>
-                        <path d="M8.5 10h7"></path>
-                        <path d="M8.5 14h4"></path>
-                      </svg>
-                    </span>
-                    <div class="workspace-guide-step-copy">
-                      <strong>Ferramenta</strong>
-                      <span>Escolha a conversao</span>
-                    </div>
-                  </article>
-
-                  <article class="workspace-guide-step" data-workspace-step="files" data-state="idle">
-                    <span class="workspace-guide-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 18a4 4 0 1 1 .8-7.92A5 5 0 0 1 17.5 12H18a3 3 0 1 1 0 6"></path>
-                        <path d="M12 12v6"></path>
-                        <path d="m9.5 14.5 2.5-2.5 2.5 2.5"></path>
-                      </svg>
-                    </span>
-                    <div class="workspace-guide-step-copy">
-                      <strong>Arquivos</strong>
-                      <span>Envie e organize</span>
-                    </div>
-                  </article>
-
-                  <article class="workspace-guide-step" data-workspace-step="adjust" data-state="idle">
-                    <span class="workspace-guide-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 4.75v2.1"></path>
-                        <path d="M12 17.15v2.1"></path>
-                        <path d="m6.2 7.15 1.5 1.5"></path>
-                        <path d="m16.3 17.25 1.5 1.5"></path>
-                        <path d="M4.75 12h2.1"></path>
-                        <path d="M17.15 12h2.1"></path>
-                        <path d="m6.2 16.85 1.5-1.5"></path>
-                        <path d="m16.3 6.75 1.5-1.5"></path>
-                        <circle cx="12" cy="12" r="3.1"></circle>
-                      </svg>
-                    </span>
-                    <div class="workspace-guide-step-copy">
-                      <strong>Ajustes</strong>
-                      <span>So o que for necessario</span>
-                    </div>
-                  </article>
-
-                  <article class="workspace-guide-step" data-workspace-step="convert" data-state="idle">
-                    <span class="workspace-guide-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14"></path>
-                        <path d="m13 6 6 6-6 6"></path>
-                      </svg>
-                    </span>
-                    <div class="workspace-guide-step-copy">
-                      <strong>Resultado</strong>
-                      <span>Converta e baixe</span>
-                    </div>
-                  </article>
-                </div>
-              </section>
-
-              <section class="premium-lock premium-lock-compact" id="premium-lock" hidden aria-live="polite">
-                <div class="premium-lock-copy">
-                  <span class="selection-kicker">Ferramenta Pro</span>
-                  <strong id="premium-lock-title">Desbloqueie para usar esta conversao.</strong>
-                  <p id="premium-lock-copy">
-                    O plano Pro libera OCR, ferramentas PDF avancadas e conversoes 3D com prioridade.
-                  </p>
-                </div>
-
-                <div class="premium-lock-actions">
-                  <button type="button" class="button primary" id="unlock-tool">Acessar conta</button>
-                </div>
-              </section>
-            </aside>
-
             <div class="convert-main" id="convert-main">
               <div class="workspace-main-grid" id="workspace-main-grid">
                 <section class="convert-stage-card workspace-canvas-card" id="workspace-canvas-card">
@@ -496,6 +409,20 @@
                           <span id="progress-label">Aguardando arquivo</span>
                           <strong id="progress-value">0%</strong>
                         </div>
+                      </div>
+                    </section>
+
+                    <section class="premium-lock premium-lock-compact" id="premium-lock" hidden aria-live="polite">
+                      <div class="premium-lock-copy">
+                        <span class="selection-kicker">Ferramenta Pro</span>
+                        <strong id="premium-lock-title">Desbloqueie para usar esta conversao.</strong>
+                        <p id="premium-lock-copy">
+                          O plano Pro libera OCR, ferramentas PDF avancadas e conversoes 3D com prioridade.
+                        </p>
+                      </div>
+
+                      <div class="premium-lock-actions">
+                        <button type="button" class="button primary" id="unlock-tool">Acessar conta</button>
                       </div>
                     </section>
                   </div>
