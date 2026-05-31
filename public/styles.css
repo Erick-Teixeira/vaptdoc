@@ -3722,6 +3722,14 @@ html[data-theme="dark"] select option {
   gap: 0.8rem;
 }
 
+.file-stage-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
 .file-stage-heading,
 .choice-copy,
 .toggle-copy {
@@ -4023,54 +4031,6 @@ html[data-theme="dark"] .file-preview-icon-badge {
   min-width: 2.55rem;
   min-height: 2.55rem;
   padding-inline: 0;
-}
-
-.file-stage-add-card {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 0.42rem;
-  min-height: 21rem;
-  padding: 1rem;
-  border: 1px dashed rgba(125, 56, 255, 0.3);
-  border-radius: 1.45rem;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent),
-    rgba(125, 56, 255, 0.06);
-  color: var(--text);
-  text-align: center;
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    background 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.file-stage-add-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(125, 56, 255, 0.44);
-  box-shadow: 0 16px 28px rgba(93, 49, 199, 0.12);
-}
-
-.file-stage-add-card strong {
-  font-size: 1rem;
-}
-
-.file-stage-add-card span:last-child {
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
-.file-stage-add-icon {
-  display: grid;
-  place-items: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 1.1rem;
-  background: linear-gradient(135deg, var(--tool-from), var(--tool-to));
-  color: #ffffff;
-  box-shadow: 0 14px 28px var(--tool-glow);
 }
 
 .ghost-action,
@@ -5107,10 +5067,6 @@ html[data-theme="dark"] .choice-chip {
 
   .file-stage-actions {
     justify-content: space-between;
-  }
-
-  .file-stage-add-card {
-    min-height: 12rem;
   }
 
   .access-actions,

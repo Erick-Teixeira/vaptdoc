@@ -4168,13 +4168,26 @@ function renderStagedFiles() {
 
   heading.append(meta);
 
+  const headerActions = document.createElement("div");
+  headerActions.className = "file-stage-head-actions";
+
+  if (canAddMore) {
+    const addMoreButton = document.createElement("button");
+    addMoreButton.type = "button";
+    addMoreButton.className = "ghost-action";
+    addMoreButton.textContent = "Adicionar arquivos";
+    addMoreButton.addEventListener("click", () => fileInput.click());
+    headerActions.append(addMoreButton);
+  }
+
   const clearButton = document.createElement("button");
   clearButton.type = "button";
   clearButton.className = "ghost-action";
   clearButton.textContent = "Limpar tudo";
   clearButton.addEventListener("click", clearStagedFiles);
+  headerActions.append(clearButton);
 
-  header.append(heading, clearButton);
+  header.append(heading, headerActions);
 
   const list = document.createElement("div");
   list.className = "file-stage-list";
@@ -4325,19 +4338,6 @@ function renderStagedFiles() {
     item.append(topBar, preview, copy, actions);
     list.append(item);
   });
-
-  if (canAddMore) {
-    const addCard = document.createElement("button");
-    addCard.type = "button";
-    addCard.className = "file-stage-add-card";
-    addCard.innerHTML = `
-      <span class="file-stage-add-icon" aria-hidden="true">${getAddIcon()}</span>
-      <strong>Adicionar arquivos</strong>
-      <span>Toque ou clique para completar sua grade.</span>
-    `;
-    addCard.addEventListener("click", () => fileInput.click());
-    list.append(addCard);
-  }
 
   fileStage.append(header, list);
   updateWorkspacePanels(tool);
@@ -5028,27 +5028,6 @@ function createWorkspaceSpecialSection(title, copy = "") {
   return { section, body };
 }
 
-function createWorkspaceStats(items) {
-  const grid = document.createElement("div");
-  grid.className = "workspace-special-stats";
-
-  items.forEach((item) => {
-    const card = document.createElement("article");
-    card.className = "workspace-special-stat";
-
-    const value = document.createElement("strong");
-    value.textContent = item.value;
-
-    const label = document.createElement("span");
-    label.textContent = item.label;
-
-    card.append(value, label);
-    grid.append(card);
-  });
-
-  return grid;
-}
-
 function createWorkspaceInfoNote(title, copy, tone = "soft") {
   const note = document.createElement("article");
   note.className = `workspace-special-note workspace-special-note-${tone}`;
@@ -5145,17 +5124,8 @@ function getSplitModeWorkspaceNote() {
 
 function renderMergeWorkspace(tool) {
   const files = getSelectedFiles();
-  const totalBytes = files.reduce((sum, file) => sum + Number(file.size || 0), 0);
   const canReorder = files.length > 1;
   const fragment = document.createDocumentFragment();
-
-  fragment.append(
-    createWorkspaceStats([
-      { value: `${files.length}`, label: files.length === 1 ? "PDF na pilha" : "PDFs na pilha" },
-      { value: formatFileSize(totalBytes || 0), label: "Peso total" },
-      { value: canReorder ? "Ativa" : "Aguardando", label: "Ordem final" }
-    ])
-  );
 
   const actionsSection = createWorkspaceSpecialSection("Atalhos de montagem", "Use estes controles para fechar a ordem final mais rapido.");
   const actions = document.createElement("div");
@@ -5191,16 +5161,7 @@ function renderMergeWorkspace(tool) {
 
 function renderSplitWorkspace(tool) {
   const fragment = document.createDocumentFragment();
-  const file = getSelectedFiles()[0] ?? null;
   const splitMode = readOptionFieldValue("splitMode") || "ranges";
-
-  fragment.append(
-    createWorkspaceStats([
-      { value: file ? "1 PDF" : "0", label: "Arquivo de origem" },
-      { value: splitMode === "remove_pages" ? "PDF" : "ZIP", label: "Saida prevista" },
-      { value: file ? formatFileSize(file.size) : "0 KB", label: "Peso atual" }
-    ])
-  );
 
   const modeSection = createWorkspaceSpecialSection("Escolha o tipo de corte", "Comece pelo modo e o resto da lateral se adapta ao que voce selecionou.");
   const modeField = getToolOptionField(tool, "splitMode");
@@ -5222,18 +5183,8 @@ function renderSplitWorkspace(tool) {
 
 function renderImageToPdfWorkspace(tool) {
   const files = getSelectedFiles();
-  const totalBytes = files.reduce((sum, file) => sum + Number(file.size || 0), 0);
   const canReorder = files.length > 1;
-  const mergeAfter = readBooleanOptionFieldValue("imagePdfMergeAfter", true);
   const fragment = document.createDocumentFragment();
-
-  fragment.append(
-    createWorkspaceStats([
-      { value: `${files.length}`, label: files.length === 1 ? "Imagem pronta" : "Imagens prontas" },
-      { value: formatFileSize(totalBytes || 0), label: "Peso da grade" },
-      { value: mergeAfter ? "PDF unico" : "Separado", label: "Saida" }
-    ])
-  );
 
   const actionsSection = createWorkspaceSpecialSection("Atalhos da montagem", "Organize as paginas do PDF visualmente antes de gerar o arquivo final.");
   const actions = document.createElement("div");
@@ -5471,8 +5422,12 @@ function applyActiveTool(toolId, options = {}) {
     return;
   }
 
-  activeToolTitle.textContent = tool.label;
-  activeToolDescription.textContent = getToolDescription(tool);
+  if (activeToolTitle) {
+    activeToolTitle.textContent = tool.label;
+  }
+  if (activeToolDescription) {
+    activeToolDescription.textContent = getToolDescription(tool);
+  }
   applyToolTheme(tool);
   updateFavoriteButton(tool.id);
   updateFileInputConfig(tool, { reset: resetFiles });
