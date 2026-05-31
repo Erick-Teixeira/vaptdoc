@@ -433,14 +433,6 @@
                 </div>
               </section>
 
-              <section class="access-strip access-strip-compact" id="access-strip" aria-live="polite" hidden>
-                <div class="access-summary">
-                  <span class="selection-kicker">Seu plano</span>
-                  <strong id="access-plan-label">Gratis</strong>
-                  <p id="access-usage-copy">8 conversoes gratis por dia.</p>
-                </div>
-              </section>
-
               <section class="premium-lock premium-lock-compact" id="premium-lock" hidden aria-live="polite">
                 <div class="premium-lock-copy">
                   <span class="selection-kicker">Ferramenta Pro</span>
@@ -520,6 +512,24 @@
                     </label>
 
                     <section class="file-stage" id="file-stage" hidden aria-live="polite"></section>
+
+                    <section class="workspace-action-stack" id="workspace-action-stack" aria-live="polite">
+                      <button type="submit" class="button primary wide" id="convert-button" hidden>Converter arquivo</button>
+
+                      <p class="workspace-inline-status" id="status-text" role="status" aria-atomic="true" hidden>
+                        Pronto para converter.
+                      </p>
+
+                      <div class="upload-progress-inline" id="upload-progress" aria-live="polite" aria-atomic="true" hidden>
+                        <div class="progress-track" aria-hidden="true">
+                          <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-meta">
+                          <span id="progress-label">Aguardando arquivo</span>
+                          <strong id="progress-value">0%</strong>
+                        </div>
+                      </div>
+                    </section>
                   </div>
                 </section>
 
@@ -579,32 +589,6 @@
                     <div class="workspace-help-list" id="workspace-help-list"></div>
                   </section>
 
-                  <section class="convert-submit-card workspace-submit-card" id="workspace-submit-card">
-                    <div class="workspace-panel-head workspace-panel-head-compact">
-                      <div class="workspace-panel-copy">
-                        <span class="selection-kicker">Resultado</span>
-                        <strong id="workspace-submit-title">Converter e baixar</strong>
-                        <p id="workspace-submit-copy">Acompanhe o progresso e baixe o arquivo assim que ele estiver pronto.</p>
-                      </div>
-                    </div>
-
-                    <div class="status-strip" role="status" aria-live="polite" aria-atomic="true">
-                      <div class="pulse"></div>
-                      <span id="status-text">Pronto para converter.</span>
-                    </div>
-
-                    <div class="progress-panel" aria-live="polite" aria-atomic="true">
-                      <div class="progress-track" aria-hidden="true">
-                        <div class="progress-fill" id="progress-fill"></div>
-                      </div>
-                      <div class="progress-meta">
-                        <span id="progress-label">Aguardando arquivo</span>
-                        <strong id="progress-value">0%</strong>
-                      </div>
-                    </div>
-
-                    <button type="submit" class="button primary wide" id="convert-button">Converter arquivo</button>
-                  </section>
                 </aside>
               </div>
             </div>

@@ -2752,6 +2752,18 @@ body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-panel-head
   gap: 0.55rem;
 }
 
+body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-action-stack {
+  width: min(100%, 30rem);
+  margin: 0 auto;
+  justify-items: center;
+}
+
+body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-action-stack #convert-button,
+body[data-page-mode="tool"] .convert-panel.is-upload-stage .workspace-inline-status,
+body[data-page-mode="tool"] .convert-panel.is-upload-stage .upload-progress-inline {
+  width: 100%;
+}
+
 body[data-page-mode="tool"] .workspace-options-card,
 body[data-page-mode="tool"] .workspace-help-card,
 body[data-page-mode="tool"] .convert-stage-card,
@@ -3320,6 +3332,33 @@ html[data-theme="dark"] .workspace-special-order-item {
 .convert-stage-card .option-field,
 .convert-stage-card .file-stage {
   background: color-mix(in srgb, var(--field-bg) 98%, transparent);
+}
+
+.workspace-action-stack {
+  display: grid;
+  gap: 0.72rem;
+  padding-top: 0.9rem;
+}
+
+.workspace-action-stack #convert-button {
+  margin-top: 0;
+}
+
+.workspace-inline-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.workspace-inline-status[hidden],
+.upload-progress-inline[hidden] {
+  display: none;
+}
+
+.upload-progress-inline {
+  display: grid;
+  gap: 0.55rem;
 }
 
 .convert-submit-card {

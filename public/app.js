@@ -42,6 +42,7 @@ const pageDataScript = document.getElementById("vaptdoc-page-data");
 const progressFill = document.getElementById("progress-fill");
 const progressLabel = document.getElementById("progress-label");
 const progressValue = document.getElementById("progress-value");
+const uploadProgress = document.getElementById("upload-progress");
 const backToTopButton = document.getElementById("back-to-top");
 const activeToolTitle = document.getElementById("active-tool-title");
 const activeToolDescription = document.getElementById("active-tool-description");
@@ -300,6 +301,11 @@ const browserThemeColors = {
   light: "#7d38ff",
   dark: "#5d31c7"
 };
+const quietStatusMessages = new Set([
+  "Pronto para converter.",
+  "Aguardando arquivo",
+  "Enviando seu arquivo..."
+]);
 const defaultSiteUrl = window.location.origin || "https://transmutalab.up.railway.app";
 const initialPageData = (() => {
   try {
@@ -978,14 +984,37 @@ function renderToolHelp(tool) {
 }
 
 function setStatus(message) {
+  if (!statusText) {
+    return;
+  }
+
   statusText.textContent = message;
+  statusText.hidden = !message || quietStatusMessages.has(message);
 }
 
 function setProgress(value, label) {
   const safeValue = Math.max(0, Math.min(100, Math.round(value)));
-  progressFill.style.width = `${safeValue}%`;
-  progressValue.textContent = `${safeValue}%`;
-  progressLabel.textContent = label;
+  if (progressFill) {
+    progressFill.style.width = `${safeValue}%`;
+  }
+  if (progressValue) {
+    progressValue.textContent = `${safeValue}%`;
+  }
+  if (progressLabel) {
+    progressLabel.textContent = label;
+  }
+}
+
+function showUploadProgress() {
+  if (uploadProgress) {
+    uploadProgress.hidden = false;
+  }
+}
+
+function hideUploadProgress() {
+  if (uploadProgress) {
+    uploadProgress.hidden = true;
+  }
 }
 
 function stopProgressAnimation() {
@@ -3611,6 +3640,10 @@ function updateToolFlowLayout(tool = getToolById()) {
 
   if (convertButton) {
     convertButton.hidden = !showConvertAction;
+  }
+
+  if (!showConvertAction && !form.classList.contains("is-processing")) {
+    hideUploadProgress();
   }
 }
 
@@ -6441,6 +6474,7 @@ form.addEventListener("submit", async (event) => {
 
   setStatus("Enviando seu arquivo...");
   setProgress(4, "Preparando conversao...");
+  showUploadProgress();
   setWorkspaceLoadingState(true, "Convertendo");
 
   try {
@@ -6461,7 +6495,7 @@ form.addEventListener("submit", async (event) => {
       });
 
       xhr.upload.addEventListener("load", () => {
-        startProcessingAnimation(72);
+        hideUploadProgress();
       });
 
       xhr.addEventListener("load", () => {
@@ -6471,11 +6505,13 @@ form.addEventListener("submit", async (event) => {
 
       xhr.addEventListener("error", () => {
         stopProgressAnimation();
+        hideUploadProgress();
         reject(new Error("Falha de rede durante a conversao."));
       });
 
       xhr.addEventListener("abort", () => {
         stopProgressAnimation();
+        hideUploadProgress();
         reject(new Error("Conversao cancelada."));
       });
 
@@ -6504,7 +6540,6 @@ form.addEventListener("submit", async (event) => {
     anchor.href = url;
     anchor.download = filename;
     document.body.append(anchor);
-    setProgress(100, "Tudo pronto");
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
@@ -6522,17 +6557,20 @@ form.addEventListener("submit", async (event) => {
     setStatus("Conversao concluida. Download iniciado.");
   } catch (error) {
     stopProgressAnimation();
+    hideUploadProgress();
     const message = error instanceof Error ? error.message : "Nao foi possivel concluir a conversao.";
     if (/plano pro|premium|limite gratuito/iu.test(message)) {
       promptAccountPlanAccess(tool);
     }
     setStatus(message);
   } finally {
+    hideUploadProgress();
     setWorkspaceLoadingState(false);
   }
 });
 
 initializeTheme();
+hideUploadProgress();
 setProgress(0, "Aguardando arquivo");
 updateSearchClearButton();
 startSearchPlaceholderAnimation();
