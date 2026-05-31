@@ -2241,6 +2241,8 @@ body[data-page-mode="tool"] .workbench {
     var(--panel);
   position: relative;
   min-height: 9.5rem;
+  width: min(760px, 100%);
+  margin: 0 auto;
 }
 
 .tool-directory {
@@ -2250,14 +2252,14 @@ body[data-page-mode="tool"] .workbench {
 
 .tool-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.7rem;
   align-items: stretch;
 }
 
 .tool-grid-skeleton {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.7rem;
 }
 
@@ -2291,7 +2293,7 @@ body[data-page-mode="tool"] .workbench {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.5rem 0.65rem;
-  min-height: 5.1rem;
+  min-height: 4.95rem;
   min-width: 0;
   width: 100%;
   padding: 0.62rem 0.72rem;
@@ -2603,6 +2605,58 @@ html[data-theme="dark"] .tool-card::before {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 32%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 38%);
+}
+
+.tool-directory-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  margin-top: 0.85rem;
+  min-height: 3.15rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--field-border);
+  border-radius: 1.2rem;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--muted-strong);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.tool-directory-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(125, 56, 255, 0.22);
+  box-shadow: 0 14px 24px rgba(20, 31, 38, 0.08);
+}
+
+.tool-directory-toggle[hidden] {
+  display: none !important;
+}
+
+.tool-directory-toggle-copy {
+  font-weight: 700;
+}
+
+.tool-directory-toggle-icon {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  transition: transform 0.18s ease;
+}
+
+.tool-directory-toggle[aria-expanded="true"] .tool-directory-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.tool-directory-toggle-icon svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 body[data-page-mode="tool"] .convert-panel {
@@ -4869,11 +4923,11 @@ html[data-theme="dark"] .choice-chip {
   }
 
   .tool-grid {
-    grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .tool-grid-skeleton {
-    grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+    grid-template-columns: 1fr;
   }
 }
 
@@ -5026,22 +5080,18 @@ html[data-theme="dark"] .choice-chip {
   }
 
   .tool-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 0.6rem;
   }
 
-  .tool-icon-from {
-    justify-self: end;
-  }
-
-  .tool-icon-to {
-    justify-self: start;
+  .tool-grid-wrap {
+    width: 100%;
   }
 
   .tool-pill-label {
-    text-align: center;
-    font-size: 0.82rem;
-    min-height: 1.95em;
+    text-align: left;
+    font-size: 0.92rem;
+    min-height: auto;
   }
 
   .tool-toolbar-copy {
@@ -5316,11 +5366,11 @@ html[data-theme="dark"] .choice-chip {
   }
 
   .tool-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .tool-grid-skeleton {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .dropzone {

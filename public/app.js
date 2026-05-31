@@ -1,5 +1,7 @@
 const toolGrid = document.getElementById("tool-grid");
 const toolGridSkeleton = document.getElementById("tool-grid-skeleton");
+const toolDirectoryToggle = document.getElementById("tool-directory-toggle");
+const toolDirectoryToggleCopy = document.getElementById("tool-directory-toggle-copy");
 const toolSelect = document.getElementById("toolId");
 const toolTemplate = document.getElementById("tool-card-template");
 const form = document.getElementById("convert-form");
@@ -252,6 +254,7 @@ let searchQuery = "";
 let activeFilter = "all";
 let searchHideTimer = null;
 let isSearchResultsOpen = false;
+let isToolDirectoryExpanded = false;
 let searchPlaceholderTimer = null;
 let searchPlaceholderIndex = 0;
 let searchPlaceholderText = "";
@@ -574,6 +577,16 @@ const searchPlaceholderExamples = [
   "stl para obj"
 ];
 const searchResultsLimit = 12;
+const defaultFeaturedToolIds = [
+  "pdf-to-docx",
+  "docx-to-pdf",
+  "pdf-merge",
+  "pdf-split",
+  "pdf-compress",
+  "image-to-pdf",
+  "pdf-to-jpg",
+  "jpg-to-png"
+];
 const orderSensitiveTools = new Set(["pdf-merge", "image-to-pdf"]);
 const specializedWorkspaceTools = new Set(["pdf-merge", "pdf-split", "image-to-pdf"]);
 
@@ -3236,6 +3249,52 @@ function getVisibleTools() {
   });
 }
 
+function getPrioritizedTools(source) {
+  const orderedTools = getOrderedTools(source);
+  const featuredSet = new Set(defaultFeaturedToolIds);
+  const featuredTools = orderedTools.filter((tool) => featuredSet.has(tool.id));
+  const remainingTools = orderedTools.filter((tool) => !featuredSet.has(tool.id));
+  return [...featuredTools, ...remainingTools];
+}
+
+function getVisibleDirectoryTools(visibleTools) {
+  const canCollapse = activeFilter === "all" && !searchQuery;
+  const prioritizedTools = getPrioritizedTools(visibleTools);
+  const featuredTools = prioritizedTools.filter((tool) => defaultFeaturedToolIds.includes(tool.id));
+  const collapsedTools = (featuredTools.length > 0 ? featuredTools : prioritizedTools).slice(0, 8);
+  const expandedTools = [
+    ...collapsedTools,
+    ...prioritizedTools.filter((tool) => !collapsedTools.some((entry) => entry.id === tool.id))
+  ];
+
+  return {
+    canCollapse,
+    totalCount: prioritizedTools.length,
+    collapsedCount: collapsedTools.length,
+    tools: canCollapse && !isToolDirectoryExpanded ? collapsedTools : expandedTools
+  };
+}
+
+function updateToolDirectoryToggleState(directoryState) {
+  if (!toolDirectoryToggle || !toolDirectoryToggleCopy) {
+    return;
+  }
+
+  const hiddenCount = Math.max(0, directoryState.totalCount - directoryState.collapsedCount);
+  const shouldShow = directoryState.canCollapse && hiddenCount > 0;
+
+  toolDirectoryToggle.hidden = !shouldShow;
+  toolDirectoryToggle.setAttribute("aria-expanded", String(shouldShow && isToolDirectoryExpanded));
+
+  if (!shouldShow) {
+    return;
+  }
+
+  toolDirectoryToggleCopy.textContent = isToolDirectoryExpanded
+    ? "Mostrar menos"
+    : `Ver mais ${hiddenCount} ferramenta${hiddenCount > 1 ? "s" : ""}`;
+}
+
 function getSearchMatches(limit = searchResultsLimit) {
   const normalizedQuery = normalizeText(searchQuery);
   if (!normalizedQuery) {
@@ -5703,10 +5762,13 @@ function applyActiveTool(toolId, options = {}) {
 
 function renderTools() {
   const visibleTools = getVisibleTools();
+  const directoryState = getVisibleDirectoryTools(visibleTools);
+  const toolsToRender = directoryState.tools;
   toolGrid.innerHTML = "";
   updateToolTabs();
   updateToolbarCopy(visibleTools.length);
   toolEmpty.hidden = visibleTools.length > 0;
+  updateToolDirectoryToggleState(directoryState);
 
   if (!activeToolId && visibleTools[0]) {
     activeToolId = visibleTools[0].id;
@@ -5714,7 +5776,7 @@ function renderTools() {
     activeToolId = visibleTools[0].id;
   }
 
-  visibleTools.forEach((tool) => {
+  toolsToRender.forEach((tool) => {
     const fragment = toolTemplate.content.cloneNode(true);
     const card = fragment.querySelector(".tool-card");
     const fromIcon = fragment.querySelector(".tool-icon-from");
@@ -6506,6 +6568,7 @@ favoriteToggle?.addEventListener("click", () => {
 toolTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     activeFilter = tab.dataset.filter ?? "all";
+    isToolDirectoryExpanded = false;
     renderTools();
     renderSearchResults();
   });
@@ -6514,6 +6577,9 @@ toolTabs.forEach((tab) => {
 searchInput.addEventListener("input", (event) => {
   searchQuery = event.currentTarget.value.trim();
   isSearchResultsOpen = searchQuery.length > 0;
+  if (searchQuery.length > 0) {
+    isToolDirectoryExpanded = false;
+  }
   updateSearchClearButton();
   renderTools();
   renderSearchResults();
@@ -6555,10 +6621,16 @@ searchClear.addEventListener("click", () => {
   searchInput.value = "";
   searchQuery = "";
   isSearchResultsOpen = false;
+  isToolDirectoryExpanded = false;
   updateSearchClearButton();
   renderTools();
   hideSearchResults();
   searchInput.focus();
+});
+
+toolDirectoryToggle?.addEventListener("click", () => {
+  isToolDirectoryExpanded = !isToolDirectoryExpanded;
+  renderTools();
 });
 
 dropzone.addEventListener("dragover", (event) => {
