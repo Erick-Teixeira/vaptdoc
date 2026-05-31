@@ -67,22 +67,7 @@
     <div class="background-orb orb-a"></div>
     <div class="background-orb orb-b"></div>
     <div class="grid-overlay"></div>
-    <header class="site-header">
-      <a class="site-header-brand" href="/" aria-label="Ir para a home do vaptdoc">
-        <span class="site-header-brand-mark" aria-hidden="true">
-          <img src="/assets/vaptdoc-symbol-clean.png" alt="" width="56" height="56" decoding="async" />
-        </span>
-        <strong class="brand-wordmark site-header-brand-wordmark" aria-label="vaptdoc">
-          <span class="brand-word-vapt">vapt</span><span class="brand-word-doc">doc</span>
-        </strong>
-      </a>
-
-      <div class="site-header-nav">
-        <a class="site-header-link" href="/" id="site-header-home-link">Ferramentas</a>
-        <span class="site-header-current" id="site-header-current" hidden></span>
-      </div>
-
-      <div class="site-header-actions">
+    <div class="top-corner-bar">
       <div class="account-corner">
         <button
           type="button"
@@ -230,11 +215,26 @@
           </span>
         </span>
       </button>
-      </div>
-    </header>
+    </div>
 
     <main class="shell shell-compact">
       <section class="hero-panel" id="home-hero" aria-labelledby="hero-title">
+        <a class="hero-brand" href="#workbench" aria-label="Ir para o conversor vaptdoc">
+          <span class="hero-brand-mark" aria-hidden="true">
+            <picture>
+              <source
+                srcset="/assets/vaptdoc-symbol-clean-320.webp 320w, /assets/vaptdoc-symbol-clean-640.webp 640w, /assets/vaptdoc-symbol-clean.webp 960w"
+                sizes="(max-width: 720px) 48vw, 12rem"
+                type="image/webp"
+              />
+              <img src="/assets/vaptdoc-symbol-clean.png" alt="" class="hero-brand-image" width="640" height="640" decoding="async" />
+            </picture>
+          </span>
+          <strong class="brand-wordmark hero-brand-wordmark" aria-label="vaptdoc">
+            <span class="brand-word-vapt">vapt</span><span class="brand-word-doc">doc</span>
+          </strong>
+        </a>
+
         <div class="search-shell hero-search-shell">
           <label class="search-field" for="tool-search">
             <span class="search-icon" aria-hidden="true">
@@ -361,7 +361,7 @@
           <input id="toolId" name="toolId" type="hidden" required />
 
           <div class="convert-layout">
-            <aside class="convert-sidebar">
+            <aside class="convert-sidebar" id="convert-sidebar">
               <section class="selection-card workspace-guide-card" aria-label="Fluxo do workspace">
                 <div class="workspace-guide-head">
                   <span class="selection-kicker">Workspace</span>
@@ -439,38 +439,6 @@
                   <strong id="access-plan-label">Gratis</strong>
                   <p id="access-usage-copy">8 conversoes gratis por dia.</p>
                 </div>
-
-                <div class="access-actions">
-                  <button type="button" class="ghost-action ghost-action-rich" id="open-billing">
-                    <span class="ghost-action-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4.5" y="6.5" width="15" height="11" rx="2.5"></rect>
-                        <path d="M8.25 11.5h7.5"></path>
-                      </svg>
-                    </span>
-                    <span>Planos</span>
-                  </button>
-                  <button type="button" class="ghost-action ghost-action-rich" id="open-redeem">
-                    <span class="ghost-action-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m8.5 6.5 7 7"></path>
-                        <path d="M14.1 5.2h3.3a1.4 1.4 0 0 1 1.4 1.4v3.3a2 2 0 0 1-.58 1.42l-5.78 5.78a2 2 0 0 1-2.83 0l-3.2-3.2a2 2 0 0 1 0-2.83l5.78-5.78a2 2 0 0 1 1.41-.58Z"></path>
-                        <circle cx="15.7" cy="8.3" r="0.85"></circle>
-                      </svg>
-                    </span>
-                    <span>Codigo</span>
-                  </button>
-                  <button type="button" class="ghost-action ghost-action-rich" id="access-logout" hidden>
-                    <span class="ghost-action-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10 7.25H7.25A2.25 2.25 0 0 0 5 9.5v5A2.25 2.25 0 0 0 7.25 16.75H10"></path>
-                        <path d="m13.5 8.5 4 3.5-4 3.5"></path>
-                        <path d="M17.5 12h-8"></path>
-                      </svg>
-                    </span>
-                    <span>Sair</span>
-                  </button>
-                </div>
               </section>
 
               <section class="premium-lock premium-lock-compact" id="premium-lock" hidden aria-live="polite">
@@ -483,12 +451,12 @@
                 </div>
 
                 <div class="premium-lock-actions">
-                  <button type="button" class="button primary" id="unlock-tool">Desbloquear agora</button>
+                  <button type="button" class="button primary" id="unlock-tool">Acessar conta</button>
                 </div>
               </section>
             </aside>
 
-            <div class="convert-main">
+            <div class="convert-main" id="convert-main">
               <section class="selection-card selection-card-primary workspace-tool-card" aria-live="polite">
                 <div class="selection-head">
                   <div class="selection-heading-block">
@@ -521,8 +489,8 @@
                 </div>
               </section>
 
-              <div class="workspace-main-grid">
-                <section class="convert-stage-card workspace-canvas-card">
+              <div class="workspace-main-grid" id="workspace-main-grid">
+                <section class="convert-stage-card workspace-canvas-card" id="workspace-canvas-card">
                   <div class="workspace-panel-head">
                     <div class="workspace-panel-copy">
                       <span class="selection-kicker">Arquivos e previa</span>
@@ -555,7 +523,7 @@
                   </div>
                 </section>
 
-                <aside class="workspace-inspector">
+                <aside class="workspace-inspector" id="workspace-inspector">
                   <section class="workspace-options-card workspace-special-card" id="workspace-special-card" hidden>
                     <div class="workspace-panel-head workspace-panel-head-compact">
                       <div class="workspace-panel-copy">
@@ -611,7 +579,7 @@
                     <div class="workspace-help-list" id="workspace-help-list"></div>
                   </section>
 
-                  <section class="convert-submit-card workspace-submit-card">
+                  <section class="convert-submit-card workspace-submit-card" id="workspace-submit-card">
                     <div class="workspace-panel-head workspace-panel-head-compact">
                       <div class="workspace-panel-copy">
                         <span class="selection-kicker">Resultado</span>

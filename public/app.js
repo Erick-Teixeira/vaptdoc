@@ -1551,6 +1551,21 @@ function hideBillingModal() {
   updateBodyScrollLock();
 }
 
+function promptAccountPlanAccess(tool = getToolById()) {
+  const toolLabel = tool?.label ?? "Essa ferramenta";
+  hideAccountMenu();
+  hideBillingModal();
+
+  if (isAccountAuthenticated()) {
+    showAccountModal({ focus: "overview" });
+    setAccountStatus(`${toolLabel} faz parte do Pro. Gerencie plano, creditos e codigos pela sua conta.`);
+    return;
+  }
+
+  showAccountModal({ focus: "login" });
+  setAccountStatus(`Entre na sua conta para ver planos e liberar ${toolLabel}.`);
+}
+
 function hideAccountPaneModals() {
   accountPaneModals.forEach((modal) => {
     modal.hidden = true;
@@ -1947,11 +1962,14 @@ function renderAccountUi() {
 
 function updateAccessUi() {
   const shouldShowAccess = shouldRevealUpgradeContext(accessSession);
-  accessStrip.hidden = !shouldShowAccess;
-  accessPlanLabel.textContent = formatAccessPlanLabel(accessSession);
-  accessUsageCopy.textContent = getAccessUsageLabel(accessSession);
-  if (openBillingButton) {
-    openBillingButton.textContent = "Planos";
+  if (accessStrip) {
+    accessStrip.hidden = !shouldShowAccess;
+  }
+  if (accessPlanLabel) {
+    accessPlanLabel.textContent = formatAccessPlanLabel(accessSession);
+  }
+  if (accessUsageCopy) {
+    accessUsageCopy.textContent = getAccessUsageLabel(accessSession);
   }
   renderBillingOffers();
   renderAccountUi();
@@ -1981,7 +1999,9 @@ function updateAccessUi() {
     "Suporte em breve"
   );
 
-  accessLogoutButton.hidden = !accessSession?.premium || isAccountAuthenticated();
+  if (accessLogoutButton) {
+    accessLogoutButton.hidden = !accessSession?.premium || isAccountAuthenticated();
+  }
 
   const activeTool = getToolById();
   if (activeTool) {
@@ -3974,7 +3994,7 @@ function addStagedFiles(fileList, options = {}) {
   }
 
   if (isToolLocked(tool)) {
-    showBillingModal({ tool });
+    promptAccountPlanAccess(tool);
     return;
   }
 
@@ -5718,10 +5738,6 @@ backToTopButton?.addEventListener("click", () => {
   });
 });
 
-openBillingButton?.addEventListener("click", () => {
-  showBillingModal({ tool: getToolById() });
-});
-
 accountLauncher?.addEventListener("click", () => {
   if (isAccountAuthenticated()) {
     toggleAccountMenu();
@@ -5736,7 +5752,7 @@ openRedeemButton?.addEventListener("click", () => {
 });
 
 unlockToolButton?.addEventListener("click", () => {
-  showBillingModal({ tool: getToolById() });
+  promptAccountPlanAccess(getToolById());
 });
 
 accessLogoutButton?.addEventListener("click", async () => {
@@ -6369,7 +6385,7 @@ form.addEventListener("submit", async (event) => {
   }
 
   if (isToolLocked(tool)) {
-    showBillingModal({ tool });
+    promptAccountPlanAccess(tool);
     setStatus(`${tool.label} faz parte do plano Pro.`);
     return;
   }
@@ -6508,7 +6524,7 @@ form.addEventListener("submit", async (event) => {
     stopProgressAnimation();
     const message = error instanceof Error ? error.message : "Nao foi possivel concluir a conversao.";
     if (/plano pro|premium|limite gratuito/iu.test(message)) {
-      showBillingModal({ tool });
+      promptAccountPlanAccess(tool);
     }
     setStatus(message);
   } finally {
