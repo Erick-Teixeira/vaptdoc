@@ -3293,11 +3293,11 @@ function updateToolDirectoryToggleState(directoryState) {
   }
 
   toolDirectoryToggleCopy.textContent = isToolDirectoryExpanded
-    ? "Mostrar menos"
-    : `Ver mais ${hiddenCount} ferramenta${hiddenCount > 1 ? "s" : ""}`;
+    ? "Ocultar ferramentas"
+    : "Exibir todas as ferramentas";
   toolDirectoryToggle.setAttribute(
     "aria-label",
-    isToolDirectoryExpanded ? "Recolher lista de ferramentas" : `Ver mais ${hiddenCount} ferramentas`
+    isToolDirectoryExpanded ? "Ocultar lista completa de ferramentas" : `Exibir mais ${hiddenCount} ferramentas`
   );
 }
 
