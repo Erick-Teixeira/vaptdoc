@@ -4943,12 +4943,14 @@ html[data-theme="dark"] .choice-chip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .tool-grid {
-    grid-template-columns: 1fr;
+  .tool-grid,
+  .tool-grid.is-collapsed-line,
+  .tool-grid-skeleton {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .tool-grid-skeleton {
-    grid-template-columns: 1fr;
+  .tool-grid.is-collapsed-line .tool-card {
+    width: 100%;
   }
 }
 
@@ -5021,8 +5023,14 @@ html[data-theme="dark"] .choice-chip {
     gap: 0.55rem;
   }
 
+  .tool-grid,
+  .tool-grid.is-collapsed-line,
   .tool-grid-skeleton {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tool-grid.is-collapsed-line .tool-card {
+    width: 100%;
   }
 
   .site-footer-inner {
@@ -5386,12 +5394,14 @@ html[data-theme="dark"] .choice-chip {
     display: grid;
   }
 
-  .tool-grid {
-    grid-template-columns: 1fr;
+  .tool-grid,
+  .tool-grid.is-collapsed-line,
+  .tool-grid-skeleton {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .tool-grid-skeleton {
-    grid-template-columns: 1fr;
+  .tool-grid.is-collapsed-line .tool-card {
+    width: 100%;
   }
 
   .dropzone {
@@ -5433,13 +5443,18 @@ html[data-theme="dark"] .choice-chip {
     --top-ui-offset: 4.8rem;
   }
 
-  .search-results,
-  .tool-grid {
+  .search-results {
     grid-template-columns: 1fr;
   }
 
+  .tool-grid,
+  .tool-grid.is-collapsed-line,
   .tool-grid-skeleton {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tool-grid.is-collapsed-line .tool-card {
+    width: 100%;
   }
 
   .tool-toolbar-copy {
