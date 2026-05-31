@@ -4103,9 +4103,6 @@ function renderStagedFiles() {
   }
 
   const canReorder = files.length > 1;
-  const maxFiles = tool.maxFiles ?? (tool.allowsMultipleFiles ? 10 : 1);
-  const canAddMore = Boolean(tool.allowsMultipleFiles && files.length < maxFiles);
-
   const header = document.createElement("div");
   header.className = "file-stage-head";
 
@@ -4170,15 +4167,6 @@ function renderStagedFiles() {
 
   const headerActions = document.createElement("div");
   headerActions.className = "file-stage-head-actions";
-
-  if (canAddMore) {
-    const addMoreButton = document.createElement("button");
-    addMoreButton.type = "button";
-    addMoreButton.className = "ghost-action";
-    addMoreButton.textContent = "Adicionar arquivos";
-    addMoreButton.addEventListener("click", () => fileInput.click());
-    headerActions.append(addMoreButton);
-  }
 
   const clearButton = document.createElement("button");
   clearButton.type = "button";
