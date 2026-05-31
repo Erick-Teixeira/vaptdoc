@@ -88,6 +88,16 @@ const workspaceMainGrid = document.getElementById("workspace-main-grid");
 const workspaceCanvasCard = document.getElementById("workspace-canvas-card");
 const workspaceInspector = document.getElementById("workspace-inspector");
 const workspaceSubmitCard = document.getElementById("workspace-submit-card");
+const conversionModal = document.getElementById("conversion-modal");
+const conversionModalCloseButton = document.getElementById("conversion-modal-close");
+const conversionModalCancelButton = document.getElementById("conversion-modal-cancel");
+const conversionModalTitle = document.getElementById("conversion-modal-title");
+const conversionModalCopy = document.getElementById("conversion-modal-copy");
+const conversionModalBody = document.getElementById("conversion-modal-body");
+const conversionModalStatus = document.getElementById("conversion-modal-status");
+const conversionSummaryFiles = document.getElementById("conversion-summary-files");
+const conversionSummaryOutput = document.getElementById("conversion-summary-output");
+const conversionConfirmButton = document.getElementById("conversion-confirm-button");
 const toolHelpModal = document.getElementById("tool-help-modal");
 const toolHelpCloseButton = document.getElementById("tool-help-close");
 const toolHelpTitle = document.getElementById("tool-help-title");
@@ -249,6 +259,7 @@ let searchPlaceholderPhase = "typing";
 let stagedFiles = [];
 let draggedFileIndex = null;
 let toolOptionState = {};
+let conversionModalRenderedCards = [];
 const filePreviewUrlCache = new Map();
 let accessSession = {
   plan: "free",
@@ -760,6 +771,7 @@ function updatePageModeUi(tool) {
   if (toolHelpButton && !isToolPage) {
     toolHelpButton.hidden = true;
   }
+  hideConversionModal();
   if (!isToolPage) {
     hideToolHelpModal();
   }
@@ -1532,11 +1544,179 @@ function hideAccountMenu() {
 
 function updateBodyScrollLock() {
   const hasOpenModal =
+    (conversionModal && !conversionModal.hidden) ||
     (toolHelpModal && !toolHelpModal.hidden) ||
     (billingModal && !billingModal.hidden) ||
     accountPaneModals.some((modal) => !modal.hidden);
 
   document.body.style.overflow = hasOpenModal ? "hidden" : "";
+}
+
+function restoreConversionModalCards() {
+  if (!workspaceInspector) {
+    return;
+  }
+
+  [workspaceSpecialCard, workspaceOptionsCard].forEach((card) => {
+    if (card) {
+      card.classList.remove("is-modal-mounted");
+    }
+    if (card && card.parentElement !== workspaceInspector) {
+      workspaceInspector.append(card);
+    }
+  });
+
+  conversionModalRenderedCards = [];
+}
+
+function setConversionModalStatus(message) {
+  if (!conversionModalStatus) {
+    return;
+  }
+
+  conversionModalStatus.textContent = message;
+}
+
+function getConversionModalCards() {
+  const cards = [];
+
+  if (workspaceSpecialCard && !workspaceSpecialCard.hidden) {
+    cards.push(workspaceSpecialCard);
+  }
+
+  if (workspaceOptionsCard && !workspaceOptionsCard.hidden) {
+    cards.push(workspaceOptionsCard);
+  }
+
+  return cards;
+}
+
+function renderConversionModalCards(tool) {
+  if (!conversionModalBody) {
+    return;
+  }
+
+  restoreConversionModalCards();
+  conversionModalBody.innerHTML = "";
+  conversionModalRenderedCards = getConversionModalCards();
+
+  if (conversionModalRenderedCards.length === 0) {
+    const emptyState = document.createElement("article");
+    emptyState.className = "conversion-modal-empty";
+    emptyState.innerHTML = `
+      <strong>Sem ajustes extras</strong>
+      <p>Essa conversao ja esta pronta. Clique em converter para iniciar o envio real do arquivo.</p>
+    `;
+    conversionModalBody.append(emptyState);
+    return;
+  }
+
+  conversionModalRenderedCards.forEach((card) => {
+    card.hidden = false;
+    card.classList.add("is-modal-mounted");
+    conversionModalBody.append(card);
+  });
+}
+
+function syncConversionModalSummary(tool, files) {
+  if (conversionModalTitle) {
+    conversionModalTitle.textContent = tool ? `${tool.label} pronto para converter` : "Revise antes de converter";
+  }
+
+  if (conversionModalCopy) {
+    conversionModalCopy.textContent = tool
+      ? "Ajuste apenas o necessario, confirme as opcoes desta ferramenta e conclua a conversao real."
+      : "Revise os ajustes necessarios antes de converter.";
+  }
+
+  if (conversionSummaryFiles) {
+    conversionSummaryFiles.textContent = `${files.length} ${files.length === 1 ? "arquivo" : "arquivos"}`;
+  }
+
+  if (conversionSummaryOutput) {
+    conversionSummaryOutput.textContent = String(tool?.outputExtension ?? "").toUpperCase() || "Arquivo";
+  }
+
+  if (conversionConfirmButton) {
+    conversionConfirmButton.textContent = getToolActionLabel(tool);
+  }
+
+  setConversionModalStatus("Revise os ajustes e clique em converter para iniciar o envio real do arquivo.");
+}
+
+function hideConversionModal() {
+  if (!conversionModal) {
+    return;
+  }
+
+  restoreConversionModalCards();
+  conversionModal.hidden = true;
+  updateBodyScrollLock();
+}
+
+function validateConversionRequest() {
+  const toolId = toolSelect.value;
+  const tool = getToolById(toolId);
+  const files = getSelectedFiles();
+
+  if (!toolId || !tool) {
+    throw new Error("Selecione uma conversao antes de continuar.");
+  }
+
+  if (isToolLocked(tool)) {
+    promptAccountPlanAccess(tool);
+    throw new Error(`${tool.label} faz parte do plano Pro.`);
+  }
+
+  if (files.length === 0) {
+    throw new Error("Selecione uma ferramenta e um arquivo para continuar.");
+  }
+
+  const minFiles = tool.minFiles ?? 1;
+  const maxFiles = tool.maxFiles ?? (tool.allowsMultipleFiles ? 10 : 1);
+
+  if (files.length < minFiles) {
+    throw new Error(
+      minFiles === 1
+        ? "Envie um arquivo para continuar."
+        : `Envie pelo menos ${minFiles} arquivos para usar ${tool.label.toLowerCase()}.`
+    );
+  }
+
+  if (files.length > maxFiles) {
+    throw new Error(`Essa conversao aceita no maximo ${maxFiles} arquivos por vez.`);
+  }
+
+  return { toolId, tool, files };
+}
+
+function showConversionModal(tool = getToolById()) {
+  if (!conversionModal || !conversionModalBody) {
+    return;
+  }
+
+  let request;
+  try {
+    request = validateConversionRequest();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Nao foi possivel abrir os ajustes.";
+    setStatus(message);
+    return;
+  }
+
+  hideAccountMenu();
+  hideToolHelpModal();
+  hideBillingModal();
+  hideAccountPaneModals();
+
+  renderConversionModalCards(request.tool);
+  syncConversionModalSummary(request.tool, request.files);
+  conversionModal.hidden = false;
+  updateBodyScrollLock();
+
+  window.setTimeout(() => {
+    conversionConfirmButton?.focus();
+  }, 0);
 }
 
 function hideToolHelpModal() {
@@ -1560,6 +1740,7 @@ function showToolHelpModal(tool = getToolById()) {
   }
 
   hideAccountMenu();
+  hideConversionModal();
   hideBillingModal();
   hideAccountPaneModals();
   toolHelpModal.hidden = false;
@@ -1595,6 +1776,7 @@ function showBillingModal(options = {}) {
   }
 
   hideAccountMenu();
+  hideConversionModal();
   hideToolHelpModal();
   billingModal.hidden = false;
   updateBodyScrollLock();
@@ -1723,6 +1905,7 @@ function showAccountModal(options = {}) {
 
   hideAccountMenu();
   hideBillingModal();
+  hideConversionModal();
   hideToolHelpModal();
   hideAccountPaneModals();
   modal.hidden = false;
@@ -3608,6 +3791,7 @@ function updateWorkspacePanels(tool = getToolById()) {
       workspaceOptionsCard.hidden = true;
     }
     renderToolHelp(null);
+    hideConversionModal();
     updateWorkspaceGuide(null);
     return;
   }
@@ -3654,6 +3838,14 @@ function updateWorkspacePanels(tool = getToolById()) {
     workspaceOptionsCard.hidden = !(hasFiles && shouldShowWorkspaceOptionsCard(tool));
   }
 
+  if (conversionModal && !conversionModal.hidden) {
+    if (!hasFiles) {
+      hideConversionModal();
+    } else {
+      syncConversionModalSummary(tool, getSelectedFiles());
+    }
+  }
+
   updateWorkspaceGuide(tool);
   updateToolFlowLayout(tool);
 }
@@ -3668,10 +3860,7 @@ function updateToolFlowLayout(tool = getToolById()) {
   const revealUpgrade = Boolean(tool && isToolLocked(tool) && shouldRevealUpgradeContext(accessSession));
   const isUploadStage = Boolean(isToolPage && tool && !hasFiles && !revealUpgrade);
   const showSidebar = false;
-  const showInspector = Boolean(
-    tool &&
-      ((workspaceSpecialCard && !workspaceSpecialCard.hidden) || (workspaceOptionsCard && !workspaceOptionsCard.hidden))
-  );
+  const showInspector = false;
   const showConvertAction = Boolean(tool && hasFiles && !revealUpgrade);
 
   form.classList.toggle("is-upload-stage", isUploadStage);
@@ -5760,6 +5949,21 @@ unlockToolButton?.addEventListener("click", () => {
   promptAccountPlanAccess(getToolById());
 });
 
+convertButton?.addEventListener("click", () => {
+  showConversionModal(getToolById());
+});
+
+conversionModalCloseButton?.addEventListener("click", hideConversionModal);
+conversionModalCancelButton?.addEventListener("click", hideConversionModal);
+conversionModal?.addEventListener("click", (event) => {
+  if (event.target?.dataset?.closeConversion === "true") {
+    hideConversionModal();
+  }
+});
+conversionConfirmButton?.addEventListener("click", async () => {
+  await performConversion();
+});
+
 toolHelpButton?.addEventListener("click", () => {
   showToolHelpModal(getToolById());
 });
@@ -5819,6 +6023,7 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    hideConversionModal();
     hideToolHelpModal();
     hideAccountModal();
     hideBillingModal();
@@ -6389,46 +6594,7 @@ fileInput.addEventListener("change", () => {
   addStagedFiles(fileInput.files, { append: Boolean(getToolById()?.allowsMultipleFiles) });
 });
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const toolId = toolSelect.value;
-  const tool = getToolById(toolId);
-  const files = getSelectedFiles();
-
-  if (!toolId || !tool) {
-    setStatus("Selecione uma conversao antes de continuar.");
-    return;
-  }
-
-  if (isToolLocked(tool)) {
-    promptAccountPlanAccess(tool);
-    setStatus(`${tool.label} faz parte do plano Pro.`);
-    return;
-  }
-
-  if (files.length === 0) {
-    setStatus("Selecione uma ferramenta e um arquivo para continuar.");
-    return;
-  }
-
-  const minFiles = tool.minFiles ?? 1;
-  const maxFiles = tool.maxFiles ?? (tool.allowsMultipleFiles ? 10 : 1);
-
-  if (files.length < minFiles) {
-    setStatus(
-      minFiles === 1
-        ? "Envie um arquivo para continuar."
-        : `Envie pelo menos ${minFiles} arquivos para usar ${tool.label.toLowerCase()}.`
-    );
-    return;
-  }
-
-  if (files.length > maxFiles) {
-    setStatus(`Essa conversao aceita no maximo ${maxFiles} arquivos por vez.`);
-    return;
-  }
-
+function buildConversionFormData(toolId, files) {
   const formData = new FormData();
   formData.set("toolId", toolId);
 
@@ -6456,10 +6622,30 @@ form.addEventListener("submit", async (event) => {
     }
   });
 
+  return formData;
+}
+
+async function performConversion() {
+  let request;
+  try {
+    request = validateConversionRequest();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Nao foi possivel iniciar a conversao.";
+    setConversionModalStatus(message);
+    setStatus(message);
+    return;
+  }
+
+  const { toolId, tool, files } = request;
+  hideConversionModal();
+  const formData = buildConversionFormData(toolId, files);
   setStatus("Enviando seu arquivo...");
   setProgress(4, "Preparando conversao...");
   showUploadProgress();
   setWorkspaceLoadingState(true, "Convertendo");
+  if (conversionConfirmButton) {
+    conversionConfirmButton.disabled = true;
+  }
 
   try {
     const response = await new Promise((resolve, reject) => {
@@ -6546,11 +6732,20 @@ form.addEventListener("submit", async (event) => {
     if (/plano pro|premium|limite gratuito/iu.test(message)) {
       promptAccountPlanAccess(tool);
     }
+    setConversionModalStatus(message);
     setStatus(message);
   } finally {
     hideUploadProgress();
+    if (conversionConfirmButton) {
+      conversionConfirmButton.disabled = false;
+    }
     setWorkspaceLoadingState(false);
   }
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  showConversionModal(getToolById());
 });
 
 initializeTheme();

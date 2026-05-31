@@ -396,7 +396,7 @@
                     <section class="file-stage" id="file-stage" hidden aria-live="polite"></section>
 
                     <section class="workspace-action-stack" id="workspace-action-stack" aria-live="polite">
-                      <button type="submit" class="button primary wide" id="convert-button" hidden>Converter arquivo</button>
+                      <button type="button" class="button primary wide" id="convert-button" hidden>Converter arquivo</button>
 
                       <p class="workspace-inline-status" id="status-text" role="status" aria-atomic="true" hidden>
                         Pronto para converter.
@@ -664,6 +664,47 @@
         </div>
 
         <div class="tool-help-list" id="tool-help-list"></div>
+      </section>
+    </div>
+
+    <div class="billing-modal conversion-modal" id="conversion-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar ajustes da conversao" data-close-conversion="true"></button>
+
+      <section class="billing-dialog conversion-dialog" role="dialog" aria-modal="true" aria-labelledby="conversion-modal-title">
+        <button type="button" class="billing-close" id="conversion-modal-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header conversion-header">
+          <span class="selection-kicker">Ajustes da conversao</span>
+          <h2 id="conversion-modal-title">Revise antes de converter</h2>
+          <p id="conversion-modal-copy">Confira os ajustes necessarios desta ferramenta e confirme a conversao.</p>
+        </div>
+
+        <section class="conversion-summary" id="conversion-summary" aria-live="polite">
+          <div class="conversion-summary-chip">
+            <span class="conversion-summary-label">Arquivos</span>
+            <strong id="conversion-summary-files">0 arquivos</strong>
+          </div>
+          <div class="conversion-summary-chip">
+            <span class="conversion-summary-label">Formato final</span>
+            <strong id="conversion-summary-output">PDF</strong>
+          </div>
+        </section>
+
+        <div class="conversion-modal-body" id="conversion-modal-body"></div>
+
+        <p class="billing-status conversion-modal-status" id="conversion-modal-status">
+          Revise os ajustes e clique em converter para iniciar o envio real do arquivo.
+        </p>
+
+        <div class="conversion-modal-actions">
+          <button type="button" class="button secondary" id="conversion-modal-cancel">Voltar</button>
+          <button type="button" class="button primary" id="conversion-confirm-button">Converter arquivo</button>
+        </div>
       </section>
     </div>
 
