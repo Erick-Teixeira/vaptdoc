@@ -17,8 +17,8 @@ async function main() {
   await assertOk("/readyz", (body) => body.includes('"status":"ready"') || body.includes('"status":"busy"'));
   await assertOk("/api/tools", (body) => body.includes('"pdf-to-docx"') && body.includes('"3d-convert"'));
   await assertOk("/", (body) => body.includes("vaptdoc") && body.includes("tool-search"));
-  await assertOk("/ferramenta/pdf-to-docx", (body) => body.includes("Converter PDF para DOCX online | vaptdoc"));
-  await assertOk("/sitemap.xml", (body) => body.includes("/ferramenta/pdf-to-docx") && body.includes("/privacy.html"));
+  await assertOk("/pdf-para-docx", (body) => body.includes("Converter PDF para DOCX online | vaptdoc"));
+  await assertOk("/sitemap.xml", (body) => body.includes("/pdf-para-docx") && body.includes("/privacy.html"));
   await assertOk("/robots.txt", (body) => body.includes("Disallow: /api/") && body.includes("Sitemap:"));
 
   console.log(`Smoke publico concluido com sucesso em ${baseUrl}`);

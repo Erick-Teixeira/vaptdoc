@@ -62,12 +62,27 @@
     <script type="application/json" id="vaptdoc-page-data">{"toolId":"","canonicalUrl":"https://transmutalab.up.railway.app/","pagePath":"/","siteUrl":"https://transmutalab.up.railway.app"}</script>
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
+  <body data-page-mode="home">
     <a class="skip-link" href="#workbench">Pular para o conversor</a>
     <div class="background-orb orb-a"></div>
     <div class="background-orb orb-b"></div>
     <div class="grid-overlay"></div>
-    <div class="top-corner-bar">
+    <header class="site-header">
+      <a class="site-header-brand" href="/" aria-label="Ir para a home do vaptdoc">
+        <span class="site-header-brand-mark" aria-hidden="true">
+          <img src="/assets/vaptdoc-symbol-clean.png" alt="" width="56" height="56" decoding="async" />
+        </span>
+        <strong class="brand-wordmark site-header-brand-wordmark" aria-label="vaptdoc">
+          <span class="brand-word-vapt">vapt</span><span class="brand-word-doc">doc</span>
+        </strong>
+      </a>
+
+      <div class="site-header-nav">
+        <a class="site-header-link" href="/" id="site-header-home-link">Ferramentas</a>
+        <span class="site-header-current" id="site-header-current" hidden></span>
+      </div>
+
+      <div class="site-header-actions">
       <div class="account-corner">
         <button
           type="button"
@@ -215,26 +230,11 @@
           </span>
         </span>
       </button>
-    </div>
+      </div>
+    </header>
 
     <main class="shell shell-compact">
-      <section class="hero-panel" aria-labelledby="hero-title">
-        <a class="hero-brand" href="#workbench" aria-label="Ir para o conversor vaptdoc">
-          <span class="hero-brand-mark" aria-hidden="true">
-            <picture>
-              <source
-                srcset="/assets/vaptdoc-symbol-clean-320.webp 320w, /assets/vaptdoc-symbol-clean-640.webp 640w, /assets/vaptdoc-symbol-clean.webp 960w"
-                sizes="(max-width: 720px) 48vw, 12rem"
-                type="image/webp"
-              />
-              <img src="/assets/vaptdoc-symbol-clean.png" alt="" class="hero-brand-image" width="640" height="640" decoding="async" />
-            </picture>
-          </span>
-          <strong class="brand-wordmark hero-brand-wordmark" aria-label="vaptdoc">
-            <span class="brand-word-vapt">vapt</span><span class="brand-word-doc">doc</span>
-          </strong>
-        </a>
-
+      <section class="hero-panel" id="home-hero" aria-labelledby="hero-title">
         <div class="search-shell hero-search-shell">
           <label class="search-field" for="tool-search">
             <span class="search-icon" aria-hidden="true">
@@ -289,59 +289,72 @@
         </div>
       </section>
 
+      <section class="route-hero" id="route-hero" aria-labelledby="route-title" hidden>
+        <a class="route-hero-back" href="/" id="route-hero-back">Voltar para ferramentas</a>
+        <div class="route-hero-copy">
+          <p class="eyebrow" id="route-kicker">Ferramenta exclusiva</p>
+          <h1 id="route-title">Converter arquivo</h1>
+          <p class="section-copy route-hero-description" id="route-copy">
+            Envie seu arquivo, ajuste so o que for necessario e baixe o resultado no formato escolhido.
+          </p>
+        </div>
+      </section>
+
       <section class="workbench" id="workbench">
-        <div class="section-heading centered compact-heading">
-          <p class="eyebrow">Escolha a conversao</p>
-          <h2 class="section-subtitle">Ferramentas prontas para converter</h2>
-        </div>
-
-        <div class="tool-toolbar">
-          <div class="tool-tabs" role="tablist" aria-label="Filtrar conversoes">
-            <button
-              type="button"
-              class="tool-tab active"
-              id="tab-all"
-              data-filter="all"
-              aria-selected="true"
-            >
-              Todas
-            </button>
-            <button
-              type="button"
-              class="tool-tab"
-              id="tab-favorites"
-              data-filter="favorites"
-              aria-selected="false"
-            >
-              Favoritas
-            </button>
-            <button
-              type="button"
-              class="tool-tab"
-              id="tab-3d"
-              data-filter="3d"
-              aria-selected="false"
-            >
-              Impressao 3D
-            </button>
+        <div class="tool-directory" id="tool-directory">
+          <div class="section-heading centered compact-heading">
+            <p class="eyebrow">Escolha a conversao</p>
+            <h2 class="section-subtitle">Ferramentas prontas para converter</h2>
           </div>
 
-          <p class="tool-toolbar-copy" id="tool-toolbar-copy">Conversoes prontas para voce</p>
-        </div>
+          <div class="tool-toolbar">
+            <div class="tool-tabs" role="tablist" aria-label="Filtrar conversoes">
+              <button
+                type="button"
+                class="tool-tab active"
+                id="tab-all"
+                data-filter="all"
+                aria-selected="true"
+              >
+                Todas
+              </button>
+              <button
+                type="button"
+                class="tool-tab"
+                id="tab-favorites"
+                data-filter="favorites"
+                aria-selected="false"
+              >
+                Favoritas
+              </button>
+              <button
+                type="button"
+                class="tool-tab"
+                id="tab-3d"
+                data-filter="3d"
+                aria-selected="false"
+              >
+                Impressao 3D
+              </button>
+            </div>
 
-        <div class="tool-grid-wrap">
-          <div class="tool-grid-skeleton" id="tool-grid-skeleton" aria-hidden="true">
-            <span class="tool-skeleton-card"></span>
-            <span class="tool-skeleton-card"></span>
-            <span class="tool-skeleton-card"></span>
-            <span class="tool-skeleton-card"></span>
-            <span class="tool-skeleton-card"></span>
-            <span class="tool-skeleton-card"></span>
-            <span class="tool-skeleton-card"></span>
-            <span class="tool-skeleton-card"></span>
+            <p class="tool-toolbar-copy" id="tool-toolbar-copy">Conversoes prontas para voce</p>
           </div>
-          <div class="tool-grid" id="tool-grid" aria-live="polite" hidden></div>
-          <p class="tool-empty" id="tool-empty" hidden>Nenhuma conversao encontrada.</p>
+
+          <div class="tool-grid-wrap">
+            <div class="tool-grid-skeleton" id="tool-grid-skeleton" aria-hidden="true">
+              <span class="tool-skeleton-card"></span>
+              <span class="tool-skeleton-card"></span>
+              <span class="tool-skeleton-card"></span>
+              <span class="tool-skeleton-card"></span>
+              <span class="tool-skeleton-card"></span>
+              <span class="tool-skeleton-card"></span>
+              <span class="tool-skeleton-card"></span>
+              <span class="tool-skeleton-card"></span>
+            </div>
+            <div class="tool-grid" id="tool-grid" aria-live="polite" hidden></div>
+            <p class="tool-empty" id="tool-empty" hidden>Nenhuma conversao encontrada.</p>
+          </div>
         </div>
 
         <form class="convert-panel" id="convert-form" aria-busy="false">

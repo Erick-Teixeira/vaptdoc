@@ -12,6 +12,7 @@ import type { UsageTracker } from "../services/usage-tracker.js";
 import type { ConversionGate } from "../utils/conversion-gate.js";
 import { AppError } from "../utils/errors.js";
 import { assertUploadLimits } from "../utils/file-validation.js";
+import { getToolPath } from "../tool-paths.js";
 
 type ConversionHandler = Pick<{ convert: (payload: ConversionRequest) => Promise<ConversionResult> }, "convert">;
 
@@ -353,7 +354,10 @@ function sanitizeOptionsForLogs(rawOptions: Record<string, string>) {
 
 export async function registerApiRoutes(app: FastifyInstance, conversionService: ConversionHandler, options: RegisterApiOptions = {}) {
   app.get("/api/tools", async () => ({
-    tools: toolList,
+    tools: toolList.map((tool) => ({
+      ...tool,
+      routePath: getToolPath(tool.id as ToolId)
+    })),
     limits: {
       maxFileSizeMB: env.MAX_FILE_SIZE_MB
     }

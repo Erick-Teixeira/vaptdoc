@@ -6,6 +6,13 @@ const form = document.getElementById("convert-form");
 const fileInput = document.getElementById("file");
 const dropzone = document.getElementById("dropzone");
 const workbench = document.getElementById("workbench");
+const homeHero = document.getElementById("home-hero");
+const routeHero = document.getElementById("route-hero");
+const routeKicker = document.getElementById("route-kicker");
+const routeTitle = document.getElementById("route-title");
+const routeCopy = document.getElementById("route-copy");
+const routeHeroBack = document.getElementById("route-hero-back");
+const toolDirectory = document.getElementById("tool-directory");
 const themeToggle = document.getElementById("theme-toggle");
 const searchInput = document.getElementById("tool-search");
 const searchClear = document.getElementById("search-clear");
@@ -47,6 +54,7 @@ const openBillingButton = document.getElementById("open-billing");
 const openRedeemButton = document.getElementById("open-redeem");
 const accessLogoutButton = document.getElementById("access-logout");
 const accountLauncher = document.getElementById("account-launcher");
+const siteHeaderCurrent = document.getElementById("site-header-current");
 const accountLauncherCopy = document.getElementById("account-launcher-copy");
 const accountLauncherImage = document.getElementById("account-launcher-image");
 const accountLauncherInitials = document.getElementById("account-launcher-initials");
@@ -688,7 +696,7 @@ function getToolMetaDescription(tool) {
 }
 
 function getToolPagePath(tool) {
-  return `/ferramenta/${encodeURIComponent(tool.id)}`;
+  return String(tool?.routePath ?? `/ferramenta/${encodeURIComponent(tool?.id ?? "")}`);
 }
 
 function setMetaContent(element, value) {
@@ -713,6 +721,72 @@ function updatePageData(tool) {
     canonicalUrl: buildAbsoluteSiteUrl(tool ? getToolPagePath(tool) : "/"),
     pagePath: tool ? getToolPagePath(tool) : "/",
     siteUrl: runtimeConfig.siteUrl
+  });
+}
+
+function getRouteToolIdFromLocation() {
+  const normalizedPath = window.location.pathname.replace(/\/+$/u, "") || "/";
+  const directMatch = tools.find((tool) => getToolPagePath(tool) === normalizedPath);
+  if (directMatch) {
+    return directMatch.id;
+  }
+
+  return normalizedPath.startsWith("/ferramenta/")
+    ? decodeURIComponent(normalizedPath.slice("/ferramenta/".length))
+    : "";
+}
+
+function updatePageModeUi(tool) {
+  const isToolPage = Boolean(tool);
+  document.body.dataset.pageMode = isToolPage ? "tool" : "home";
+  homeHero.hidden = isToolPage;
+  toolDirectory.hidden = isToolPage;
+  routeHero.hidden = !isToolPage;
+  form.hidden = !isToolPage;
+
+  if (siteHeaderCurrent) {
+    siteHeaderCurrent.hidden = !isToolPage;
+    siteHeaderCurrent.textContent = tool?.label ?? "";
+  }
+
+  if (routeKicker) {
+    routeKicker.textContent = isToolPage ? "Ferramenta exclusiva" : "Conversor online rapido e leve";
+  }
+
+  if (routeTitle) {
+    routeTitle.textContent = tool?.label ?? "Converter arquivo";
+  }
+
+  if (routeCopy) {
+    routeCopy.textContent = tool
+      ? `${getToolDescription(tool)} Ajuste apenas o que fizer sentido para essa conversao e baixe o arquivo no final.`
+      : "Escolha uma ferramenta, envie seu arquivo e baixe o resultado sem um painel carregado.";
+  }
+
+  document.querySelectorAll(".tool-card").forEach((card) => {
+    card.classList.toggle("active", isToolPage && card.dataset.toolId === tool?.id);
+  });
+}
+
+function navigateToTool(tool, options = {}) {
+  if (!tool) {
+    return;
+  }
+
+  const { replace = false } = options;
+  applyActiveTool(tool.id, {
+    moveToUpload: false,
+    resetFiles: false,
+    syncHistory: true,
+    replaceHistory: replace,
+    syncSeo: true
+  });
+  updatePageModeUi(tool);
+  requestAnimationFrame(() => {
+    routeHero?.scrollIntoView({
+      behavior: getPreferredScrollBehavior(),
+      block: "start"
+    });
   });
 }
 
@@ -5217,7 +5291,7 @@ function selectToolFromSearch(tool) {
   updateSearchClearButton();
   renderTools();
   hideSearchResults();
-  applyActiveTool(tool.id, { moveToUpload: true, resetFiles: true, syncHistory: true, syncSeo: true });
+  navigateToTool(tool);
 }
 
 function renderSearchResults() {
@@ -5312,7 +5386,7 @@ function applyActiveTool(toolId, options = {}) {
   toolSelect.value = toolId;
 
   document.querySelectorAll(".tool-card").forEach((card) => {
-    card.classList.toggle("active", card.dataset.toolId === toolId);
+    card.classList.toggle("active", document.body.dataset.pageMode === "tool" && card.dataset.toolId === toolId);
   });
 
   const tool = tools.find((item) => item.id === toolId);
@@ -5399,9 +5473,7 @@ function renderTools() {
     renderFormatBadge(formats.to, toIcon, "tool-icon-to");
     applyToolTheme(tool, card);
 
-    card.addEventListener("click", () =>
-      applyActiveTool(tool.id, { moveToUpload: true, resetFiles: true, syncHistory: true, syncSeo: true })
-    );
+    card.addEventListener("click", () => navigateToTool(tool));
     toolGrid.append(fragment);
   });
 
@@ -5421,11 +5493,7 @@ async function loadTools() {
       order: index
     }));
 
-    const routeToolId =
-      String(initialPageData.toolId ?? "").trim() ||
-      (window.location.pathname.startsWith("/ferramenta/")
-        ? decodeURIComponent(window.location.pathname.slice("/ferramenta/".length))
-        : "");
+    const routeToolId = getRouteToolIdFromLocation();
 
     if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
       activeToolId = routeToolId;
@@ -5436,11 +5504,14 @@ async function loadTools() {
     hasLoadedTools = true;
 
     if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
+      const routeTool = tools.find((tool) => tool.id === routeToolId);
       applyActiveTool(routeToolId, { resetFiles: false, syncSeo: true, syncHistory: false });
+      updatePageModeUi(routeTool);
       return;
     }
 
     syncSeoForTool(null);
+    updatePageModeUi(null);
   } finally {
     setToolsLoadingState(false);
   }
@@ -5576,21 +5647,22 @@ window.addEventListener("popstate", () => {
     return;
   }
 
-  const routeToolId = window.location.pathname.startsWith("/ferramenta/")
-    ? decodeURIComponent(window.location.pathname.slice("/ferramenta/".length))
-    : "";
+  const routeToolId = getRouteToolIdFromLocation();
 
   if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
+    const routeTool = tools.find((tool) => tool.id === routeToolId);
     applyActiveTool(routeToolId, {
       moveToUpload: false,
       resetFiles: false,
       syncHistory: false,
       syncSeo: true
     });
+    updatePageModeUi(routeTool);
     return;
   }
 
   syncSeoForTool(null);
+  updatePageModeUi(null);
 });
 
 window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });

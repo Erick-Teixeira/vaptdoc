@@ -1,12 +1,12 @@
 import path from "node:path";
 import { readFile } from "node:fs/promises";
-import Fastify from "fastify";
+import Fastify, { type FastifyRequest } from "fastify";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
 import fastifyStatic from "@fastify/static";
 import { ZodError } from "zod";
-import { toolCatalog } from "./catalog.js";
+import { toolCatalog, type ToolId } from "./catalog.js";
 import { env } from "./env.js";
 import { registerApiRoutes } from "./routes/api.js";
 import { createConversionService } from "./services/conversion-service.js";
@@ -19,6 +19,7 @@ import { ConversionGate } from "./utils/conversion-gate.js";
 import { AppError, isAppError } from "./utils/errors.js";
 import { resolveServerSecret } from "./utils/secrets.js";
 import { buildRobotsTxt, buildSitemapXml, getSeoViewModel, renderSeoHtml } from "./seo.js";
+import { getToolPath, getToolPathEntries } from "./tool-paths.js";
 
 interface AppOptions {
   conversionService?: ReturnType<typeof createConversionService>;
@@ -160,12 +161,27 @@ export async function createApp(options: AppOptions = {}) {
     return renderSeoHtml(indexTemplate, getSeoViewModel(baseUrl, toolId));
   }
 
+  function resolveRequestOrigin(request: FastifyRequest) {
+    return request.protocol && request.headers.host
+      ? `${request.protocol}://${request.headers.host}`
+      : resolvePublicBaseUrl();
+  }
+
   app.get("/", async (request, reply) => {
     reply
       .header("Cache-Control", "public, max-age=0, must-revalidate")
       .type("text/html; charset=utf-8");
-    return reply.send(renderIndexPage(request.protocol && request.headers.host ? `${request.protocol}://${request.headers.host}` : resolvePublicBaseUrl()));
+    return reply.send(renderIndexPage(resolveRequestOrigin(request)));
   });
+
+  for (const entry of getToolPathEntries()) {
+    app.get(entry.path, async (request, reply) => {
+      reply
+        .header("Cache-Control", "public, max-age=0, must-revalidate")
+        .type("text/html; charset=utf-8");
+      return reply.send(renderIndexPage(resolveRequestOrigin(request), entry.toolId));
+    });
+  }
 
   app.get("/ferramenta/:toolId", async (request, reply) => {
     const toolId = String((request.params as { toolId?: string }).toolId ?? "");
@@ -174,11 +190,7 @@ export async function createApp(options: AppOptions = {}) {
       return reply.code(404).type("text/html; charset=utf-8").send(renderIndexPage(resolvePublicBaseUrl()));
     }
 
-    const origin = request.protocol && request.headers.host ? `${request.protocol}://${request.headers.host}` : resolvePublicBaseUrl();
-    reply
-      .header("Cache-Control", "public, max-age=0, must-revalidate")
-      .type("text/html; charset=utf-8");
-    return reply.send(renderIndexPage(origin, toolId));
+    return reply.redirect(getToolPath(toolId as ToolId), 301);
   });
 
   app.get("/sitemap.xml", async (request, reply) => {

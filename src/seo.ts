@@ -1,5 +1,6 @@
 import { env } from "./env.js";
 import { toolCatalog, toolList, type ToolDefinition, type ToolId } from "./catalog.js";
+import { getToolPath } from "./tool-paths.js";
 
 const siteName = "vaptdoc";
 const defaultTitle = "vaptdoc | Converta arquivos sem complicacao";
@@ -50,7 +51,7 @@ function formatToolDescription(tool: ToolDefinition) {
 }
 
 function formatToolPagePath(toolId: ToolId) {
-  return `/ferramenta/${encodeURIComponent(toolId)}`;
+  return getToolPath(toolId);
 }
 
 function getReadableFormats(tool: ToolDefinition) {
