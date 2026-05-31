@@ -297,6 +297,7 @@
           <p class="section-copy route-hero-description" id="route-copy">
             Envie seu arquivo, ajuste so o que for necessario e baixe o resultado no formato escolhido.
           </p>
+          <button type="button" class="ghost-action route-help-button" id="tool-help-button" hidden>Como usar esta ferramenta</button>
         </div>
       </section>
 
@@ -471,19 +472,6 @@
                       <section class="tool-options" id="tool-options" hidden aria-live="polite"></section>
                     </div>
                   </section>
-
-                  <section class="workspace-options-card workspace-help-card" id="workspace-help-card" hidden aria-live="polite">
-                    <div class="workspace-panel-head workspace-panel-head-compact">
-                      <div class="workspace-panel-copy">
-                        <span class="selection-kicker">Ajuda rapida</span>
-                        <strong id="workspace-help-title">Dicas desta ferramenta</strong>
-                        <p id="workspace-help-copy">Mostramos atalhos e observacoes para voce usar esta conversao com mais clareza.</p>
-                      </div>
-                    </div>
-
-                    <div class="workspace-help-list" id="workspace-help-list"></div>
-                  </section>
-
                 </aside>
               </div>
             </div>
@@ -655,6 +643,27 @@
           </div>
           <p class="billing-status" id="billing-status">Escolha um plano para abrir o checkout seguro ou ative um codigo.</p>
         </form>
+      </section>
+    </div>
+
+    <div class="billing-modal tool-help-modal" id="tool-help-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar ajuda da ferramenta" data-close-tool-help="true"></button>
+
+      <section class="billing-dialog tool-help-dialog" role="dialog" aria-modal="true" aria-labelledby="tool-help-title">
+        <button type="button" class="billing-close" id="tool-help-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header tool-help-header">
+          <span class="selection-kicker">Ajuda da ferramenta</span>
+          <h2 id="tool-help-title">Como usar esta conversao</h2>
+          <p id="tool-help-copy">Abrimos aqui as orientacoes essenciais para voce usar esta ferramenta com mais clareza.</p>
+        </div>
+
+        <div class="tool-help-list" id="tool-help-list"></div>
       </section>
     </div>
 

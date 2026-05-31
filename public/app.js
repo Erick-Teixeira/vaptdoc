@@ -12,6 +12,7 @@ const routeKicker = document.getElementById("route-kicker");
 const routeTitle = document.getElementById("route-title");
 const routeCopy = document.getElementById("route-copy");
 const routeHeroBack = document.getElementById("route-hero-back");
+const toolHelpButton = document.getElementById("tool-help-button");
 const toolDirectory = document.getElementById("tool-directory");
 const themeToggle = document.getElementById("theme-toggle");
 const searchInput = document.getElementById("tool-search");
@@ -87,6 +88,11 @@ const workspaceMainGrid = document.getElementById("workspace-main-grid");
 const workspaceCanvasCard = document.getElementById("workspace-canvas-card");
 const workspaceInspector = document.getElementById("workspace-inspector");
 const workspaceSubmitCard = document.getElementById("workspace-submit-card");
+const toolHelpModal = document.getElementById("tool-help-modal");
+const toolHelpCloseButton = document.getElementById("tool-help-close");
+const toolHelpTitle = document.getElementById("tool-help-title");
+const toolHelpCopy = document.getElementById("tool-help-copy");
+const toolHelpList = document.getElementById("tool-help-list");
 const billingModal = document.getElementById("billing-modal");
 const billingCloseButton = document.getElementById("billing-close");
 const billingMonthlyButton = document.getElementById("billing-monthly-button");
@@ -214,10 +220,6 @@ const workspaceSpecialStack = document.getElementById("workspace-special-stack")
 const workspaceOptionsCard = document.getElementById("workspace-options-card");
 const workspaceOptionsTitle = document.getElementById("workspace-options-title");
 const workspaceOptionsCopy = document.getElementById("workspace-options-copy");
-const workspaceHelpCard = document.getElementById("workspace-help-card");
-const workspaceHelpTitle = document.getElementById("workspace-help-title");
-const workspaceHelpCopy = document.getElementById("workspace-help-copy");
-const workspaceHelpList = document.getElementById("workspace-help-list");
 const workspaceSubmitTitle = document.getElementById("workspace-submit-title");
 const workspaceSubmitCopy = document.getElementById("workspace-submit-copy");
 const workspaceLoading = document.getElementById("workspace-loading");
@@ -755,6 +757,13 @@ function updatePageModeUi(tool) {
   routeHero.hidden = !isToolPage;
   form.hidden = !isToolPage;
 
+  if (toolHelpButton && !isToolPage) {
+    toolHelpButton.hidden = true;
+  }
+  if (!isToolPage) {
+    hideToolHelpModal();
+  }
+
   if (siteHeaderCurrent) {
     siteHeaderCurrent.hidden = !isToolPage;
     siteHeaderCurrent.textContent = tool?.label ?? "";
@@ -941,33 +950,37 @@ function getFilesOverLimit(files) {
 }
 
 function renderToolHelp(tool) {
-  if (!workspaceHelpCard || !workspaceHelpTitle || !workspaceHelpCopy || !workspaceHelpList) {
+  if (!toolHelpTitle || !toolHelpCopy || !toolHelpList) {
     return;
   }
 
   const content = tool ? toolHelpContent[tool.id] : null;
+  if (toolHelpButton) {
+    toolHelpButton.hidden = !content || document.body.dataset.pageMode !== "tool";
+  }
+
   if (!content) {
-    workspaceHelpCard.hidden = true;
-    workspaceHelpList.innerHTML = "";
+    toolHelpList.innerHTML = "";
+    hideToolHelpModal();
     return;
   }
 
-  workspaceHelpTitle.textContent = content.title;
-  workspaceHelpCopy.textContent = content.copy;
-  workspaceHelpList.innerHTML = "";
+  toolHelpTitle.textContent = content.title;
+  toolHelpCopy.textContent = content.copy;
+  toolHelpList.innerHTML = "";
 
   content.items.forEach((item) => {
     const article = document.createElement("article");
-    article.className = "workspace-help-item";
+    article.className = "tool-help-item";
 
     const icon = document.createElement("span");
-    icon.className = "workspace-help-icon";
+    icon.className = "tool-help-icon";
     icon.setAttribute("aria-hidden", "true");
     icon.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 10.2v4.6"></path><path d="M12 7.8h.01"></path></svg>';
 
     const copy = document.createElement("div");
-    copy.className = "workspace-help-copy";
+    copy.className = "tool-help-copy";
 
     const title = document.createElement("strong");
     title.textContent = item.title;
@@ -977,10 +990,8 @@ function renderToolHelp(tool) {
 
     copy.append(title, text);
     article.append(icon, copy);
-    workspaceHelpList.append(article);
+    toolHelpList.append(article);
   });
-
-  workspaceHelpCard.hidden = false;
 }
 
 function setStatus(message) {
@@ -1521,10 +1532,42 @@ function hideAccountMenu() {
 
 function updateBodyScrollLock() {
   const hasOpenModal =
+    (toolHelpModal && !toolHelpModal.hidden) ||
     (billingModal && !billingModal.hidden) ||
     accountPaneModals.some((modal) => !modal.hidden);
 
   document.body.style.overflow = hasOpenModal ? "hidden" : "";
+}
+
+function hideToolHelpModal() {
+  if (!toolHelpModal) {
+    return;
+  }
+
+  toolHelpModal.hidden = true;
+  updateBodyScrollLock();
+}
+
+function showToolHelpModal(tool = getToolById()) {
+  if (!toolHelpModal || !toolHelpTitle || !toolHelpCopy || !toolHelpList) {
+    return;
+  }
+
+  renderToolHelp(tool);
+  const content = tool ? toolHelpContent[tool.id] : null;
+  if (!content) {
+    return;
+  }
+
+  hideAccountMenu();
+  hideBillingModal();
+  hideAccountPaneModals();
+  toolHelpModal.hidden = false;
+  updateBodyScrollLock();
+
+  window.setTimeout(() => {
+    toolHelpCloseButton?.focus();
+  }, 0);
 }
 
 function showAccountMenu() {
@@ -1552,6 +1595,7 @@ function showBillingModal(options = {}) {
   }
 
   hideAccountMenu();
+  hideToolHelpModal();
   billingModal.hidden = false;
   updateBodyScrollLock();
 
@@ -1679,6 +1723,7 @@ function showAccountModal(options = {}) {
 
   hideAccountMenu();
   hideBillingModal();
+  hideToolHelpModal();
   hideAccountPaneModals();
   modal.hidden = false;
   if (focus !== "profile") {
@@ -3562,9 +3607,7 @@ function updateWorkspacePanels(tool = getToolById()) {
     if (workspaceOptionsCard) {
       workspaceOptionsCard.hidden = true;
     }
-    if (workspaceHelpCard) {
-      workspaceHelpCard.hidden = true;
-    }
+    renderToolHelp(null);
     updateWorkspaceGuide(null);
     return;
   }
@@ -3610,9 +3653,6 @@ function updateWorkspacePanels(tool = getToolById()) {
   if (workspaceOptionsCard) {
     workspaceOptionsCard.hidden = !(hasFiles && shouldShowWorkspaceOptionsCard(tool));
   }
-  if (workspaceHelpCard) {
-    workspaceHelpCard.hidden = !(hasFiles && workspaceHelpList?.childElementCount);
-  }
 
   updateWorkspaceGuide(tool);
   updateToolFlowLayout(tool);
@@ -3630,9 +3670,7 @@ function updateToolFlowLayout(tool = getToolById()) {
   const showSidebar = false;
   const showInspector = Boolean(
     tool &&
-      ((workspaceSpecialCard && !workspaceSpecialCard.hidden) ||
-        (workspaceOptionsCard && !workspaceOptionsCard.hidden) ||
-        (workspaceHelpCard && !workspaceHelpCard.hidden))
+      ((workspaceSpecialCard && !workspaceSpecialCard.hidden) || (workspaceOptionsCard && !workspaceOptionsCard.hidden))
   );
   const showConvertAction = Boolean(tool && hasFiles && !revealUpgrade);
 
@@ -5722,6 +5760,17 @@ unlockToolButton?.addEventListener("click", () => {
   promptAccountPlanAccess(getToolById());
 });
 
+toolHelpButton?.addEventListener("click", () => {
+  showToolHelpModal(getToolById());
+});
+
+toolHelpCloseButton?.addEventListener("click", hideToolHelpModal);
+toolHelpModal?.addEventListener("click", (event) => {
+  if (event.target?.dataset?.closeToolHelp === "true") {
+    hideToolHelpModal();
+  }
+});
+
 accessLogoutButton?.addEventListener("click", async () => {
   await logoutAccess();
   setStatus("Acesso premium encerrado neste navegador.");
@@ -5770,6 +5819,7 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    hideToolHelpModal();
     hideAccountModal();
     hideBillingModal();
     hideAccountMenu();
