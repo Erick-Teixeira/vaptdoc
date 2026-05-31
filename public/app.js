@@ -16,6 +16,7 @@ const routeCopy = document.getElementById("route-copy");
 const routeHeroBack = document.getElementById("route-hero-back");
 const toolHelpButton = document.getElementById("tool-help-button");
 const toolDirectory = document.getElementById("tool-directory");
+const toolGridWrap = document.querySelector(".tool-grid-wrap");
 const themeToggle = document.getElementById("theme-toggle");
 const searchInput = document.getElementById("tool-search");
 const searchClear = document.getElementById("search-clear");
@@ -3293,6 +3294,10 @@ function updateToolDirectoryToggleState(directoryState) {
   toolDirectoryToggleCopy.textContent = isToolDirectoryExpanded
     ? "Mostrar menos"
     : `Ver mais ${hiddenCount} ferramenta${hiddenCount > 1 ? "s" : ""}`;
+  toolDirectoryToggle.setAttribute(
+    "aria-label",
+    isToolDirectoryExpanded ? "Recolher lista de ferramentas" : `Ver mais ${hiddenCount} ferramentas`
+  );
 }
 
 function getSearchMatches(limit = searchResultsLimit) {
@@ -3476,6 +3481,11 @@ function updateToolbarCopy(visibleCount) {
   if (searchQuery) {
     toolToolbarCopy.textContent =
       visibleCount > 0 ? `${visibleCount} resultado${visibleCount > 1 ? "s" : ""}` : "Nada encontrado";
+    return;
+  }
+
+  if (activeFilter === "all") {
+    toolToolbarCopy.textContent = isToolDirectoryExpanded ? "Todas as ferramentas" : "Mais usadas no momento";
     return;
   }
 
@@ -5764,11 +5774,16 @@ function renderTools() {
   const visibleTools = getVisibleTools();
   const directoryState = getVisibleDirectoryTools(visibleTools);
   const toolsToRender = directoryState.tools;
+  const isCollapsedDirectoryRow = Boolean(directoryState.canCollapse && !isToolDirectoryExpanded);
   toolGrid.innerHTML = "";
   updateToolTabs();
   updateToolbarCopy(visibleTools.length);
   toolEmpty.hidden = visibleTools.length > 0;
   updateToolDirectoryToggleState(directoryState);
+  toolGrid.classList.toggle("is-collapsed-line", isCollapsedDirectoryRow);
+  toolGrid.classList.toggle("is-expanded-grid", !isCollapsedDirectoryRow);
+  toolGridWrap?.classList.toggle("is-collapsed-line", isCollapsedDirectoryRow);
+  toolGridWrap?.classList.toggle("is-expanded-grid", !isCollapsedDirectoryRow);
 
   if (!activeToolId && visibleTools[0]) {
     activeToolId = visibleTools[0].id;

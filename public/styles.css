@@ -2241,7 +2241,7 @@ body[data-page-mode="tool"] .workbench {
     var(--panel);
   position: relative;
   min-height: 9.5rem;
-  width: min(760px, 100%);
+  width: min(1120px, 100%);
   margin: 0 auto;
 }
 
@@ -2252,14 +2252,44 @@ body[data-page-mode="tool"] .workbench {
 
 .tool-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: 0.7rem;
   align-items: stretch;
 }
 
+.tool-grid.is-collapsed-line {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.15rem;
+  scroll-snap-type: x proximity;
+}
+
+.tool-grid.is-collapsed-line .tool-card {
+  flex: 0 0 12.4rem;
+  width: 12.4rem;
+  scroll-snap-align: start;
+}
+
+.tool-grid.is-expanded-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.tool-grid.is-collapsed-line::-webkit-scrollbar {
+  height: 0.45rem;
+}
+
+.tool-grid.is-collapsed-line::-webkit-scrollbar-thumb {
+  background: rgba(125, 56, 255, 0.2);
+  border-radius: 999px;
+}
+
 .tool-grid-skeleton {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: 0.7rem;
 }
 
@@ -2611,13 +2641,14 @@ html[data-theme="dark"] .tool-card::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
-  width: 100%;
-  margin-top: 0.85rem;
-  min-height: 3.15rem;
-  padding: 0.85rem 1rem;
+  gap: 0;
+  width: 3.2rem;
+  height: 3.2rem;
+  margin: 0.9rem auto 0;
+  min-height: 3.2rem;
+  padding: 0;
   border: 1px solid var(--field-border);
-  border-radius: 1.2rem;
+  border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 88%, transparent);
   color: var(--muted-strong);
   cursor: pointer;
@@ -2639,14 +2670,22 @@ html[data-theme="dark"] .tool-card::before {
 }
 
 .tool-directory-toggle-copy {
-  font-weight: 700;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .tool-directory-toggle-icon {
   display: grid;
   place-items: center;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.45rem;
+  height: 1.45rem;
   transition: transform 0.18s ease;
 }
 
