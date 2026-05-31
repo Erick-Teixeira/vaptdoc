@@ -3860,7 +3860,6 @@ function updateToolFlowLayout(tool = getToolById()) {
   const revealUpgrade = Boolean(tool && isToolLocked(tool) && shouldRevealUpgradeContext(accessSession));
   const isUploadStage = Boolean(isToolPage && tool && !hasFiles && !revealUpgrade);
   const showSidebar = false;
-  const showInspector = false;
   const showConvertAction = Boolean(tool && hasFiles && !revealUpgrade);
 
   form.classList.toggle("is-upload-stage", isUploadStage);
@@ -3870,7 +3869,8 @@ function updateToolFlowLayout(tool = getToolById()) {
   }
 
   if (workspaceInspector) {
-    workspaceInspector.hidden = !showInspector;
+    workspaceInspector.hidden = true;
+    workspaceInspector.setAttribute("aria-hidden", "true");
   }
 
   if (workspaceSubmitCard) {

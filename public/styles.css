@@ -2681,6 +2681,10 @@ body[data-page-mode="tool"] .convert-main {
   top: calc(var(--top-ui-offset) + 0.15rem);
 }
 
+.workspace-modal-store[hidden] {
+  display: none !important;
+}
+
 body[data-page-mode="tool"] .workspace-main-grid {
   width: 100%;
   grid-template-columns: minmax(0, 1fr);
