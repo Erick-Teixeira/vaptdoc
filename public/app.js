@@ -81,6 +81,11 @@ const accountMenuLogout = document.getElementById("account-menu-logout");
 const premiumLock = document.getElementById("premium-lock");
 const unlockToolButton = document.getElementById("unlock-tool");
 const convertButton = document.getElementById("convert-button");
+const convertSidebar = document.getElementById("convert-sidebar");
+const workspaceMainGrid = document.getElementById("workspace-main-grid");
+const workspaceCanvasCard = document.getElementById("workspace-canvas-card");
+const workspaceInspector = document.getElementById("workspace-inspector");
+const workspaceSubmitCard = document.getElementById("workspace-submit-card");
 const billingModal = document.getElementById("billing-modal");
 const billingCloseButton = document.getElementById("billing-close");
 const billingMonthlyButton = document.getElementById("billing-monthly-button");
@@ -759,7 +764,7 @@ function updatePageModeUi(tool) {
 
   if (routeCopy) {
     routeCopy.textContent = tool
-      ? `${getToolDescription(tool)} Ajuste apenas o que fizer sentido para essa conversao e baixe o arquivo no final.`
+      ? `${getToolDescription(tool)} Envie o arquivo para liberar so os ajustes necessarios desta conversao.`
       : "Escolha uma ferramenta, envie seu arquivo e baixe o resultado sem um painel carregado.";
   }
 
@@ -3464,6 +3469,7 @@ function updateWorkspaceGuide(tool) {
 
 function updateWorkspacePanels(tool = getToolById()) {
   const blueprint = getWorkspaceBlueprint(tool);
+  const hasFiles = stagedFiles.length > 0;
 
   if (workspaceGuideCopy) {
     workspaceGuideCopy.textContent = getWorkspaceGuideCopy(tool);
@@ -3525,10 +3531,12 @@ function updateWorkspacePanels(tool = getToolById()) {
     workspaceFlowBadge.textContent = getWorkspaceFlowLabel(tool);
   }
   if (workspaceCanvasTitle) {
-    workspaceCanvasTitle.textContent = blueprint.canvasTitle;
+    workspaceCanvasTitle.textContent = hasFiles ? blueprint.canvasTitle : getDropzoneTitleForTool(tool);
   }
   if (workspaceCanvasCopy) {
-    workspaceCanvasCopy.textContent = blueprint.canvasCopy;
+    workspaceCanvasCopy.textContent = hasFiles
+      ? blueprint.canvasCopy
+      : "Depois do envio, mostramos apenas os ajustes e a acao final desta conversao.";
   }
   if (workspaceSubmitTitle) {
     workspaceSubmitTitle.textContent = blueprint.submitTitle;
@@ -3548,6 +3556,42 @@ function updateWorkspacePanels(tool = getToolById()) {
   }
 
   updateWorkspaceGuide(tool);
+  updateToolFlowLayout(tool);
+}
+
+function updateToolFlowLayout(tool = getToolById()) {
+  if (!form) {
+    return;
+  }
+
+  const isToolPage = document.body.dataset.pageMode === "tool";
+  const hasFiles = stagedFiles.length > 0;
+  const revealUpgrade = Boolean(tool && isToolLocked(tool) && shouldRevealUpgradeContext(accessSession));
+  const isUploadStage = Boolean(isToolPage && tool && !hasFiles && !revealUpgrade);
+  const showSidebar = Boolean(tool && (hasFiles || revealUpgrade));
+  const showInspector = Boolean(tool && hasFiles);
+  const showConvertAction = Boolean(tool && hasFiles && !revealUpgrade);
+
+  form.classList.toggle("is-upload-stage", isUploadStage);
+
+  if (convertSidebar) {
+    convertSidebar.hidden = !showSidebar;
+  }
+
+  if (workspaceInspector) {
+    workspaceInspector.hidden = !showInspector;
+  }
+
+  if (workspaceSubmitCard) {
+    workspaceSubmitCard.hidden = !showConvertAction;
+  }
+
+  workspaceCanvasCard?.classList.toggle("is-upload-focus", isUploadStage);
+  workspaceMainGrid?.classList.toggle("is-upload-focus", isUploadStage);
+
+  if (convertButton) {
+    convertButton.hidden = !showConvertAction;
+  }
 }
 
 function getDropzoneTitleForTool(tool) {
