@@ -924,7 +924,7 @@ function setWorkspaceLoadingState(isLoading, label = "Processando") {
   form?.classList.toggle("is-processing", isLoading);
   form?.setAttribute("aria-busy", String(isLoading));
   if (workspaceLoading) {
-    workspaceLoading.hidden = !isLoading;
+    workspaceLoading.hidden = true;
     workspaceLoading.setAttribute("aria-hidden", String(!isLoading));
     const badge = workspaceLoading.querySelector(".workspace-loading-badge");
     if (badge) {
