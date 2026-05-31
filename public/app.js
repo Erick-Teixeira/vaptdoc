@@ -3200,6 +3200,10 @@ function updateToolbarCopy(visibleCount) {
 }
 
 function updateFavoriteButton(toolId) {
+  if (!favoriteToggle || !favoriteToggleCopy) {
+    return;
+  }
+
   const favorite = isFavorite(toolId);
   favoriteToggle.classList.toggle("active", favorite);
   favoriteToggle.setAttribute("aria-pressed", String(favorite));
@@ -4087,6 +4091,10 @@ function renderStagedFiles() {
 
   fileStage.innerHTML = "";
   fileStage.hidden = files.length === 0;
+  if (dropzone) {
+    dropzone.hidden = files.length > 0;
+    dropzone.setAttribute("aria-hidden", String(files.length > 0));
+  }
   syncPreviewUrlCache(files);
 
   if (!tool || files.length === 0) {
@@ -5179,14 +5187,10 @@ function renderMergeWorkspace(tool) {
   actionsSection.body.append(actions);
   fragment.append(actionsSection.section);
 
-  const orderSection = createWorkspaceSpecialSection("Espelho da ordem final", "A primeira linha abre o PDF unido e a ultima fecha o documento.");
-  orderSection.body.append(createWorkspaceOrderList(tool, files));
-  fragment.append(orderSection.section);
-
   fragment.append(
     createWorkspaceInfoNote(
       "Dica rapida",
-      "Se precisar revisar visualmente, arraste os cards centrais. Esta lateral serve como espelho compacto da pilha final."
+      "Use os atalhos acima para montar a ordem final e revise apenas os cards centrais antes de converter."
     )
   );
 
@@ -6297,7 +6301,7 @@ redeemForm?.addEventListener("submit", async (event) => {
   }
 });
 
-favoriteToggle.addEventListener("click", () => {
+favoriteToggle?.addEventListener("click", () => {
   if (!activeToolId) {
     return;
   }
