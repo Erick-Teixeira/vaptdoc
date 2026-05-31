@@ -578,6 +578,7 @@ const searchPlaceholderExamples = [
   "stl para obj"
 ];
 const searchResultsLimit = 12;
+const featuredToolRowLimit = 5;
 const defaultFeaturedToolIds = [
   "pdf-to-docx",
   "docx-to-pdf",
@@ -3262,7 +3263,7 @@ function getVisibleDirectoryTools(visibleTools) {
   const canCollapse = activeFilter === "all" && !searchQuery;
   const prioritizedTools = getPrioritizedTools(visibleTools);
   const featuredTools = prioritizedTools.filter((tool) => defaultFeaturedToolIds.includes(tool.id));
-  const collapsedTools = (featuredTools.length > 0 ? featuredTools : prioritizedTools).slice(0, 8);
+  const collapsedTools = (featuredTools.length > 0 ? featuredTools : prioritizedTools).slice(0, featuredToolRowLimit);
   const expandedTools = [
     ...collapsedTools,
     ...prioritizedTools.filter((tool) => !collapsedTools.some((entry) => entry.id === tool.id))

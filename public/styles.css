@@ -2258,33 +2258,17 @@ body[data-page-mode="tool"] .workbench {
 }
 
 .tool-grid.is-collapsed-line {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 12rem));
+  justify-content: center;
   align-items: stretch;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 0.15rem;
-  scroll-snap-type: x proximity;
+  overflow: visible;
+  padding-bottom: 0;
 }
 
 .tool-grid.is-collapsed-line .tool-card {
-  flex: 0 0 12.4rem;
-  width: 12.4rem;
-  scroll-snap-align: start;
-}
-
-.tool-grid.is-expanded-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-}
-
-.tool-grid.is-collapsed-line::-webkit-scrollbar {
-  height: 0.45rem;
-}
-
-.tool-grid.is-collapsed-line::-webkit-scrollbar-thumb {
-  background: rgba(125, 56, 255, 0.2);
-  border-radius: 999px;
+  width: 12rem;
+  max-width: 100%;
 }
 
 .tool-grid-skeleton {
