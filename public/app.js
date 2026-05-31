@@ -5147,7 +5147,6 @@ function renderMergeWorkspace(tool) {
   const files = getSelectedFiles();
   const totalBytes = files.reduce((sum, file) => sum + Number(file.size || 0), 0);
   const canReorder = files.length > 1;
-  const canAddMore = files.length < getToolMaximumFiles(tool);
   const fragment = document.createDocumentFragment();
 
   fragment.append(
@@ -5162,13 +5161,6 @@ function renderMergeWorkspace(tool) {
   const actions = document.createElement("div");
   actions.className = "workspace-special-actions";
   actions.append(
-    createWorkspaceActionButton({
-      label: "Adicionar PDFs",
-      meta: canAddMore ? "Complete a pilha sem sair daqui" : "Voce atingiu o limite desta ferramenta",
-      iconMarkup: getAddIcon(),
-      onClick: () => fileInput.click(),
-      disabled: !canAddMore
-    }),
     createWorkspaceActionButton({
       label: "Inverter ordem",
       meta: "Troca o primeiro pelo ultimo",
@@ -5190,7 +5182,7 @@ function renderMergeWorkspace(tool) {
   fragment.append(
     createWorkspaceInfoNote(
       "Dica rapida",
-      "Use os atalhos acima para montar a ordem final e revise apenas os cards centrais antes de converter."
+      "Use os atalhos acima para reorganizar mais rapido e mantenha a revisao visual apenas na grade central."
     )
   );
 
@@ -5225,10 +5217,6 @@ function renderSplitWorkspace(tool) {
   detailsSection.body.append(getSplitModeWorkspaceNote());
   fragment.append(detailsSection.section);
 
-  const sourceSection = createWorkspaceSpecialSection("Arquivo de origem", "Aqui voce acompanha o arquivo que sera dividido antes de converter.");
-  sourceSection.body.append(createWorkspaceOrderList(tool, file ? [file] : []));
-  fragment.append(sourceSection.section);
-
   return fragment;
 }
 
@@ -5236,7 +5224,6 @@ function renderImageToPdfWorkspace(tool) {
   const files = getSelectedFiles();
   const totalBytes = files.reduce((sum, file) => sum + Number(file.size || 0), 0);
   const canReorder = files.length > 1;
-  const canAddMore = files.length < getToolMaximumFiles(tool);
   const mergeAfter = readBooleanOptionFieldValue("imagePdfMergeAfter", true);
   const fragment = document.createDocumentFragment();
 
@@ -5252,13 +5239,6 @@ function renderImageToPdfWorkspace(tool) {
   const actions = document.createElement("div");
   actions.className = "workspace-special-actions";
   actions.append(
-    createWorkspaceActionButton({
-      label: "Adicionar imagens",
-      meta: canAddMore ? "Complete a grade em poucos toques" : "Voce atingiu o limite desta ferramenta",
-      iconMarkup: getAddIcon(),
-      onClick: () => fileInput.click(),
-      disabled: !canAddMore
-    }),
     createWorkspaceActionButton({
       label: "Inverter paginas",
       meta: "Troca capa e sequencia",
@@ -5287,14 +5267,10 @@ function renderImageToPdfWorkspace(tool) {
   layoutSection.body.append(layoutGrid);
   fragment.append(layoutSection.section);
 
-  const orderSection = createWorkspaceSpecialSection("Ordem das paginas", "A primeira imagem vira a capa. O restante segue exatamente a sequencia abaixo.");
-  orderSection.body.append(createWorkspaceOrderList(tool, files));
-  fragment.append(orderSection.section);
-
   fragment.append(
     createWorkspaceInfoNote(
       "Layout mais seguro",
-      "Use retrato para documentos verticais e paisagem quando suas imagens forem mais largas. A margem pode ser ajustada a qualquer momento."
+      "Use retrato para documentos verticais e paisagem quando suas imagens forem mais largas. Revise a ordem apenas na grade central."
     )
   );
 
