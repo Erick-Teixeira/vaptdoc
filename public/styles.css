@@ -4960,9 +4960,9 @@ html[data-theme="dark"] .choice-chip {
   }
 
   .top-corner-bar {
-    left: max(0.75rem, env(safe-area-inset-left));
+    left: auto;
     right: max(0.75rem, env(safe-area-inset-right));
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
   .shell {
@@ -5315,8 +5315,9 @@ html[data-theme="dark"] .choice-chip {
 
   .top-corner-bar {
     top: max(0.62rem, env(safe-area-inset-top));
-    left: max(0.62rem, env(safe-area-inset-left));
+    left: auto;
     right: max(0.62rem, env(safe-area-inset-right));
+    justify-content: flex-end;
     gap: 0.55rem;
   }
 

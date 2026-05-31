@@ -80,7 +80,8 @@ const accountPopoverPlanButton = document.getElementById("account-popover-plan-b
 const accountMenuOverview = document.getElementById("account-menu-overview");
 const accountMenuOverviewLabel = document.getElementById("account-menu-overview-label");
 const accountMenuProfile = document.getElementById("account-menu-profile");
-const accountMenuSettings = document.getElementById("account-menu-settings");
+const accountMenuTheme = document.getElementById("account-menu-theme");
+const accountMenuThemeLabel = document.getElementById("account-menu-theme-label");
 const accountMenuAdmin = document.getElementById("account-menu-admin");
 const accountMenuLogout = document.getElementById("account-menu-logout");
 const premiumLock = document.getElementById("premium-lock");
@@ -165,7 +166,6 @@ const accountAvatarInitials = document.getElementById("account-avatar-initials")
 const accountAvatarInput = document.getElementById("account-avatar-input");
 const accountAvatarActions = document.getElementById("account-avatar-actions");
 const accountAvatarRemoveButton = document.getElementById("account-avatar-remove-button");
-const accountThemeButton = document.getElementById("account-theme-button");
 const accountSettingsTitle = document.getElementById("account-settings-title");
 const accountSettingsCopy = document.getElementById("account-settings-copy");
 const accountVerificationKicker = document.getElementById("account-verification-kicker");
@@ -1890,7 +1890,7 @@ function getAccountModalFocusTarget(focus) {
   }
 
   if (focus === "settings") {
-    return accountThemeButton ?? accountSettingsCloseButton;
+    return accountSettingsCloseButton;
   }
 
   if (focus === "admin") {
@@ -2102,7 +2102,7 @@ function renderAccountUi() {
   if (accountPopoverPlanButton) {
     accountPopoverPlanButton.textContent = accessSession?.premium ? "Gerenciar" : "Pro";
   }
-  for (const menuButton of [accountMenuProfile, accountMenuSettings, accountMenuLogout]) {
+  for (const menuButton of [accountMenuProfile, accountMenuTheme, accountMenuLogout]) {
     if (menuButton) {
       menuButton.hidden = !authenticated;
     }
@@ -2114,6 +2114,9 @@ function renderAccountUi() {
     accountMenuOverviewLabel.textContent = authenticated ? "Minha conta" : "Entrar ou criar conta";
   } else if (accountMenuOverview) {
     accountMenuOverview.textContent = authenticated ? "Minha conta" : "Entrar ou criar conta";
+  }
+  if (accountMenuThemeLabel) {
+    accountMenuThemeLabel.textContent = document.documentElement.dataset.theme === "dark" ? "Tema claro" : "Tema escuro";
   }
   applyAvatarToElements(accountLauncherImage, accountLauncherInitials, avatarUrl, initials);
   applyAvatarToElements(accountPopoverImage, accountPopoverInitials, avatarUrl, initials);
@@ -2200,17 +2203,14 @@ function renderAccountUi() {
     accountShortcutAdminButton.hidden = !isAdmin;
   }
   if (accountSettingsTitle) {
-    accountSettingsTitle.textContent = `Tema atual: ${document.documentElement.dataset.theme === "dark" ? "escuro" : "claro"}`;
+    accountSettingsTitle.textContent = "Sessao e seguranca";
   }
   if (accountSettingsCopy) {
     accountSettingsCopy.textContent = isAdmin
-      ? "Sua conta controla o painel do dono. Revise perfil, tema e gestao do vaptdoc daqui."
+      ? "Sua conta controla o painel do dono. Revise a sessao deste navegador e volte ao painel quando quiser."
       : accountState.user?.hasAvatar
-        ? "Sua conta esta personalizada. Voce pode trocar a foto, atualizar credenciais ou revisar seu plano quando quiser."
-        : "Adicione uma foto, ajuste seu tema e mantenha suas credenciais atualizadas com seguranca.";
-  }
-  if (accountThemeButton) {
-    accountThemeButton.textContent = `Usar tema ${document.documentElement.dataset.theme === "dark" ? "claro" : "escuro"}`;
+        ? "Sua conta esta personalizada. Revise a sessao deste navegador sempre que precisar sair com seguranca."
+        : "Sua conta esta protegida. Use este modal para encerrar a sessao deste navegador.";
   }
   if (accountDisplayNameInput) {
     accountDisplayNameInput.value = accountState.user?.displayName ?? "";
@@ -3329,8 +3329,14 @@ function getCookie(name) {
 }
 
 function updateThemeButton(theme) {
-  themeToggle.setAttribute("aria-label", theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro");
-  themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+  themeToggle?.setAttribute("aria-label", theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro");
+  themeToggle?.setAttribute("aria-pressed", String(theme === "dark"));
+}
+
+function toggleThemePreference() {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(nextTheme);
+  renderAccountUi();
 }
 
 function updateBrowserThemeColor(theme) {
@@ -5968,10 +5974,7 @@ async function resumeCheckoutIfNeeded() {
   }
 }
 
-themeToggle.addEventListener("click", () => {
-  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  applyTheme(nextTheme);
-});
+themeToggle?.addEventListener("click", toggleThemePreference);
 
 reducedMotionQuery.addEventListener("change", () => {
   startSearchPlaceholderAnimation();
@@ -6132,9 +6135,9 @@ accountPopoverPlanButton?.addEventListener("click", () => {
   hideAccountMenu();
   showBillingModal({ tool: getToolById() });
 });
-accountMenuSettings?.addEventListener("click", () => {
+accountMenuTheme?.addEventListener("click", () => {
   hideAccountMenu();
-  showAccountModal({ focus: "settings" });
+  toggleThemePreference();
 });
 accountMenuAdmin?.addEventListener("click", () => {
   hideAccountMenu();
@@ -6380,11 +6383,6 @@ accountAvatarRemoveButton?.addEventListener("click", async () => {
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel remover a foto.");
   }
-});
-
-accountThemeButton?.addEventListener("click", () => {
-  themeToggle?.click();
-  renderAccountUi();
 });
 
 adminRefreshUsersButton?.addEventListener("click", () => {

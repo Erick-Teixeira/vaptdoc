@@ -145,21 +145,13 @@
               </span>
               <span class="menu-action-label">Dados</span>
             </button>
-            <button type="button" class="account-popover-action" id="account-menu-settings" role="menuitem">
+            <button type="button" class="account-popover-action" id="account-menu-theme" role="menuitem">
               <span class="menu-action-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 4.75v2.1"></path>
-                  <path d="M12 17.15v2.1"></path>
-                  <path d="m6.2 7.15 1.5 1.5"></path>
-                  <path d="m16.3 17.25 1.5 1.5"></path>
-                  <path d="M4.75 12h2.1"></path>
-                  <path d="M17.15 12h2.1"></path>
-                  <path d="m6.2 16.85 1.5-1.5"></path>
-                  <path d="m16.3 6.75 1.5-1.5"></path>
-                  <circle cx="12" cy="12" r="3.1"></circle>
+                  <path d="M21 12.8A9 9 0 1 1 11.2 3a7.2 7.2 0 0 0 9.8 9.8z"></path>
                 </svg>
               </span>
-              <span class="menu-action-label">Ajustes</span>
+              <span class="menu-action-label" id="account-menu-theme-label">Tema escuro</span>
             </button>
             <button type="button" class="account-popover-action" id="account-menu-admin" role="menuitem" hidden>
               <span class="menu-action-icon" aria-hidden="true">
@@ -186,35 +178,6 @@
         </div>
       </div>
 
-      <button
-        type="button"
-        class="theme-toggle"
-        id="theme-toggle"
-        aria-pressed="false"
-        aria-label="Alternar tema"
-      >
-        <span class="theme-toggle-track" aria-hidden="true">
-          <span class="theme-toggle-thumb"></span>
-          <span class="theme-toggle-icon theme-toggle-icon-sun">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="4"></circle>
-              <path d="M12 2.5v2.2"></path>
-              <path d="M12 19.3v2.2"></path>
-              <path d="m4.93 4.93 1.56 1.56"></path>
-              <path d="m17.51 17.51 1.56 1.56"></path>
-              <path d="M2.5 12h2.2"></path>
-              <path d="M19.3 12h2.2"></path>
-              <path d="m4.93 19.07 1.56-1.56"></path>
-              <path d="m17.51 6.49 1.56-1.56"></path>
-            </svg>
-          </span>
-          <span class="theme-toggle-icon theme-toggle-icon-moon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12.8A9 9 0 1 1 11.2 3a7.2 7.2 0 0 0 9.8 9.8z"></path>
-            </svg>
-          </span>
-        </span>
-      </button>
     </div>
 
     <main class="shell shell-compact">
@@ -873,20 +836,14 @@
               <button type="button" class="account-shortcut-card" id="account-shortcut-settings">
                 <span class="account-shortcut-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 4.8v1.8"></path>
-                    <path d="M12 17.4v1.8"></path>
-                    <path d="m6.45 6.45 1.3 1.3"></path>
-                    <path d="m16.25 16.25 1.3 1.3"></path>
-                    <path d="M4.8 12h1.8"></path>
-                    <path d="M17.4 12h1.8"></path>
-                    <path d="m6.45 17.55 1.3-1.3"></path>
-                    <path d="m16.25 7.75 1.3-1.3"></path>
+                    <path d="M10 7.25H7.25A2.25 2.25 0 0 0 5 9.5v5A2.25 2.25 0 0 0 7.25 16.75H10"></path>
+                    <path d="m13.5 8.5 4 3.5-4 3.5"></path>
+                    <path d="M17.5 12h-8"></path>
                   </svg>
                 </span>
                 <span class="account-shortcut-copy">
-                  <strong>Configuracoes</strong>
-                  <span>Controle tema e preferencias</span>
+                  <strong>Sessao</strong>
+                  <span>Revise a sessao deste navegador</span>
                 </span>
               </button>
               <button type="button" class="account-shortcut-card" id="account-shortcut-admin" hidden>
@@ -1017,34 +974,11 @@
 
         <div class="billing-header">
           <span class="selection-kicker">Configuracoes</span>
-          <h2 id="account-settings-modal-title">Preferencias e seguranca</h2>
-          <p>Controle o tema e finalize sua sessao de forma simples, em um modal proprio.</p>
+          <h2 id="account-settings-modal-title">Sessao da conta</h2>
+          <p>Gerencie a sessao deste navegador de forma simples e segura.</p>
         </div>
 
         <div class="account-forms-grid account-settings-grid">
-          <article class="account-card account-setting-card" id="account-settings-card">
-            <div class="account-card-heading">
-              <span class="account-card-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M12 4.8v1.8"></path>
-                  <path d="M12 17.4v1.8"></path>
-                  <path d="m6.45 6.45 1.3 1.3"></path>
-                  <path d="m16.25 16.25 1.3 1.3"></path>
-                  <path d="M4.8 12h1.8"></path>
-                  <path d="M17.4 12h1.8"></path>
-                  <path d="m6.45 17.55 1.3-1.3"></path>
-                  <path d="m16.25 7.75 1.3-1.3"></path>
-                </svg>
-              </span>
-              <div class="account-card-copy">
-                <strong id="account-settings-title">Preferencias e seguranca</strong>
-                <span id="account-settings-copy">Controle seu tema, seus dados e como sua conta aparece no app.</span>
-              </div>
-            </div>
-            <button type="button" class="button secondary wide" id="account-theme-button">Alternar tema</button>
-          </article>
-
           <article class="account-card account-setting-card">
             <div class="account-card-heading">
               <span class="account-card-icon" aria-hidden="true">
