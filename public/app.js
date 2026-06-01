@@ -1555,6 +1555,11 @@ function syncAccountMenu(expanded) {
 
   accountLauncher.setAttribute("aria-expanded", expanded ? "true" : "false");
   accountPopover.hidden = !expanded;
+  if ("inert" in accountPopover) {
+    accountPopover.inert = !expanded;
+  }
+  document.body.classList.toggle("account-menu-screen-open", expanded && shouldUseFullscreenAccountMenu());
+  updateBodyScrollLock();
 }
 
 function hideAccountMenu() {
@@ -1566,7 +1571,8 @@ function updateBodyScrollLock() {
     (conversionModal && !conversionModal.hidden) ||
     (toolHelpModal && !toolHelpModal.hidden) ||
     (billingModal && !billingModal.hidden) ||
-    accountPaneModals.some((modal) => !modal.hidden);
+    accountPaneModals.some((modal) => !modal.hidden) ||
+    (accountPopover && !accountPopover.hidden && shouldUseFullscreenAccountMenu());
 
   document.body.style.overflow = hasOpenModal ? "hidden" : "";
 }
@@ -1776,6 +1782,7 @@ function showAccountMenu() {
     return;
   }
 
+  renderAccountUi();
   syncAccountMenu(true);
 }
 
@@ -4717,6 +4724,7 @@ function syncDialogPresentationMode() {
 }
 
 function syncResponsiveUi() {
+  document.body.classList.toggle("account-menu-screen-open", Boolean(accountPopover && !accountPopover.hidden && shouldUseFullscreenAccountMenu()));
   syncDialogPresentationMode();
   renderTools();
   renderSearchResults();
