@@ -5130,17 +5130,19 @@ html[data-theme="dark"] .choice-chip {
     overscroll-behavior: contain;
   }
 
-  body.account-menu-screen-open .account-popover > * {
+  body.account-menu-screen-open .account-popover > :not(.account-popover-close) {
       width: min(36rem, 100%);
       margin-inline: auto;
     }
 
   body.account-menu-screen-open .account-popover-close {
-      position: sticky;
-      top: max(0.15rem, env(safe-area-inset-top));
+      position: static;
       display: grid;
-      margin-left: auto;
-      margin-bottom: 0.35rem;
+      place-items: center;
+      width: 3rem;
+      height: 3rem;
+      margin: 0.5rem auto 0;
+      order: 99;
       z-index: 8;
     }
 
