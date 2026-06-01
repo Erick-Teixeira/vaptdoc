@@ -311,6 +311,9 @@ const pendingCheckoutStorageKey = "vaptdoc-checkout-pending";
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const compactViewportQuery = window.matchMedia("(max-width: 720px)");
 const touchViewportQuery = window.matchMedia("(pointer: coarse)");
+const isAndroidUserAgent =
+  /Android/i.test(navigator.userAgent || "") ||
+  /Android/i.test(navigator.userAgentData?.platform || "");
 const internalClientHeader = {
   "X-Vaptdoc-Client": "web"
 };
@@ -4709,7 +4712,12 @@ function updateBackToTopVisibility() {
   backToTopButton.setAttribute("aria-hidden", String(!shouldShow));
 }
 
+function syncDialogPresentationMode() {
+  document.body.classList.toggle("android-fullscreen-dialogs", isAndroidUserAgent);
+}
+
 function syncResponsiveUi() {
+  syncDialogPresentationMode();
   renderTools();
   renderSearchResults();
 
@@ -6837,6 +6845,7 @@ form.addEventListener("submit", (event) => {
 });
 
 initializeTheme();
+syncDialogPresentationMode();
 hideUploadProgress();
 setProgress(0, "Aguardando arquivo");
 updateSearchClearButton();
