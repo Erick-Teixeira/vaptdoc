@@ -5131,6 +5131,21 @@ html[data-theme="dark"] .choice-chip {
     margin-inline: auto;
   }
 
+  body.account-menu-screen-open .shell,
+  body.account-menu-screen-open .site-footer,
+  body.account-menu-screen-open .background-orb,
+  body.account-menu-screen-open .grid-overlay,
+  body.account-menu-screen-open .back-to-top,
+  body.account-menu-screen-open .skip-link {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  body.account-menu-screen-open .account-launcher {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .back-to-top {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: max(0.9rem, calc(env(safe-area-inset-bottom) + 0.9rem));

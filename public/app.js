@@ -3601,6 +3601,10 @@ function isTouchViewport() {
   return touchViewportQuery.matches;
 }
 
+function shouldUseFullscreenAccountMenu() {
+  return isCompactViewport() && isTouchViewport();
+}
+
 function getToolActionLabel(tool) {
   if (!tool) {
     return "Converter arquivo";
