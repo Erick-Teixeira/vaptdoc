@@ -77,6 +77,7 @@ const accountPopoverProgressFill = document.getElementById("account-popover-prog
 const accountPopoverProgressLabel = document.getElementById("account-popover-progress-label");
 const accountPopoverProgressMeta = document.getElementById("account-popover-progress-meta");
 const accountPopoverPlanButton = document.getElementById("account-popover-plan-button");
+const accountPopoverCloseButton = document.getElementById("account-popover-close");
 const accountMenuOverview = document.getElementById("account-menu-overview");
 const accountMenuOverviewLabel = document.getElementById("account-menu-overview-label");
 const accountMenuProfile = document.getElementById("account-menu-profile");
@@ -6143,6 +6144,7 @@ accountSwitchToRegisterButton?.addEventListener("click", () => showAccountModal(
 accountShortcutProfileButton?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
 accountShortcutSettingsButton?.addEventListener("click", () => showAccountModal({ focus: "settings" }));
 accountShortcutAdminButton?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
+accountPopoverCloseButton?.addEventListener("click", hideAccountMenu);
 accountMenuOverview?.addEventListener("click", () => {
   hideAccountMenu();
   showAccountModal({ focus: "close" });

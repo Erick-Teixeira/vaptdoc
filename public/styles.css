@@ -845,6 +845,10 @@ body.android-fullscreen-dialogs .billing-close {
   height: 1rem;
 }
 
+.account-popover-close {
+  display: none;
+}
+
 .billing-header {
   display: grid;
   gap: 0.32rem;
@@ -5104,11 +5108,11 @@ html[data-theme="dark"] .choice-chip {
   }
 
   body.account-menu-screen-open .account-popover {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100vw;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
     max-height: none;
     padding:
       calc(var(--top-ui-offset) + env(safe-area-inset-top) + 0.45rem)
@@ -5127,9 +5131,18 @@ html[data-theme="dark"] .choice-chip {
   }
 
   body.account-menu-screen-open .account-popover > * {
-    width: min(36rem, 100%);
-    margin-inline: auto;
-  }
+      width: min(36rem, 100%);
+      margin-inline: auto;
+    }
+
+  body.account-menu-screen-open .account-popover-close {
+      position: sticky;
+      top: max(0.15rem, env(safe-area-inset-top));
+      display: grid;
+      margin-left: auto;
+      margin-bottom: 0.35rem;
+      z-index: 8;
+    }
 
   body.account-menu-screen-open .shell,
   body.account-menu-screen-open .site-footer,
@@ -5142,9 +5155,16 @@ html[data-theme="dark"] .choice-chip {
   }
 
   body.account-menu-screen-open .account-launcher {
-    visibility: hidden;
-    pointer-events: none;
-  }
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+  body.android-fullscreen-dialogs .billing-close {
+      position: sticky;
+      top: max(0.15rem, env(safe-area-inset-top));
+      margin-left: auto;
+      z-index: 8;
+    }
 
   .back-to-top {
     right: max(0.75rem, env(safe-area-inset-right));
