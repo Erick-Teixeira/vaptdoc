@@ -187,6 +187,8 @@ select:focus-visible,
   width: min(1360px, calc(100% - 1.25rem));
   margin: 0 auto calc(1.5rem + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
+  content-visibility: auto;
+  contain-intrinsic-size: 180px;
 }
 
 .site-footer-inner {
@@ -236,6 +238,8 @@ select:focus-visible,
   border-radius: 1.45rem;
   background: var(--panel-strong);
   box-shadow: var(--shadow);
+  content-visibility: auto;
+  contain-intrinsic-size: 760px;
 }
 
 .doc-panel h1,
@@ -1982,12 +1986,14 @@ html[data-theme="dark"] .theme-toggle-icon-sun {
 .hero-panel,
 .tool-grid-wrap,
 .convert-panel,
+.tool-directory,
 .quick-benefit,
 .comfort-card {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   box-shadow: var(--shadow);
   backdrop-filter: blur(20px);
+  content-visibility: auto;
 }
 
 .hero-panel {
@@ -5539,6 +5545,27 @@ html[data-theme="dark"] .choice-chip {
 
   .stepper-button {
     width: 100%;
+  }
+
+  .button,
+  .ghost-action,
+  .mini-action,
+  .tool-card,
+  .choice-card,
+  .choice-chip,
+  .account-shortcut-card,
+  .file-stage-item,
+  .dropzone {
+    transition: none;
+  }
+
+  .tool-skeleton-card,
+  .tool-icon-skeleton,
+  .workspace-loading-badge,
+  .workspace-loading-block,
+  .workspace-loading-block-wide,
+  .workspace-loading-block-tall {
+    animation: none;
   }
 }
 
