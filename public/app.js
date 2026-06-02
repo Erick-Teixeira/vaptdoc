@@ -1,12 +1,22 @@
 const toolGrid = document.getElementById("tool-grid");
 const toolGridSkeleton = document.getElementById("tool-grid-skeleton");
+const toolDirectoryToggle = document.getElementById("tool-directory-toggle");
+const toolDirectoryToggleCopy = document.getElementById("tool-directory-toggle-copy");
 const toolSelect = document.getElementById("toolId");
 const toolTemplate = document.getElementById("tool-card-template");
 const form = document.getElementById("convert-form");
 const fileInput = document.getElementById("file");
 const dropzone = document.getElementById("dropzone");
 const workbench = document.getElementById("workbench");
-const inertableSurfaces = Array.from(document.querySelectorAll(".shell, .site-footer"));
+const homeHero = document.getElementById("home-hero");
+const routeHero = document.getElementById("route-hero");
+const routeKicker = document.getElementById("route-kicker");
+const routeTitle = document.getElementById("route-title");
+const routeCopy = document.getElementById("route-copy");
+const routeHeroBack = document.getElementById("route-hero-back");
+const toolHelpButton = document.getElementById("tool-help-button");
+const toolDirectory = document.getElementById("tool-directory");
+const toolGridWrap = document.querySelector(".tool-grid-wrap");
 const themeToggle = document.getElementById("theme-toggle");
 const searchInput = document.getElementById("tool-search");
 const searchClear = document.getElementById("search-clear");
@@ -36,6 +46,7 @@ const pageDataScript = document.getElementById("vaptdoc-page-data");
 const progressFill = document.getElementById("progress-fill");
 const progressLabel = document.getElementById("progress-label");
 const progressValue = document.getElementById("progress-value");
+const uploadProgress = document.getElementById("upload-progress");
 const backToTopButton = document.getElementById("back-to-top");
 const activeToolTitle = document.getElementById("active-tool-title");
 const activeToolDescription = document.getElementById("active-tool-description");
@@ -48,6 +59,7 @@ const openBillingButton = document.getElementById("open-billing");
 const openRedeemButton = document.getElementById("open-redeem");
 const accessLogoutButton = document.getElementById("access-logout");
 const accountLauncher = document.getElementById("account-launcher");
+const siteHeaderCurrent = document.getElementById("site-header-current");
 const accountLauncherCopy = document.getElementById("account-launcher-copy");
 const accountLauncherImage = document.getElementById("account-launcher-image");
 const accountLauncherInitials = document.getElementById("account-launcher-initials");
@@ -65,15 +77,37 @@ const accountPopoverProgressFill = document.getElementById("account-popover-prog
 const accountPopoverProgressLabel = document.getElementById("account-popover-progress-label");
 const accountPopoverProgressMeta = document.getElementById("account-popover-progress-meta");
 const accountPopoverPlanButton = document.getElementById("account-popover-plan-button");
+const accountPopoverCloseButton = document.getElementById("account-popover-close");
 const accountMenuOverview = document.getElementById("account-menu-overview");
 const accountMenuOverviewLabel = document.getElementById("account-menu-overview-label");
 const accountMenuProfile = document.getElementById("account-menu-profile");
-const accountMenuSettings = document.getElementById("account-menu-settings");
+const accountMenuTheme = document.getElementById("account-menu-theme");
+const accountMenuThemeLabel = document.getElementById("account-menu-theme-label");
 const accountMenuAdmin = document.getElementById("account-menu-admin");
 const accountMenuLogout = document.getElementById("account-menu-logout");
 const premiumLock = document.getElementById("premium-lock");
 const unlockToolButton = document.getElementById("unlock-tool");
 const convertButton = document.getElementById("convert-button");
+const convertSidebar = document.getElementById("convert-sidebar");
+const workspaceMainGrid = document.getElementById("workspace-main-grid");
+const workspaceCanvasCard = document.getElementById("workspace-canvas-card");
+const workspaceInspector = document.getElementById("workspace-inspector");
+const workspaceSubmitCard = document.getElementById("workspace-submit-card");
+const conversionModal = document.getElementById("conversion-modal");
+const conversionModalCloseButton = document.getElementById("conversion-modal-close");
+const conversionModalCancelButton = document.getElementById("conversion-modal-cancel");
+const conversionModalTitle = document.getElementById("conversion-modal-title");
+const conversionModalCopy = document.getElementById("conversion-modal-copy");
+const conversionModalBody = document.getElementById("conversion-modal-body");
+const conversionModalStatus = document.getElementById("conversion-modal-status");
+const conversionSummaryFiles = document.getElementById("conversion-summary-files");
+const conversionSummaryOutput = document.getElementById("conversion-summary-output");
+const conversionConfirmButton = document.getElementById("conversion-confirm-button");
+const toolHelpModal = document.getElementById("tool-help-modal");
+const toolHelpCloseButton = document.getElementById("tool-help-close");
+const toolHelpTitle = document.getElementById("tool-help-title");
+const toolHelpCopy = document.getElementById("tool-help-copy");
+const toolHelpList = document.getElementById("tool-help-list");
 const billingModal = document.getElementById("billing-modal");
 const billingCloseButton = document.getElementById("billing-close");
 const billingMonthlyButton = document.getElementById("billing-monthly-button");
@@ -133,7 +167,6 @@ const accountAvatarInitials = document.getElementById("account-avatar-initials")
 const accountAvatarInput = document.getElementById("account-avatar-input");
 const accountAvatarActions = document.getElementById("account-avatar-actions");
 const accountAvatarRemoveButton = document.getElementById("account-avatar-remove-button");
-const accountThemeButton = document.getElementById("account-theme-button");
 const accountSettingsTitle = document.getElementById("account-settings-title");
 const accountSettingsCopy = document.getElementById("account-settings-copy");
 const accountVerificationKicker = document.getElementById("account-verification-kicker");
@@ -201,10 +234,6 @@ const workspaceSpecialStack = document.getElementById("workspace-special-stack")
 const workspaceOptionsCard = document.getElementById("workspace-options-card");
 const workspaceOptionsTitle = document.getElementById("workspace-options-title");
 const workspaceOptionsCopy = document.getElementById("workspace-options-copy");
-const workspaceHelpCard = document.getElementById("workspace-help-card");
-const workspaceHelpTitle = document.getElementById("workspace-help-title");
-const workspaceHelpCopy = document.getElementById("workspace-help-copy");
-const workspaceHelpList = document.getElementById("workspace-help-list");
 const workspaceSubmitTitle = document.getElementById("workspace-submit-title");
 const workspaceSubmitCopy = document.getElementById("workspace-submit-copy");
 const workspaceLoading = document.getElementById("workspace-loading");
@@ -227,6 +256,7 @@ let searchQuery = "";
 let activeFilter = "all";
 let searchHideTimer = null;
 let isSearchResultsOpen = false;
+let isToolDirectoryExpanded = false;
 let searchPlaceholderTimer = null;
 let searchPlaceholderIndex = 0;
 let searchPlaceholderText = "";
@@ -234,6 +264,7 @@ let searchPlaceholderPhase = "typing";
 let stagedFiles = [];
 let draggedFileIndex = null;
 let toolOptionState = {};
+let conversionModalRenderedCards = [];
 const filePreviewUrlCache = new Map();
 let accessSession = {
   plan: "free",
@@ -281,6 +312,9 @@ const pendingCheckoutStorageKey = "vaptdoc-checkout-pending";
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const compactViewportQuery = window.matchMedia("(max-width: 720px)");
 const touchViewportQuery = window.matchMedia("(pointer: coarse)");
+const isAndroidUserAgent =
+  /Android/i.test(navigator.userAgent || "") ||
+  /Android/i.test(navigator.userAgentData?.platform || "");
 const internalClientHeader = {
   "X-Vaptdoc-Client": "web"
 };
@@ -288,6 +322,11 @@ const browserThemeColors = {
   light: "#7d38ff",
   dark: "#5d31c7"
 };
+const quietStatusMessages = new Set([
+  "Pronto para converter.",
+  "Aguardando arquivo",
+  "Enviando seu arquivo..."
+]);
 const defaultSiteUrl = window.location.origin || "https://transmutalab.up.railway.app";
 const initialPageData = (() => {
   try {
@@ -432,29 +471,29 @@ const formatVisuals = {
 };
 
 const toolSupportCopy = {
-  "pdf-to-docx": "Envie seu PDF para receber um DOCX mais fácil de editar.",
+  "pdf-to-docx": "Envie seu PDF para receber um DOCX mais facil de editar.",
   "docx-to-pdf": "Envie seu DOCX e receba um PDF pronto para compartilhar.",
   "jpg-to-png": "Transforme sua imagem JPG em PNG em poucos toques.",
   "jpeg-to-png": "Transforme sua imagem JPEG em PNG em poucos toques.",
   "png-to-jpg": "Transforme sua imagem PNG em JPG com rapidez.",
   "png-to-jpeg": "Transforme sua imagem PNG em JPEG com rapidez.",
-  "mp4-to-mp3": "Envie seu vídeo e receba somente o áudio em MP3.",
+  "mp4-to-mp3": "Envie seu video e receba somente o audio em MP3.",
   "pdf-to-text": "Extraia o texto do PDF para ler, copiar ou editar.",
-  "3d-convert": "Envie um modelo 3D e escolha o formato de saída para converter com o motor Aspose 3D."
+  "3d-convert": "Envie um modelo 3D e escolha o formato de saida para converter com o motor Aspose 3D."
 };
 
 const toolHelpContent = {
   "3d-convert": {
     title: "Ajuda do conversor 3D",
-    copy: "Cada formato 3D prioriza uma necessidade diferente. Esta lateral evita que você precise adivinhar a melhor saída.",
+    copy: "Cada formato 3D prioriza uma necessidade diferente. Esta lateral evita que voce precise adivinhar a melhor saida.",
     items: [
       {
         title: "Escolha pela finalidade",
-        copy: "STL e OBJ são mais comuns para impressão e modelagem leve. GLB e GLTF funcionam melhor para visualização em apps e web."
+        copy: "STL e OBJ sao mais comuns para impressao e modelagem leve. GLB e GLTF funcionam melhor para visualizacao em apps e web."
       },
       {
-        title: "Revise a orientação",
-        copy: "Se o modelo vier de CAD ou escaneamento, confira a prévia e mantenha o formato mais estável para não perder detalhes."
+        title: "Revise a orientacao",
+        copy: "Se o modelo vier de CAD ou escaneamento, confira a previa e mantenha o formato mais estavel para nao perder detalhes."
       },
       {
         title: "Arquivos maiores demoram mais",
@@ -463,16 +502,16 @@ const toolHelpContent = {
     ]
   },
   "pdf-extract": {
-    title: "Ajuda da extração avançada",
-    copy: "Use a extração simples quando quiser texto corrido e a avançada quando precisar organizar blocos ou planilhas depois.",
+    title: "Ajuda da extracao avancada",
+    copy: "Use a extracao simples quando quiser texto corrido e a avancada quando precisar organizar blocos ou planilhas depois.",
     items: [
       {
         title: "CSV detalhado",
-        copy: "Ative quando precisar reutilizar o conteúdo em planilhas, pipelines ou revisão por colunas."
+        copy: "Ative quando precisar reusar o conteudo em planilhas, pipelines ou revisao por colunas."
       },
       {
         title: "Separar por palavra",
-        copy: "Ideal para análise fina, mas gera saídas maiores e mais detalhadas."
+        copy: "Ideal para analise fina, mas gera saidas maiores e mais detalhadas."
       },
       {
         title: "PDF escaneado",
@@ -481,16 +520,16 @@ const toolHelpContent = {
     ]
   },
   "pdf-validate-pdfa": {
-    title: "Ajuda da validação PDF/A",
-    copy: "Esta ferramenta não converte o arquivo. Ela confirma se o PDF já segue o nível de arquivamento que você espera.",
+    title: "Ajuda da validacao PDF/A",
+    copy: "Esta ferramenta nao converte o arquivo. Ela confirma se o PDF ja segue o nivel de arquivamento que voce espera.",
     items: [
       {
-        title: "Relatório em vez de conversão",
+        title: "Relatorio em vez de conversao",
         copy: "O resultado mostra a conformidade atual para ajudar na checagem antes de enviar documentos."
       },
       {
         title: "Escolha a regra certa",
-        copy: "Use a conformidade esperada que sua instituição ou fluxo realmente pede, como PDF/A-2b ou PDF/A-3u."
+        copy: "Use a conformidade esperada que sua instituicao ou fluxo realmente pede, como PDF/A-2b ou PDF/A-3u."
       }
     ]
   }
@@ -498,9 +537,9 @@ const toolHelpContent = {
 
 const defaultSeoModel = {
   siteName: "vaptdoc",
-  title: "vaptdoc | Converta arquivos sem complicação",
+  title: "vaptdoc | Converta arquivos sem complicacao",
   description:
-    "Converta PDF, DOCX, imagens, áudio, vídeo e modelos 3D com rapidez, segurança e uma experiência limpa em qualquer dispositivo.",
+    "Converta PDF, DOCX, imagens, audio, video e modelos 3D com rapidez, seguranca e uma experiencia limpa em qualquer dispositivo.",
   imagePath: "/assets/vaptdoc-logo-transparent.png"
 };
 
@@ -543,13 +582,25 @@ const searchPlaceholderExamples = [
   "stl para obj"
 ];
 const searchResultsLimit = 12;
+const featuredToolRowDesktopLimit = 5;
+const featuredToolRowMobileLimit = 6;
+const defaultFeaturedToolIds = [
+  "pdf-to-docx",
+  "docx-to-pdf",
+  "pdf-merge",
+  "pdf-split",
+  "pdf-compress",
+  "image-to-pdf",
+  "pdf-to-jpg",
+  "jpg-to-png"
+];
 const orderSensitiveTools = new Set(["pdf-merge", "image-to-pdf"]);
 const specializedWorkspaceTools = new Set(["pdf-merge", "pdf-split", "image-to-pdf"]);
 
 const workspaceBlueprints = {
   default: {
-    canvasTitle: "Monte sua mesa de conversão",
-    canvasCopy: "Envie, arraste, revise e troque arquivos sem sair desta área.",
+    canvasTitle: "Monte sua mesa de conversao",
+    canvasCopy: "Envie, arraste, revise e troque arquivos sem sair desta area.",
     submitTitle: "Converter e baixar",
     submitCopy: "Acompanhe o progresso e baixe o arquivo assim que ele estiver pronto."
   },
@@ -557,17 +608,17 @@ const workspaceBlueprints = {
     canvasTitle: "Monte a ordem final do PDF",
     canvasCopy: "Cada card representa um PDF na pilha final. Reordene, remova e complete a grade antes de unir.",
     submitTitle: "Unir e baixar",
-    submitCopy: "Quando a ordem estiver certa, junte tudo em um único PDF pronto para download."
+    submitCopy: "Quando a ordem estiver certa, junte tudo em um unico PDF pronto para download."
   },
   "pdf-split": {
-    canvasTitle: "Escolha o PDF que será dividido",
+    canvasTitle: "Escolha o PDF que sera dividido",
     canvasCopy: "Use a lateral para decidir o modo de corte e deixe o arquivo de origem aqui no centro para revisar.",
     submitTitle: "Dividir e baixar",
-    submitCopy: "O resultado sai como ZIP ou PDF único, conforme o tipo de divisão escolhido."
+    submitCopy: "O resultado sai como ZIP ou PDF unico, conforme o tipo de divisao escolhido."
   },
   "image-to-pdf": {
-    canvasTitle: "Organize as páginas do novo PDF",
-    canvasCopy: "Cada imagem vira uma página. Ajuste a ordem, complete a grade e refine o layout na lateral.",
+    canvasTitle: "Organize as paginas do novo PDF",
+    canvasCopy: "Cada imagem vira uma pagina. Ajuste a ordem, complete a grade e refine o layout na lateral.",
     submitTitle: "Gerar PDF e baixar",
     submitCopy: "Feche a montagem do documento e baixe o PDF com o layout escolhido."
   }
@@ -575,19 +626,19 @@ const workspaceBlueprints = {
 
 const specializedWorkspaceCopy = {
   "pdf-merge": {
-    kicker: "Mesa de união",
+    kicker: "Mesa de uniao",
     title: "Ordem final dos PDFs",
-    copy: "Atalhos rápidos para organizar a pilha, revisar o peso total e fechar a união com menos cliques."
+    copy: "Atalhos rapidos para organizar a pilha, revisar o peso total e fechar a uniao com menos cliques."
   },
   "pdf-split": {
     kicker: "Corte guiado",
-    title: "Defina como o PDF será dividido",
-    copy: "Escolha o tipo de divisão aqui na lateral e receba só os campos necessários para esse modo."
+    title: "Defina como o PDF sera dividido",
+    copy: "Escolha o tipo de divisao aqui na lateral e receba so os campos necessarios para esse modo."
   },
   "image-to-pdf": {
     kicker: "Montagem visual",
-    title: "Transforme imagens em páginas",
-    copy: "Controle ordem, orientação, tamanho e margem do PDF sem ficar preso a um formulário técnico."
+    title: "Transforme imagens em paginas",
+    copy: "Controle ordem, orientacao, tamanho e margem do PDF sem ficar preso a um formulario tecnico."
   }
 };
 
@@ -595,35 +646,35 @@ const optionPresentation = {
   target3dFormat: {
     variant: "cards",
     choices: {
-      stl: { label: "STL", hint: "Impressão 3D e slicers" },
+      stl: { label: "STL", hint: "Impressao 3D e slicers" },
       obj: { label: "OBJ", hint: "Modelagem e textura" },
-      fbx: { label: "FBX", hint: "Animação e cena" },
-      glb: { label: "GLB", hint: "Visualização rápida" },
+      fbx: { label: "FBX", hint: "Animacao e cena" },
+      glb: { label: "GLB", hint: "Visualizacao rapida" },
       gltf: { label: "GLTF", hint: "Web e apps 3D" },
       dae: { label: "DAE", hint: "Collada" },
       ply: { label: "PLY", hint: "Malha e scan" },
-      amf: { label: "AMF", hint: "Impressão 3D" },
+      amf: { label: "AMF", hint: "Impressao 3D" },
       "3ds": { label: "3DS", hint: "Formato legado" },
       u3d: { label: "U3D", hint: "PDF 3D" },
       drc: { label: "DRC", hint: "Draco compactado" },
       rvm: { label: "RVM", hint: "Plantas industriais" },
-      pdf: { label: "PDF 3D", hint: "Visualização em PDF" }
+      pdf: { label: "PDF 3D", hint: "Visualizacao em PDF" }
     }
   },
   splitMode: {
     variant: "cards",
     choices: {
-      ranges: { label: "Separar trechos", hint: "Você escolhe os intervalos" },
-      fixed_range: { label: "Dividir em partes", hint: "Mesmo número de páginas" },
-      remove_pages: { label: "Remover páginas", hint: "Retira páginas e devolve 1 PDF" }
+      ranges: { label: "Separar trechos", hint: "Voce escolhe os intervalos" },
+      fixed_range: { label: "Dividir em partes", hint: "Mesmo numero de paginas" },
+      remove_pages: { label: "Remover paginas", hint: "Retira paginas e devolve 1 PDF" }
     }
   },
   compressionLevel: {
     variant: "cards",
     choices: {
-      low: { label: "Mais qualidade", hint: "Menos compressão" },
+      low: { label: "Mais qualidade", hint: "Menos compressao" },
       recommended: { label: "Equilibrado", hint: "Qualidade e tamanho" },
-      extreme: { label: "Arquivo menor", hint: "Máxima compressão" }
+      extreme: { label: "Arquivo menor", hint: "Maxima compressao" }
     }
   },
   rotateAngle: {
@@ -689,7 +740,7 @@ function getToolMetaDescription(tool) {
 }
 
 function getToolPagePath(tool) {
-  return `/ferramenta/${encodeURIComponent(tool.id)}`;
+  return String(tool?.routePath ?? `/ferramenta/${encodeURIComponent(tool?.id ?? "")}`);
 }
 
 function setMetaContent(element, value) {
@@ -714,6 +765,80 @@ function updatePageData(tool) {
     canonicalUrl: buildAbsoluteSiteUrl(tool ? getToolPagePath(tool) : "/"),
     pagePath: tool ? getToolPagePath(tool) : "/",
     siteUrl: runtimeConfig.siteUrl
+  });
+}
+
+function getRouteToolIdFromLocation() {
+  const normalizedPath = window.location.pathname.replace(/\/+$/u, "") || "/";
+  const directMatch = tools.find((tool) => getToolPagePath(tool) === normalizedPath);
+  if (directMatch) {
+    return directMatch.id;
+  }
+
+  return normalizedPath.startsWith("/ferramenta/")
+    ? decodeURIComponent(normalizedPath.slice("/ferramenta/".length))
+    : "";
+}
+
+function updatePageModeUi(tool) {
+  const isToolPage = Boolean(tool);
+  document.body.dataset.pageMode = isToolPage ? "tool" : "home";
+  homeHero.hidden = isToolPage;
+  toolDirectory.hidden = isToolPage;
+  routeHero.hidden = !isToolPage;
+  form.hidden = !isToolPage;
+
+  if (toolHelpButton && !isToolPage) {
+    toolHelpButton.hidden = true;
+  }
+  hideConversionModal();
+  if (!isToolPage) {
+    hideToolHelpModal();
+  }
+
+  if (siteHeaderCurrent) {
+    siteHeaderCurrent.hidden = !isToolPage;
+    siteHeaderCurrent.textContent = tool?.label ?? "";
+  }
+
+  if (routeKicker) {
+    routeKicker.textContent = isToolPage ? "Ferramenta exclusiva" : "Conversor online rapido e leve";
+  }
+
+  if (routeTitle) {
+    routeTitle.textContent = tool?.label ?? "Converter arquivo";
+  }
+
+  if (routeCopy) {
+    routeCopy.textContent = tool
+      ? `${getToolDescription(tool)} Envie o arquivo para liberar so os ajustes necessarios desta conversao.`
+      : "Escolha uma ferramenta, envie seu arquivo e baixe o resultado sem um painel carregado.";
+  }
+
+  document.querySelectorAll(".tool-card").forEach((card) => {
+    card.classList.toggle("active", isToolPage && card.dataset.toolId === tool?.id);
+  });
+}
+
+function navigateToTool(tool, options = {}) {
+  if (!tool) {
+    return;
+  }
+
+  const { replace = false } = options;
+  applyActiveTool(tool.id, {
+    moveToUpload: false,
+    resetFiles: false,
+    syncHistory: true,
+    replaceHistory: replace,
+    syncSeo: true
+  });
+  updatePageModeUi(tool);
+  requestAnimationFrame(() => {
+    routeHero?.scrollIntoView({
+      behavior: getPreferredScrollBehavior(),
+      block: "start"
+    });
   });
 }
 
@@ -764,14 +889,14 @@ function syncSeoForTool(tool) {
           ? `Envie ${tool.minFiles && tool.minFiles > 1 ? `pelo menos ${tool.minFiles} arquivos` : "seus arquivos"} no formato ${tool.inputKinds.map((kind) => String(kind).toUpperCase()).join(", ")}.`
           : `Envie um arquivo no formato ${tool.inputKinds.map((kind) => String(kind).toUpperCase()).join(", ")}.`,
         Array.isArray(tool.optionFields) && tool.optionFields.length > 0
-          ? "Revise os ajustes visíveis no painel lateral antes de converter."
-          : "Revise a prévia e siga direto para a conversão.",
+          ? "Revise os ajustes visiveis no painel lateral antes de converter."
+          : "Revise a previa e siga direto para a conversao.",
         `Baixe o resultado em ${String(tool.outputExtension ?? "").toUpperCase()}.`
       ]
     : [
-        "Escolha a conversão ideal na grade principal.",
+        "Escolha a conversao ideal na grade principal.",
         "Envie seu arquivo e organize a ordem quando necessario.",
-        "Revise os ajustes visíveis e inicie a conversão.",
+        "Revise os ajustes visiveis e inicie a conversao.",
         "Baixe o resultado assim que o processamento terminar."
       ];
 
@@ -819,7 +944,7 @@ function setWorkspaceLoadingState(isLoading, label = "Processando") {
   form?.classList.toggle("is-processing", isLoading);
   form?.setAttribute("aria-busy", String(isLoading));
   if (workspaceLoading) {
-    workspaceLoading.hidden = !isLoading;
+    workspaceLoading.hidden = true;
     workspaceLoading.setAttribute("aria-hidden", String(!isLoading));
     const badge = workspaceLoading.querySelector(".workspace-loading-badge");
     if (badge) {
@@ -857,33 +982,37 @@ function getFilesOverLimit(files) {
 }
 
 function renderToolHelp(tool) {
-  if (!workspaceHelpCard || !workspaceHelpTitle || !workspaceHelpCopy || !workspaceHelpList) {
+  if (!toolHelpTitle || !toolHelpCopy || !toolHelpList) {
     return;
   }
 
   const content = tool ? toolHelpContent[tool.id] : null;
+  if (toolHelpButton) {
+    toolHelpButton.hidden = !content || document.body.dataset.pageMode !== "tool";
+  }
+
   if (!content) {
-    workspaceHelpCard.hidden = true;
-    workspaceHelpList.innerHTML = "";
+    toolHelpList.innerHTML = "";
+    hideToolHelpModal();
     return;
   }
 
-  workspaceHelpTitle.textContent = content.title;
-  workspaceHelpCopy.textContent = content.copy;
-  workspaceHelpList.innerHTML = "";
+  toolHelpTitle.textContent = content.title;
+  toolHelpCopy.textContent = content.copy;
+  toolHelpList.innerHTML = "";
 
   content.items.forEach((item) => {
     const article = document.createElement("article");
-    article.className = "workspace-help-item";
+    article.className = "tool-help-item";
 
     const icon = document.createElement("span");
-    icon.className = "workspace-help-icon";
+    icon.className = "tool-help-icon";
     icon.setAttribute("aria-hidden", "true");
     icon.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 10.2v4.6"></path><path d="M12 7.8h.01"></path></svg>';
 
     const copy = document.createElement("div");
-    copy.className = "workspace-help-copy";
+    copy.className = "tool-help-copy";
 
     const title = document.createElement("strong");
     title.textContent = item.title;
@@ -893,21 +1022,42 @@ function renderToolHelp(tool) {
 
     copy.append(title, text);
     article.append(icon, copy);
-    workspaceHelpList.append(article);
+    toolHelpList.append(article);
   });
-
-  workspaceHelpCard.hidden = false;
 }
 
 function setStatus(message) {
+  if (!statusText) {
+    return;
+  }
+
   statusText.textContent = message;
+  statusText.hidden = !message || quietStatusMessages.has(message);
 }
 
 function setProgress(value, label) {
   const safeValue = Math.max(0, Math.min(100, Math.round(value)));
-  progressFill.style.width = `${safeValue}%`;
-  progressValue.textContent = `${safeValue}%`;
-  progressLabel.textContent = label;
+  if (progressFill) {
+    progressFill.style.width = `${safeValue}%`;
+  }
+  if (progressValue) {
+    progressValue.textContent = `${safeValue}%`;
+  }
+  if (progressLabel) {
+    progressLabel.textContent = label;
+  }
+}
+
+function showUploadProgress() {
+  if (uploadProgress) {
+    uploadProgress.hidden = false;
+  }
+}
+
+function hideUploadProgress() {
+  if (uploadProgress) {
+    uploadProgress.hidden = true;
+  }
 }
 
 function stopProgressAnimation() {
@@ -1042,7 +1192,7 @@ function formatAccessPlanLabel(session) {
     return "Pro";
   }
 
-  return "Grátis";
+  return "Gratis";
 }
 
 function getAccessUsageLabel(session) {
@@ -1051,26 +1201,26 @@ function getAccessUsageLabel(session) {
   }
 
   if (session.plan === "team") {
-    return "Uso liberado para equipe e operação contínua.";
+    return "Uso liberado para equipe e operacao continua.";
   }
 
   if (session.plan === "pro") {
     if (session.remainingToday === null) {
-      return "Tudo liberado hoje para conversões premium.";
+      return "Tudo liberado hoje para conversoes premium.";
     }
 
-    return `${session.remainingToday} convers${session.remainingToday === 1 ? "ão" : "ões"} restantes hoje no Pro.`;
+    return `${session.remainingToday} convers${session.remainingToday === 1 ? "ao" : "oes"} restantes hoje no Pro.`;
   }
 
   if (session.remainingToday === null) {
-    return "Conversões disponíveis.";
+    return "Conversoes disponiveis.";
   }
 
   if (session.remainingToday <= 0) {
-    return "Suas conversões grátis acabaram hoje. Faça upgrade para continuar.";
+    return "Suas conversoes gratis acabaram hoje. Faca upgrade para continuar.";
   }
 
-  return `${session.remainingToday} de ${session.dailyLimit} convers${session.dailyLimit === 1 ? "ão grátis" : "ões grátis"} restantes hoje.`;
+  return `${session.remainingToday} de ${session.dailyLimit} convers${session.dailyLimit === 1 ? "ao gratis" : "oes gratis"} restantes hoje.`;
 }
 
 function getSupportUrl() {
@@ -1147,7 +1297,7 @@ function getAccountDiscountCopy() {
     return "Nenhum desconto ativo no momento.";
   }
 
-  return `${wallet.discountPercent}% ativo até ${formatDateTime(wallet.discountExpiresAt)}.`;
+  return `${wallet.discountPercent}% ativo ate ${formatDateTime(wallet.discountExpiresAt)}.`;
 }
 
 function getAccountInitials() {
@@ -1329,7 +1479,7 @@ function setAccountStatus(message) {
 
 function buildVerificationUiState(verification, context = {}) {
   const purpose = verification?.purpose ?? "register";
-  const submitLabel = purpose === "password-change" ? "Atualizar senha" : "Confirmar código";
+  const submitLabel = purpose === "password-change" ? "Atualizar senha" : "Confirmar codigo";
   const successMessage =
     context.successMessage ??
     (purpose === "register"
@@ -1348,7 +1498,7 @@ function buildVerificationUiState(verification, context = {}) {
       nextFocus: context.nextFocus ?? "profile",
       kicker: "Novo e-mail",
       title: "Confirme seu novo e-mail",
-      copy: "Enviamos um código numérico para o novo endereço informado. Digite os 6 dígitos para concluir a troca."
+      copy: "Enviamos um codigo numerico para o novo endereco informado. Digite os 6 digitos para concluir a troca."
     };
   }
 
@@ -1362,7 +1512,7 @@ function buildVerificationUiState(verification, context = {}) {
       nextFocus: context.nextFocus ?? "profile",
       kicker: "Troca de senha",
       title: "Confirme sua nova senha",
-      copy: "Enviamos um código numérico para o e-mail da sua conta. Digite os 6 dígitos para concluir a troca."
+      copy: "Enviamos um codigo numerico para o e-mail da sua conta. Digite os 6 digitos para concluir a troca."
     };
   }
 
@@ -1375,7 +1525,7 @@ function buildVerificationUiState(verification, context = {}) {
     nextFocus: context.nextFocus ?? "overview",
     kicker: "Criar conta",
     title: "Confirme sua conta",
-    copy: "Enviamos um código numérico para o e-mail informado. Digite os 6 dígitos para liberar sua conta com segurança."
+    copy: "Enviamos um codigo numerico para o e-mail informado. Digite os 6 digitos para liberar sua conta com seguranca."
   };
 }
 
@@ -1406,36 +1556,225 @@ function syncAccountMenu(expanded) {
 
   accountLauncher.setAttribute("aria-expanded", expanded ? "true" : "false");
   accountPopover.hidden = !expanded;
+  if ("inert" in accountPopover) {
+    accountPopover.inert = !expanded;
+  }
+  document.body.classList.toggle("account-menu-screen-open", expanded && shouldUseFullscreenAccountMenu());
+  updateBodyScrollLock();
 }
 
 function hideAccountMenu() {
   syncAccountMenu(false);
 }
 
-function syncBackgroundInteractivity(isBlocked) {
-  inertableSurfaces.forEach((surface) => {
-    if (!(surface instanceof HTMLElement)) {
-      return;
+function updateBodyScrollLock() {
+  const hasOpenModal =
+    (conversionModal && !conversionModal.hidden) ||
+    (toolHelpModal && !toolHelpModal.hidden) ||
+    (billingModal && !billingModal.hidden) ||
+    accountPaneModals.some((modal) => !modal.hidden) ||
+    (accountPopover && !accountPopover.hidden && shouldUseFullscreenAccountMenu());
+
+  document.body.style.overflow = hasOpenModal ? "hidden" : "";
+}
+
+function restoreConversionModalCards() {
+  if (!workspaceInspector) {
+    return;
+  }
+
+  [workspaceSpecialCard, workspaceOptionsCard].forEach((card) => {
+    if (card) {
+      card.classList.remove("is-modal-mounted");
     }
-
-    surface.inert = isBlocked;
-
-    if (isBlocked) {
-      surface.setAttribute("aria-hidden", "true");
-      return;
+    if (card && card.parentElement !== workspaceInspector) {
+      workspaceInspector.append(card);
     }
+  });
 
-    surface.removeAttribute("aria-hidden");
+  conversionModalRenderedCards = [];
+}
+
+function setConversionModalStatus(message) {
+  if (!conversionModalStatus) {
+    return;
+  }
+
+  conversionModalStatus.textContent = message;
+}
+
+function getConversionModalCards() {
+  const cards = [];
+
+  if (workspaceSpecialCard && !workspaceSpecialCard.hidden) {
+    cards.push(workspaceSpecialCard);
+  }
+
+  if (workspaceOptionsCard && !workspaceOptionsCard.hidden) {
+    cards.push(workspaceOptionsCard);
+  }
+
+  return cards;
+}
+
+function renderConversionModalCards(tool) {
+  if (!conversionModalBody) {
+    return;
+  }
+
+  restoreConversionModalCards();
+  conversionModalBody.innerHTML = "";
+  conversionModalRenderedCards = getConversionModalCards();
+
+  if (conversionModalRenderedCards.length === 0) {
+    const emptyState = document.createElement("article");
+    emptyState.className = "conversion-modal-empty";
+    emptyState.innerHTML = `
+      <strong>Sem ajustes extras</strong>
+      <p>Essa conversao ja esta pronta. Clique em converter para iniciar o envio real do arquivo.</p>
+    `;
+    conversionModalBody.append(emptyState);
+    return;
+  }
+
+  conversionModalRenderedCards.forEach((card) => {
+    card.hidden = false;
+    card.classList.add("is-modal-mounted");
+    conversionModalBody.append(card);
   });
 }
 
-function updateBodyScrollLock() {
-  const hasOpenModal =
-    (billingModal && !billingModal.hidden) ||
-    accountPaneModals.some((modal) => !modal.hidden);
+function syncConversionModalSummary(tool, files) {
+  if (conversionModalTitle) {
+    conversionModalTitle.textContent = tool ? `${tool.label} pronto para converter` : "Revise antes de converter";
+  }
 
-  document.body.style.overflow = hasOpenModal ? "hidden" : "";
-  syncBackgroundInteractivity(hasOpenModal);
+  if (conversionModalCopy) {
+    conversionModalCopy.textContent = tool
+      ? "Ajuste apenas o necessario, confirme as opcoes desta ferramenta e conclua a conversao real."
+      : "Revise os ajustes necessarios antes de converter.";
+  }
+
+  if (conversionSummaryFiles) {
+    conversionSummaryFiles.textContent = `${files.length} ${files.length === 1 ? "arquivo" : "arquivos"}`;
+  }
+
+  if (conversionSummaryOutput) {
+    conversionSummaryOutput.textContent = String(tool?.outputExtension ?? "").toUpperCase() || "Arquivo";
+  }
+
+  if (conversionConfirmButton) {
+    conversionConfirmButton.textContent = getToolActionLabel(tool);
+  }
+
+  setConversionModalStatus("Revise os ajustes e clique em converter para iniciar o envio real do arquivo.");
+}
+
+function hideConversionModal() {
+  if (!conversionModal) {
+    return;
+  }
+
+  restoreConversionModalCards();
+  conversionModal.hidden = true;
+  updateBodyScrollLock();
+}
+
+function validateConversionRequest() {
+  const toolId = toolSelect.value;
+  const tool = getToolById(toolId);
+  const files = getSelectedFiles();
+
+  if (!toolId || !tool) {
+    throw new Error("Selecione uma conversao antes de continuar.");
+  }
+
+  if (isToolLocked(tool)) {
+    promptAccountPlanAccess(tool);
+    throw new Error(`${tool.label} faz parte do plano Pro.`);
+  }
+
+  if (files.length === 0) {
+    throw new Error("Selecione uma ferramenta e um arquivo para continuar.");
+  }
+
+  const minFiles = tool.minFiles ?? 1;
+  const maxFiles = tool.maxFiles ?? (tool.allowsMultipleFiles ? 10 : 1);
+
+  if (files.length < minFiles) {
+    throw new Error(
+      minFiles === 1
+        ? "Envie um arquivo para continuar."
+        : `Envie pelo menos ${minFiles} arquivos para usar ${tool.label.toLowerCase()}.`
+    );
+  }
+
+  if (files.length > maxFiles) {
+    throw new Error(`Essa conversao aceita no maximo ${maxFiles} arquivos por vez.`);
+  }
+
+  return { toolId, tool, files };
+}
+
+function showConversionModal(tool = getToolById()) {
+  if (!conversionModal || !conversionModalBody) {
+    return;
+  }
+
+  let request;
+  try {
+    request = validateConversionRequest();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Nao foi possivel abrir os ajustes.";
+    setStatus(message);
+    return;
+  }
+
+  hideAccountMenu();
+  hideToolHelpModal();
+  hideBillingModal();
+  hideAccountPaneModals();
+
+  renderConversionModalCards(request.tool);
+  syncConversionModalSummary(request.tool, request.files);
+  conversionModal.hidden = false;
+  updateBodyScrollLock();
+
+  window.setTimeout(() => {
+    conversionConfirmButton?.focus();
+  }, 0);
+}
+
+function hideToolHelpModal() {
+  if (!toolHelpModal) {
+    return;
+  }
+
+  toolHelpModal.hidden = true;
+  updateBodyScrollLock();
+}
+
+function showToolHelpModal(tool = getToolById()) {
+  if (!toolHelpModal || !toolHelpTitle || !toolHelpCopy || !toolHelpList) {
+    return;
+  }
+
+  renderToolHelp(tool);
+  const content = tool ? toolHelpContent[tool.id] : null;
+  if (!content) {
+    return;
+  }
+
+  hideAccountMenu();
+  hideConversionModal();
+  hideBillingModal();
+  hideAccountPaneModals();
+  toolHelpModal.hidden = false;
+  updateBodyScrollLock();
+
+  window.setTimeout(() => {
+    toolHelpCloseButton?.focus();
+  }, 0);
 }
 
 function showAccountMenu() {
@@ -1444,6 +1783,7 @@ function showAccountMenu() {
     return;
   }
 
+  renderAccountUi();
   syncAccountMenu(true);
 }
 
@@ -1463,13 +1803,15 @@ function showBillingModal(options = {}) {
   }
 
   hideAccountMenu();
+  hideConversionModal();
+  hideToolHelpModal();
   billingModal.hidden = false;
   updateBodyScrollLock();
 
   if (tool && isPremiumTool(tool)) {
-    setBillingStatus(`${tool.label} faz parte do Pro. Escolha um plano ou ative um código para liberar essa conversão.`);
+    setBillingStatus(`${tool.label} faz parte do Pro. Escolha um plano ou ative um codigo para liberar essa conversao.`);
   } else {
-    setBillingStatus("Escolha um plano ou ative um código para liberar suas conversões premium.");
+    setBillingStatus("Escolha um plano ou ative um codigo para liberar suas conversoes premium.");
   }
 
   window.setTimeout(() => {
@@ -1489,6 +1831,21 @@ function hideBillingModal() {
 
   billingModal.hidden = true;
   updateBodyScrollLock();
+}
+
+function promptAccountPlanAccess(tool = getToolById()) {
+  const toolLabel = tool?.label ?? "Essa ferramenta";
+  hideAccountMenu();
+  hideBillingModal();
+
+  if (isAccountAuthenticated()) {
+    showAccountModal({ focus: "overview" });
+    setAccountStatus(`${toolLabel} faz parte do Pro. Gerencie plano, creditos e codigos pela sua conta.`);
+    return;
+  }
+
+  showAccountModal({ focus: "login" });
+  setAccountStatus(`Entre na sua conta para ver planos e liberar ${toolLabel}.`);
 }
 
 function hideAccountPaneModals() {
@@ -1544,7 +1901,7 @@ function getAccountModalFocusTarget(focus) {
   }
 
   if (focus === "settings") {
-    return accountThemeButton ?? accountSettingsCloseButton;
+    return accountSettingsCloseButton;
   }
 
   if (focus === "admin") {
@@ -1575,6 +1932,8 @@ function showAccountModal(options = {}) {
 
   hideAccountMenu();
   hideBillingModal();
+  hideConversionModal();
+  hideToolHelpModal();
   hideAccountPaneModals();
   modal.hidden = false;
   if (focus !== "profile") {
@@ -1622,7 +1981,7 @@ function renderBillingOffers() {
     billingStarterPrice.textContent = formatCurrencyBRL(starterOffer?.amountBRL ?? 9.9);
   }
   if (billingStarterMeta) {
-    billingStarterMeta.textContent = `${starterOffer?.accessDays ?? 7} dias de acesso rápido`;
+    billingStarterMeta.textContent = `${starterOffer?.accessDays ?? 7} dias de acesso rapido`;
   }
 }
 
@@ -1637,21 +1996,21 @@ function getAccountPlanHeadline() {
     return accessSession.plan === "team" ? "Team neste dispositivo" : "Pro neste dispositivo";
   }
 
-  return "Grátis";
+  return "Gratis";
 }
 
 function getAccountPlanDescription() {
   const accountState = getAccountState();
 
   if (accountState.plan?.status === "active" && accountState.plan.accessExpiresAt) {
-    return `Seu acesso vai até ${formatDateTime(accountState.plan.accessExpiresAt)}.`;
+    return `Seu acesso vai ate ${formatDateTime(accountState.plan.accessExpiresAt)}.`;
   }
 
   if (accessSession?.premium && !accountState.plan) {
-    return "Você tem acesso premium ativo neste navegador. Entre em um checkout logado para vincular o plano à conta.";
+    return "Voce tem acesso premium ativo neste navegador. Entre em um checkout logado para vincular o plano a conta.";
   }
 
-  return "Crie ou atualize um plano para liberar OCR, PDF avançado e conversões 3D.";
+  return "Crie ou atualize um plano para liberar OCR, PDF avancado e conversoes 3D.";
 }
 
 function getPopoverPlanBadgeLabel() {
@@ -1663,7 +2022,7 @@ function getPopoverPlanBadgeLabel() {
     return "Pro";
   }
 
-  return "Grátis";
+  return "Gratis";
 }
 
 function getPopoverUsageProgress() {
@@ -1675,18 +2034,18 @@ function getPopoverUsageProgress() {
     return {
       percent: accessSession?.premium ? 16 : 10,
       label: accessSession?.premium ? "Acesso premium ativo" : "Pronto para usar",
-      meta: accessSession?.premium ? "Seu plano não depende do limite diário grátis." : "Escolha uma conversão e comece agora."
+      meta: accessSession?.premium ? "Seu plano nao depende do limite diario gratis." : "Escolha uma conversao e comece agora."
     };
   }
 
   const percent = Math.max(6, Math.min(100, Math.round((usedToday / dailyLimit) * 100)));
   const remainingLabel =
-    remainingToday === 1 ? "1 conversão livre hoje" : `${remainingToday} conversões livres hoje`;
+    remainingToday === 1 ? "1 conversao livre hoje" : `${remainingToday} conversoes livres hoje`;
 
   return {
     percent,
     label: remainingLabel,
-    meta: `${usedToday} de ${dailyLimit} conversões usadas hoje`
+    meta: `${usedToday} de ${dailyLimit} conversoes usadas hoje`
   };
 }
 
@@ -1694,14 +2053,14 @@ function getPopoverPlanMeta() {
   const accountState = getAccountState();
 
   if (accountState.plan?.status === "active" && accountState.plan.accessExpiresAt) {
-    return `Ativo até ${formatDateTime(accountState.plan.accessExpiresAt)}`;
+    return `Ativo ate ${formatDateTime(accountState.plan.accessExpiresAt)}`;
   }
 
   if (accessSession?.premium) {
     return "Premium ativo neste dispositivo";
   }
 
-  return "Uso rápido no navegador";
+  return "Uso rapido no navegador";
 }
 
 function renderAccountUi() {
@@ -1733,7 +2092,7 @@ function renderAccountUi() {
   }
   if (accountPopoverPlanTitle) {
     accountPopoverPlanTitle.textContent = authenticated
-      ? `Olá, ${accountState.user?.displayName ?? "sua conta"}`
+      ? `Ola, ${accountState.user?.displayName ?? "sua conta"}`
       : "Seu conversor favorito sempre pronto";
   }
   if (accountPopoverPlanCopy) {
@@ -1754,7 +2113,7 @@ function renderAccountUi() {
   if (accountPopoverPlanButton) {
     accountPopoverPlanButton.textContent = accessSession?.premium ? "Gerenciar" : "Pro";
   }
-  for (const menuButton of [accountMenuProfile, accountMenuSettings, accountMenuLogout]) {
+  for (const menuButton of [accountMenuProfile, accountMenuTheme, accountMenuLogout]) {
     if (menuButton) {
       menuButton.hidden = !authenticated;
     }
@@ -1766,6 +2125,9 @@ function renderAccountUi() {
     accountMenuOverviewLabel.textContent = authenticated ? "Minha conta" : "Entrar ou criar conta";
   } else if (accountMenuOverview) {
     accountMenuOverview.textContent = authenticated ? "Minha conta" : "Entrar ou criar conta";
+  }
+  if (accountMenuThemeLabel) {
+    accountMenuThemeLabel.textContent = document.documentElement.dataset.theme === "dark" ? "Tema claro" : "Tema escuro";
   }
   applyAvatarToElements(accountLauncherImage, accountLauncherInitials, avatarUrl, initials);
   applyAvatarToElements(accountPopoverImage, accountPopoverInitials, avatarUrl, initials);
@@ -1786,7 +2148,7 @@ function renderAccountUi() {
       accountVerificationDestination.textContent = pendingAccountVerification.verification.destination;
     }
     if (accountVerificationExpiry) {
-      accountVerificationExpiry.textContent = `Válido até ${formatDateTime(pendingAccountVerification.verification.expiresAt)}.`;
+      accountVerificationExpiry.textContent = `Valido ate ${formatDateTime(pendingAccountVerification.verification.expiresAt)}.`;
     }
     if (accountVerificationSubmitButton) {
       accountVerificationSubmitButton.textContent = pendingAccountVerification.submitLabel;
@@ -1796,13 +2158,13 @@ function renderAccountUi() {
   if (!authenticated) {
     hideAccountMenu();
     if (accountSettingsTitle) {
-      accountSettingsTitle.textContent = "Preferências e segurança";
+      accountSettingsTitle.textContent = "Preferencias e seguranca";
     }
     if (accountSettingsCopy) {
-      accountSettingsCopy.textContent = "Entre para salvar suas preferências, trocar foto e proteger seus dados.";
+      accountSettingsCopy.textContent = "Entre para salvar suas preferencias, trocar foto e proteger seus dados.";
     }
     if (accountCreditsDisplay) {
-      accountCreditsDisplay.textContent = "0,00 créditos";
+      accountCreditsDisplay.textContent = "0,00 creditos";
     }
     if (accountDiscountDisplay) {
       accountDiscountDisplay.textContent = "Nenhum desconto ativo no momento.";
@@ -1815,7 +2177,7 @@ function renderAccountUi() {
     }
     setAccountStatus(
       pendingAccountVerification?.verification
-        ? `Digite o código enviado para ${pendingAccountVerification.verification.destination}.`
+        ? `Digite o codigo enviado para ${pendingAccountVerification.verification.destination}.`
         : "Entre ou crie sua conta para continuar."
     );
     return;
@@ -1843,7 +2205,7 @@ function renderAccountUi() {
       : "Conta ativa agora.";
   }
   if (accountCreditsDisplay) {
-    accountCreditsDisplay.textContent = `${wallet.creditBalance.toFixed(2).replace(".", ",")} créditos`;
+    accountCreditsDisplay.textContent = `${wallet.creditBalance.toFixed(2).replace(".", ",")} creditos`;
   }
   if (accountDiscountDisplay) {
     accountDiscountDisplay.textContent = getAccountDiscountCopy();
@@ -1852,17 +2214,14 @@ function renderAccountUi() {
     accountShortcutAdminButton.hidden = !isAdmin;
   }
   if (accountSettingsTitle) {
-    accountSettingsTitle.textContent = `Tema atual: ${document.documentElement.dataset.theme === "dark" ? "escuro" : "claro"}`;
+    accountSettingsTitle.textContent = "Sessao e seguranca";
   }
   if (accountSettingsCopy) {
     accountSettingsCopy.textContent = isAdmin
-      ? "Sua conta controla o painel do dono. Revise perfil, tema e gestão do vaptdoc daqui."
+      ? "Sua conta controla o painel do dono. Revise a sessao deste navegador e volte ao painel quando quiser."
       : accountState.user?.hasAvatar
-        ? "Sua conta está personalizada. Você pode trocar a foto, atualizar credenciais ou revisar seu plano quando quiser."
-        : "Adicione uma foto, ajuste seu tema e mantenha suas credenciais atualizadas com segurança.";
-  }
-  if (accountThemeButton) {
-    accountThemeButton.textContent = `Usar tema ${document.documentElement.dataset.theme === "dark" ? "claro" : "escuro"}`;
+        ? "Sua conta esta personalizada. Revise a sessao deste navegador sempre que precisar sair com seguranca."
+        : "Sua conta esta protegida. Use este modal para encerrar a sessao deste navegador.";
   }
   if (accountDisplayNameInput) {
     accountDisplayNameInput.value = accountState.user?.displayName ?? "";
@@ -1881,17 +2240,20 @@ function renderAccountUi() {
   }
 
   setAccountStatus(isAdmin
-    ? "Sua conta do dono está protegida. Abra o painel administrativo para gerenciar usuários, créditos e promoções."
-    : "Sua conta está protegida. Atualize dados ou siga para um upgrade quando quiser.");
+    ? "Sua conta do dono esta protegida. Abra o painel admin para gerenciar usuarios, creditos e promocoes."
+    : "Sua conta esta protegida. Atualize dados ou siga para um upgrade quando quiser.");
 }
 
 function updateAccessUi() {
   const shouldShowAccess = shouldRevealUpgradeContext(accessSession);
-  accessStrip.hidden = !shouldShowAccess;
-  accessPlanLabel.textContent = formatAccessPlanLabel(accessSession);
-  accessUsageCopy.textContent = getAccessUsageLabel(accessSession);
-  if (openBillingButton) {
-    openBillingButton.textContent = "Planos";
+  if (accessStrip) {
+    accessStrip.hidden = !shouldShowAccess;
+  }
+  if (accessPlanLabel) {
+    accessPlanLabel.textContent = formatAccessPlanLabel(accessSession);
+  }
+  if (accessUsageCopy) {
+    accessUsageCopy.textContent = getAccessUsageLabel(accessSession);
   }
   renderBillingOffers();
   renderAccountUi();
@@ -1921,7 +2283,9 @@ function updateAccessUi() {
     "Suporte em breve"
   );
 
-  accessLogoutButton.hidden = !accessSession?.premium || isAccountAuthenticated();
+  if (accessLogoutButton) {
+    accessLogoutButton.hidden = !accessSession?.premium || isAccountAuthenticated();
+  }
 
   const activeTool = getToolById();
   if (activeTool) {
@@ -1948,9 +2312,9 @@ async function redeemAccessCode(code) {
     body: JSON.stringify({ code })
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível ativar o código." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel ativar o codigo." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível ativar o código.");
+    throw new Error(payload.message ?? "Nao foi possivel ativar o codigo.");
   }
 
   applySessionPayload(payload);
@@ -1980,9 +2344,9 @@ async function registerAccount(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível criar a conta." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel criar a conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível criar a conta.");
+    throw new Error(payload.message ?? "Nao foi possivel criar a conta.");
   }
 
   return payload;
@@ -1999,9 +2363,9 @@ async function confirmAccountRegistration(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar sua conta." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar sua conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível confirmar sua conta.");
+    throw new Error(payload.message ?? "Nao foi possivel confirmar sua conta.");
   }
 
   applySessionPayload(payload);
@@ -2019,9 +2383,9 @@ async function loginAccount(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível entrar na conta." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel entrar na conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível entrar na conta.");
+    throw new Error(payload.message ?? "Nao foi possivel entrar na conta.");
   }
 
   applySessionPayload(payload);
@@ -2039,9 +2403,9 @@ async function updateAccountProfile(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível salvar seus dados." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel salvar seus dados." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível salvar seus dados.");
+    throw new Error(payload.message ?? "Nao foi possivel salvar seus dados.");
   }
 
   applySessionPayload(payload);
@@ -2059,9 +2423,9 @@ async function requestAccountEmailChange(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível enviar o código para o novo e-mail." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel enviar o codigo para o novo e-mail." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível enviar o código para o novo e-mail.");
+    throw new Error(payload.message ?? "Nao foi possivel enviar o codigo para o novo e-mail.");
   }
 
   return payload;
@@ -2078,9 +2442,9 @@ async function confirmAccountEmailChange(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar o novo e-mail." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar o novo e-mail." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível confirmar o novo e-mail.");
+    throw new Error(payload.message ?? "Nao foi possivel confirmar o novo e-mail.");
   }
 
   applySessionPayload(payload);
@@ -2098,9 +2462,9 @@ async function updateAccountPassword(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar a senha." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar a senha." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível atualizar a senha.");
+    throw new Error(payload.message ?? "Nao foi possivel atualizar a senha.");
   }
 
   return payload;
@@ -2117,9 +2481,9 @@ async function confirmAccountPassword(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar a nova senha." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar a nova senha." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível confirmar a nova senha.");
+    throw new Error(payload.message ?? "Nao foi possivel confirmar a nova senha.");
   }
 
   applySessionPayload(payload);
@@ -2137,9 +2501,9 @@ async function resendAccountVerification(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível reenviar o código." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel reenviar o codigo." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível reenviar o código.");
+    throw new Error(payload.message ?? "Nao foi possivel reenviar o codigo.");
   }
 
   return payload;
@@ -2158,9 +2522,9 @@ async function updateAccountAvatar(file) {
     body: formData
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar a foto de perfil." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar a foto de perfil." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível atualizar a foto de perfil.");
+    throw new Error(payload.message ?? "Nao foi possivel atualizar a foto de perfil.");
   }
 
   applySessionPayload(payload);
@@ -2176,9 +2540,9 @@ async function removeAccountAvatar() {
     }
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível remover a foto de perfil." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel remover a foto de perfil." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível remover a foto de perfil.");
+    throw new Error(payload.message ?? "Nao foi possivel remover a foto de perfil.");
   }
 
   applySessionPayload(payload);
@@ -2194,9 +2558,9 @@ async function logoutAccount() {
     }
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível encerrar a conta." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel encerrar a conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível encerrar a conta.");
+    throw new Error(payload.message ?? "Nao foi possivel encerrar a conta.");
   }
 
   applySessionPayload(payload);
@@ -2235,7 +2599,7 @@ function formatAdminUserPlan(user) {
     return "Sem plano ativo";
   }
 
-  return `${user.plan.plan === "team" ? "Team" : "Pro"} até ${formatDateTime(user.plan.accessExpiresAt)}`;
+  return `${user.plan.plan === "team" ? "Team" : "Pro"} ate ${formatDateTime(user.plan.accessExpiresAt)}`;
 }
 
 function formatAdminWallet(user) {
@@ -2246,9 +2610,9 @@ function formatAdminWallet(user) {
   };
 
   return {
-    credits: `${Number(wallet.creditBalance ?? 0).toFixed(2).replace(".", ",")} créditos`,
+    credits: `${Number(wallet.creditBalance ?? 0).toFixed(2).replace(".", ",")} creditos`,
     discount: wallet.discountPercent && wallet.discountExpiresAt
-      ? `${wallet.discountPercent}% até ${formatDateTime(wallet.discountExpiresAt)}`
+      ? `${wallet.discountPercent}% ate ${formatDateTime(wallet.discountExpiresAt)}`
       : "Sem desconto ativo."
   };
 }
@@ -2307,7 +2671,7 @@ function renderAdminUserList() {
           <div class="admin-user-topline">
             <strong>${escapeHtml(user.displayName)}</strong>
             <div class="admin-badge-row">
-              <span class="admin-badge" data-tone="${user.plan?.plan ?? "muted"}">${escapeHtml(user.plan?.plan === "team" ? "Team" : user.plan?.plan === "pro" ? "Pro" : "Grátis")}</span>
+              <span class="admin-badge" data-tone="${user.plan?.plan ?? "muted"}">${escapeHtml(user.plan?.plan === "team" ? "Team" : user.plan?.plan === "pro" ? "Pro" : "Gratis")}</span>
               ${user.isAdmin ? '<span class="admin-badge" data-tone="danger">Dono</span>' : ""}
             </div>
           </div>
@@ -2355,7 +2719,7 @@ function applyAdminSelectionToForms() {
   }
   if (adminSelectedUserPlan) {
     adminSelectedUserPlan.textContent = user
-      ? (user.plan?.status === "active" ? (user.plan.plan === "team" ? "Team" : "Pro") : "Grátis")
+      ? (user.plan?.status === "active" ? (user.plan.plan === "team" ? "Team" : "Pro") : "Gratis")
       : "Sem selecao";
     adminSelectedUserPlan.dataset.tone = user?.plan?.status === "active"
       ? (user.plan.plan === "team" ? "team" : "pro")
@@ -2364,10 +2728,10 @@ function applyAdminSelectionToForms() {
   if (adminSelectedUserMeta) {
     adminSelectedUserMeta.textContent = user
       ? `${user.email} • criada em ${formatDateTime(user.createdAt)}`
-      : "Abra um usuário para ver seus detalhes completos.";
+      : "Abra um usuario para ver seus detalhes completos.";
   }
   if (adminSelectedUserWallet) {
-    adminSelectedUserWallet.textContent = user ? wallet.credits : "0 créditos";
+    adminSelectedUserWallet.textContent = user ? wallet.credits : "0 creditos";
     adminSelectedUserWallet.dataset.tone = user && Number(user.wallet?.creditBalance ?? 0) > 0 ? "pro" : "muted";
   }
   if (adminSelectedUserDiscount) {
@@ -2415,7 +2779,7 @@ function applyAdminSelectionToForms() {
   renderAdminMiniList(
     adminUserPayments,
     user?.recentPayments ?? [],
-    "Nenhum pagamento recente para este usuário.",
+    "Nenhum pagamento recente para este usuario.",
     (item) => `
       <strong>${escapeHtml(item.offerId)}</strong>
       <span>${escapeHtml(formatCurrencyBRL(item.amountBRL))} • ${escapeHtml(item.status)} • ${escapeHtml(formatDateTime(item.approvedAt))}</span>
@@ -2425,12 +2789,12 @@ function applyAdminSelectionToForms() {
   renderAdminMiniList(
     adminUserPromos,
     user?.promoRedemptions ?? [],
-    "Nenhum código usado nesta conta.",
+    "Nenhum codigo usado nesta conta.",
     (item) => `
       <strong>${escapeHtml(item.code)}</strong>
       <span>${escapeHtml(
         [
-          item.creditAmount > 0 ? `${item.creditAmount.toFixed(2).replace(".", ",")} créditos` : "",
+          item.creditAmount > 0 ? `${item.creditAmount.toFixed(2).replace(".", ",")} creditos` : "",
           item.discountPercent > 0 ? `${item.discountPercent}%` : "",
           item.accessDays > 0 ? `${item.accessDays} dias ${item.accessPlan ?? "pro"}` : ""
         ].filter(Boolean).join(" • ") || "Sem beneficios registrados"
@@ -2454,7 +2818,7 @@ function renderAdminPromoList() {
     const item = document.createElement("article");
     item.className = "admin-promo-item";
     const rewards = [
-      promo.creditAmount > 0 ? `${promo.creditAmount.toFixed(2).replace(".", ",")} créditos` : "",
+      promo.creditAmount > 0 ? `${promo.creditAmount.toFixed(2).replace(".", ",")} creditos` : "",
       promo.discountPercent > 0 ? `${promo.discountPercent}% por ${promo.discountDays} dia(s)` : "",
       promo.accessDays > 0 ? `${promo.accessDays} dia(s) ${promo.accessPlan ?? "pro"}` : ""
     ].filter(Boolean).join(" • ");
@@ -2470,10 +2834,10 @@ function renderAdminPromoList() {
           <span class="admin-badge" data-tone="muted">${promo.redeemedCount}/${promo.maxRedemptions ?? "∞"}</span>
         </div>
       </div>
-      <span class="account-copy">${escapeHtml(promo.description || rewards || "Código promocional do vaptdoc")}</span>
+      <span class="account-copy">${escapeHtml(promo.description || rewards || "Codigo promocional do vaptdoc")}</span>
       <span class="account-copy">${escapeHtml(rewards || "Sem beneficios configurados")}</span>
       <div class="admin-promo-actions">
-        <button type="button" class="ghost-action" data-admin-copy-promo="${escapeHtml(promo.code)}">Copiar código</button>
+        <button type="button" class="ghost-action" data-admin-copy-promo="${escapeHtml(promo.code)}">Copiar codigo</button>
         <button type="button" class="ghost-action" data-admin-toggle-promo="${escapeHtml(promo.code)}">${promo.active ? "Pausar" : "Reativar"}</button>
         <button type="button" class="ghost-action danger" data-admin-delete-promo="${escapeHtml(promo.code)}">Excluir</button>
       </div>
@@ -2486,9 +2850,9 @@ function renderAdminPromoList() {
       const code = button.getAttribute("data-admin-copy-promo") ?? "";
       try {
         await navigator.clipboard.writeText(code);
-        setAdminStatus(`Código ${code} copiado.`);
+        setAdminStatus(`Codigo ${code} copiado.`);
       } catch {
-        setAdminStatus(`Não foi possível copiar ${code}.`);
+        setAdminStatus(`Nao foi possivel copiar ${code}.`);
       }
     });
   });
@@ -2503,9 +2867,9 @@ function renderAdminPromoList() {
 
       try {
         await updateAdminPromo(code, { active: !promo.active });
-        setAdminStatus(`Código ${code} atualizado.`);
+        setAdminStatus(`Codigo ${code} atualizado.`);
       } catch (error) {
-        setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar o código.");
+        setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar o codigo.");
       }
     });
   });
@@ -2513,15 +2877,15 @@ function renderAdminPromoList() {
   adminPromoList.querySelectorAll("[data-admin-delete-promo]").forEach((button) => {
     button.addEventListener("click", async () => {
       const code = button.getAttribute("data-admin-delete-promo") ?? "";
-      if (!window.confirm(`Excluir o código ${code}?`)) {
+      if (!window.confirm(`Excluir o codigo ${code}?`)) {
         return;
       }
 
       try {
         await deleteAdminPromo(code);
-        setAdminStatus(`Código ${code} removido.`);
+        setAdminStatus(`Codigo ${code} removido.`);
       } catch (error) {
-        setAdminStatus(error instanceof Error ? error.message : "Não foi possível remover o código.");
+        setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel remover o codigo.");
       }
     });
   });
@@ -2545,9 +2909,9 @@ async function fetchAdminDashboard() {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar o painel." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar o painel." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível carregar o painel.");
+    throw new Error(payload.message ?? "Nao foi possivel carregar o painel.");
   }
 
   return payload.dashboard ?? null;
@@ -2565,9 +2929,9 @@ async function fetchAdminUsers(query = "") {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar os usuários." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar os usuarios." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível carregar os usuários.");
+    throw new Error(payload.message ?? "Nao foi possivel carregar os usuarios.");
   }
 
   return Array.isArray(payload.users) ? payload.users : [];
@@ -2580,9 +2944,9 @@ async function fetchAdminUserDetail(userId) {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar o usuário." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar o usuario." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível carregar o usuário.");
+    throw new Error(payload.message ?? "Nao foi possivel carregar o usuario.");
   }
 
   return payload.user ?? null;
@@ -2595,9 +2959,9 @@ async function fetchAdminPromos() {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar os códigos promocionais." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar os codigos promocionais." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível carregar os códigos promocionais.");
+    throw new Error(payload.message ?? "Nao foi possivel carregar os codigos promocionais.");
   }
 
   return Array.isArray(payload.promos) ? payload.promos : [];
@@ -2606,16 +2970,16 @@ async function fetchAdminPromos() {
 async function selectAdminUser(userId) {
   adminState.selectedUserId = userId;
   renderAdminUserList();
-  setAdminStatus("Carregando os detalhes do usuário...");
+  setAdminStatus("Carregando os detalhes do usuario...");
 
   try {
     adminState.selectedUser = await fetchAdminUserDetail(userId);
     renderAdminUi();
-    setAdminStatus("Usuário carregado com sucesso.");
+    setAdminStatus("Usuario carregado com sucesso.");
   } catch (error) {
     adminState.selectedUser = null;
     renderAdminUi();
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível abrir este usuário.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel abrir este usuario.");
   }
 }
 
@@ -2643,7 +3007,7 @@ async function loadAdminPanel() {
     renderAdminUi();
     setAdminStatus("Painel administrativo atualizado.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível carregar o painel administrativo.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel carregar o painel administrativo.");
   }
 }
 
@@ -2657,9 +3021,9 @@ async function updateAdminUserProfile(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível salvar os dados do usuário." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel salvar os dados do usuario." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível salvar os dados do usuário.");
+    throw new Error(payload.message ?? "Nao foi possivel salvar os dados do usuario.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -2676,9 +3040,9 @@ async function updateAdminUserPlan(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar o plano." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar o plano." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível atualizar o plano.");
+    throw new Error(payload.message ?? "Nao foi possivel atualizar o plano.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -2696,9 +3060,9 @@ async function updateAdminUserCredits(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar os créditos." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar os creditos." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível atualizar os créditos.");
+    throw new Error(payload.message ?? "Nao foi possivel atualizar os creditos.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -2716,9 +3080,9 @@ async function updateAdminUserDiscount(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar o desconto." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar o desconto." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível atualizar o desconto.");
+    throw new Error(payload.message ?? "Nao foi possivel atualizar o desconto.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -2734,9 +3098,9 @@ async function deleteAdminUser(userId) {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível remover o usuário." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel remover o usuario." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível remover o usuário.");
+    throw new Error(payload.message ?? "Nao foi possivel remover o usuario.");
   }
 
   adminState.selectedUser = null;
@@ -2754,9 +3118,9 @@ async function createAdminPromo(input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível criar o código." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel criar o codigo." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível criar o código.");
+    throw new Error(payload.message ?? "Nao foi possivel criar o codigo.");
   }
 
   await loadAdminPanel();
@@ -2773,9 +3137,9 @@ async function updateAdminPromo(code, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar o código." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar o codigo." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível atualizar o código.");
+    throw new Error(payload.message ?? "Nao foi possivel atualizar o codigo.");
   }
 
   await loadAdminPanel();
@@ -2790,9 +3154,9 @@ async function deleteAdminPromo(code) {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Não foi possível remover o código." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel remover o codigo." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível remover o código.");
+    throw new Error(payload.message ?? "Nao foi possivel remover o codigo.");
   }
 
   await loadAdminPanel();
@@ -2809,9 +3173,9 @@ async function startCheckout(offerId) {
     body: JSON.stringify({ offerId })
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível abrir o checkout." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel abrir o checkout." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível abrir o checkout.");
+    throw new Error(payload.message ?? "Nao foi possivel abrir o checkout.");
   }
 
   return payload;
@@ -2828,13 +3192,13 @@ async function confirmCheckoutReturn(paymentId = "") {
     body: JSON.stringify(paymentId ? { paymentId } : {})
   });
 
-  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar o pagamento." }));
+  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar o pagamento." }));
   if (response.status === 202) {
     return payload;
   }
 
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível confirmar o pagamento.");
+    throw new Error(payload.message ?? "Nao foi possivel confirmar o pagamento.");
   }
 
   applySessionPayload(payload.session ?? {});
@@ -2899,6 +3263,57 @@ function getVisibleTools() {
   });
 }
 
+function getPrioritizedTools(source) {
+  const orderedTools = getOrderedTools(source);
+  const featuredSet = new Set(defaultFeaturedToolIds);
+  const featuredTools = orderedTools.filter((tool) => featuredSet.has(tool.id));
+  const remainingTools = orderedTools.filter((tool) => !featuredSet.has(tool.id));
+  return [...featuredTools, ...remainingTools];
+}
+
+function getVisibleDirectoryTools(visibleTools) {
+  const canCollapse = activeFilter === "all" && !searchQuery;
+  const prioritizedTools = getPrioritizedTools(visibleTools);
+  const featuredTools = prioritizedTools.filter((tool) => defaultFeaturedToolIds.includes(tool.id));
+  const collapsedLimit = isCompactViewport() ? featuredToolRowMobileLimit : featuredToolRowDesktopLimit;
+  const collapsedTools = (featuredTools.length > 0 ? featuredTools : prioritizedTools).slice(0, collapsedLimit);
+  const expandedTools = [
+    ...collapsedTools,
+    ...prioritizedTools.filter((tool) => !collapsedTools.some((entry) => entry.id === tool.id))
+  ];
+
+  return {
+    canCollapse,
+    totalCount: prioritizedTools.length,
+    collapsedCount: collapsedTools.length,
+    tools: canCollapse && !isToolDirectoryExpanded ? collapsedTools : expandedTools
+  };
+}
+
+function updateToolDirectoryToggleState(directoryState) {
+  if (!toolDirectoryToggle || !toolDirectoryToggleCopy) {
+    return;
+  }
+
+  const hiddenCount = Math.max(0, directoryState.totalCount - directoryState.collapsedCount);
+  const shouldShow = directoryState.canCollapse && hiddenCount > 0;
+
+  toolDirectoryToggle.hidden = !shouldShow;
+  toolDirectoryToggle.setAttribute("aria-expanded", String(shouldShow && isToolDirectoryExpanded));
+
+  if (!shouldShow) {
+    return;
+  }
+
+  toolDirectoryToggleCopy.textContent = isToolDirectoryExpanded
+    ? "Ocultar ferramentas"
+    : "Exibir todas as ferramentas";
+  toolDirectoryToggle.setAttribute(
+    "aria-label",
+    isToolDirectoryExpanded ? "Ocultar lista completa de ferramentas" : `Exibir mais ${hiddenCount} ferramentas`
+  );
+}
+
 function getSearchMatches(limit = searchResultsLimit) {
   const normalizedQuery = normalizeText(searchQuery);
   if (!normalizedQuery) {
@@ -2925,8 +3340,14 @@ function getCookie(name) {
 }
 
 function updateThemeButton(theme) {
-  themeToggle.setAttribute("aria-label", theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro");
-  themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+  themeToggle?.setAttribute("aria-label", theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro");
+  themeToggle?.setAttribute("aria-pressed", String(theme === "dark"));
+}
+
+function toggleThemePreference() {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(nextTheme);
+  renderAccountUi();
 }
 
 function updateBrowserThemeColor(theme) {
@@ -3072,8 +3493,8 @@ function updateToolbarCopy(visibleCount) {
   if (activeFilter === "3d") {
     toolToolbarCopy.textContent =
       visibleCount > 0
-        ? `${visibleCount} convers${visibleCount > 1 ? "ões" : "ão"} 3D pronta${visibleCount > 1 ? "s" : ""}`
-        : "Nenhuma conversão 3D encontrada";
+        ? `${visibleCount} convers${visibleCount > 1 ? "oes" : "ao"} 3D pronta${visibleCount > 1 ? "s" : ""}`
+        : "Nenhuma conversao 3D encontrada";
     return;
   }
 
@@ -3083,18 +3504,27 @@ function updateToolbarCopy(visibleCount) {
     return;
   }
 
+  if (activeFilter === "all") {
+    toolToolbarCopy.textContent = isToolDirectoryExpanded ? "Todas as ferramentas" : "Mais usadas no momento";
+    return;
+  }
+
   const favoriteCount = favoriteToolIds.size;
   toolToolbarCopy.textContent =
     favoriteCount > 0
-      ? `${tools.length} conversões, ${favoriteCount} favorita${favoriteCount > 1 ? "s" : ""}`
-      : "Conversões prontas para você";
+      ? `${tools.length} conversoes, ${favoriteCount} favorita${favoriteCount > 1 ? "s" : ""}`
+      : "Conversoes prontas para voce";
 }
 
 function updateFavoriteButton(toolId) {
+  if (!favoriteToggle || !favoriteToggleCopy) {
+    return;
+  }
+
   const favorite = isFavorite(toolId);
   favoriteToggle.classList.toggle("active", favorite);
   favoriteToggle.setAttribute("aria-pressed", String(favorite));
-  favoriteToggle.setAttribute("aria-label", favorite ? "Remover dos favoritos" : "Favoritar conversão");
+  favoriteToggle.setAttribute("aria-label", favorite ? "Remover dos favoritos" : "Favoritar conversao");
   favoriteToggleCopy.textContent = favorite ? "Favorita" : "Favoritar";
 }
 
@@ -3133,11 +3563,11 @@ function normalizeFormatKind(value) {
     return "html";
   }
 
-  if (["mp3", "áudio"].includes(normalized)) {
+  if (["mp3", "audio"].includes(normalized)) {
     return "mp3";
   }
 
-  if (["mp4", "vídeo"].includes(normalized)) {
+  if (["mp4", "video"].includes(normalized)) {
     return "mp4";
   }
 
@@ -3172,6 +3602,10 @@ function isTouchViewport() {
   return touchViewportQuery.matches;
 }
 
+function shouldUseFullscreenAccountMenu() {
+  return isCompactViewport() && isTouchViewport();
+}
+
 function getToolActionLabel(tool) {
   if (!tool) {
     return "Converter arquivo";
@@ -3202,30 +3636,30 @@ function getWorkspaceGuideCopy(tool) {
   }
 
   if (tool.id === "pdf-merge") {
-    return "Monte a pilha final do PDF na grade e use a lateral para acelerar organização e revisão.";
+    return "Monte a pilha final do PDF na grade e use a lateral para acelerar organizacao e revisao.";
   }
 
   if (tool.id === "pdf-split") {
-    return "Deixe o PDF no centro e use a lateral para escolher o corte sem abrir campos desnecessários.";
+    return "Deixe o PDF no centro e use a lateral para escolher o corte sem abrir campos desnecessarios.";
   }
 
   if (tool.id === "image-to-pdf") {
-    return "Trate cada imagem como página, organize a ordem e ajuste o layout no inspetor lateral.";
+    return "Trate cada imagem como pagina, organize a ordem e ajuste o layout no inspetor lateral.";
   }
 
   if (tool.category === "3d") {
-    return "Modelos 3D ficam mais confortáveis de revisar quando a prévia e os ajustes vivem no mesmo workspace.";
+    return "Modelos 3D ficam mais confortaveis de revisar quando a previa e os ajustes vivem no mesmo workspace.";
   }
 
   if (tool.allowsMultipleFiles || getToolMaximumFiles(tool) > 1 || getToolMinimumFiles(tool) > 1) {
-    return "Monte a ordem na grade, confira os cards e só depois siga para o resultado.";
+    return "Monte a ordem na grade, confira os cards e so depois siga para o resultado.";
   }
 
   if (tool.textLayoutSupport?.enabled) {
     return "Ajuste o layout do texto no painel lateral e acompanhe o resultado sem trocar de tela.";
   }
 
-  return "Envie um arquivo, revise a prévia e baixe o resultado em um fluxo mais claro.";
+  return "Envie um arquivo, revise a previa e baixe o resultado em um fluxo mais claro.";
 }
 
 function getWorkspaceModeLabel(tool) {
@@ -3242,7 +3676,7 @@ function getWorkspaceModeLabel(tool) {
   }
 
   if (tool.id === "image-to-pdf") {
-    return "Páginas por imagem";
+    return "Paginas por imagem";
   }
 
   if (tool.category === "3d") {
@@ -3257,7 +3691,7 @@ function getWorkspaceModeLabel(tool) {
       return `${minFiles}+ arquivos`;
     }
 
-    return maxFiles > 1 ? `Até ${maxFiles} arquivos` : "Vários arquivos";
+    return maxFiles > 1 ? `Ate ${maxFiles} arquivos` : "Varios arquivos";
   }
 
   if (tool.textLayoutSupport?.enabled) {
@@ -3289,7 +3723,7 @@ function shouldShowWorkspaceOptionsCard(tool = getToolById()) {
 
 function getWorkspaceOptionsTitle(tool) {
   if (!tool) {
-    return "Ajustes desta conversão";
+    return "Ajustes desta conversao";
   }
 
   if (tool.id === "pdf-rotate") {
@@ -3304,7 +3738,7 @@ function getWorkspaceOptionsTitle(tool) {
     return "Formato e detalhes do modelo";
   }
 
-  return "Ajustes desta conversão";
+  return "Ajustes desta conversao";
 }
 
 function getWorkspaceOptionsCopy(tool) {
@@ -3321,10 +3755,10 @@ function getWorkspaceOptionsCopy(tool) {
   }
 
   if (tool.category === "3d") {
-    return "Escolha o formato de saída e deixe o restante do fluxo visual por conta da grade.";
+    return "Escolha o formato de saida e deixe o restante do fluxo visual por conta da grade.";
   }
 
-  return "Os ajustes aparecem aqui apenas quando forem necessários para a conversão escolhida.";
+  return "Os ajustes aparecem aqui apenas quando forem necessarios para a conversao escolhida.";
 }
 
 function getWorkspaceFilesBadgeLabel(tool) {
@@ -3363,7 +3797,7 @@ function getWorkspaceFlowLabel(tool) {
 
   if (tool.id === "pdf-split") {
     const mode = readOptionFieldValue("splitMode") || "ranges";
-    return mode === "remove_pages" ? "Saída em PDF único" : "Saída em pacote ZIP";
+    return mode === "remove_pages" ? "Saida em PDF unico" : "Saida em pacote ZIP";
   }
 
   if (tool.id === "image-to-pdf") {
@@ -3409,6 +3843,7 @@ function updateWorkspaceGuide(tool) {
 
 function updateWorkspacePanels(tool = getToolById()) {
   const blueprint = getWorkspaceBlueprint(tool);
+  const hasFiles = stagedFiles.length > 0;
 
   if (workspaceGuideCopy) {
     workspaceGuideCopy.textContent = getWorkspaceGuideCopy(tool);
@@ -3448,6 +3883,8 @@ function updateWorkspacePanels(tool = getToolById()) {
     if (workspaceOptionsCard) {
       workspaceOptionsCard.hidden = true;
     }
+    renderToolHelp(null);
+    hideConversionModal();
     updateWorkspaceGuide(null);
     return;
   }
@@ -3470,10 +3907,12 @@ function updateWorkspacePanels(tool = getToolById()) {
     workspaceFlowBadge.textContent = getWorkspaceFlowLabel(tool);
   }
   if (workspaceCanvasTitle) {
-    workspaceCanvasTitle.textContent = blueprint.canvasTitle;
+    workspaceCanvasTitle.textContent = hasFiles ? blueprint.canvasTitle : getDropzoneTitleForTool(tool);
   }
   if (workspaceCanvasCopy) {
-    workspaceCanvasCopy.textContent = blueprint.canvasCopy;
+    workspaceCanvasCopy.textContent = hasFiles
+      ? blueprint.canvasCopy
+      : "Depois do envio, mostramos apenas os ajustes e a acao final desta conversao.";
   }
   if (workspaceSubmitTitle) {
     workspaceSubmitTitle.textContent = blueprint.submitTitle;
@@ -3489,10 +3928,58 @@ function updateWorkspacePanels(tool = getToolById()) {
   }
   renderSpecializedWorkspace(tool);
   if (workspaceOptionsCard) {
-    workspaceOptionsCard.hidden = !shouldShowWorkspaceOptionsCard(tool);
+    workspaceOptionsCard.hidden = !(hasFiles && shouldShowWorkspaceOptionsCard(tool));
+  }
+
+  if (conversionModal && !conversionModal.hidden) {
+    if (!hasFiles) {
+      hideConversionModal();
+    } else {
+      syncConversionModalSummary(tool, getSelectedFiles());
+    }
   }
 
   updateWorkspaceGuide(tool);
+  updateToolFlowLayout(tool);
+}
+
+function updateToolFlowLayout(tool = getToolById()) {
+  if (!form) {
+    return;
+  }
+
+  const isToolPage = document.body.dataset.pageMode === "tool";
+  const hasFiles = stagedFiles.length > 0;
+  const revealUpgrade = Boolean(tool && isToolLocked(tool) && shouldRevealUpgradeContext(accessSession));
+  const isUploadStage = Boolean(isToolPage && tool && !hasFiles && !revealUpgrade);
+  const showSidebar = false;
+  const showConvertAction = Boolean(tool && hasFiles && !revealUpgrade);
+
+  form.classList.toggle("is-upload-stage", isUploadStage);
+
+  if (convertSidebar) {
+    convertSidebar.hidden = !showSidebar;
+  }
+
+  if (workspaceInspector) {
+    workspaceInspector.hidden = true;
+    workspaceInspector.setAttribute("aria-hidden", "true");
+  }
+
+  if (workspaceSubmitCard) {
+    workspaceSubmitCard.hidden = !showConvertAction;
+  }
+
+  workspaceCanvasCard?.classList.toggle("is-upload-focus", isUploadStage);
+  workspaceMainGrid?.classList.toggle("is-upload-focus", isUploadStage);
+
+  if (convertButton) {
+    convertButton.hidden = !showConvertAction;
+  }
+
+  if (!showConvertAction && !form.classList.contains("is-processing")) {
+    hideUploadProgress();
+  }
 }
 
 function getDropzoneTitleForTool(tool) {
@@ -3519,7 +4006,7 @@ function getDropzoneTitleForTool(tool) {
   }
 
   if (from === "mp4") {
-    return "Envie seu vídeo";
+    return "Envie seu video";
   }
 
   if (from === "model3d") {
@@ -3661,13 +4148,13 @@ function getFilePreviewOverlayLabel(tool, kind, index, total) {
   }
 
   if (tool?.id === "image-to-pdf" && ["jpg", "jpeg", "png", "image"].includes(kind)) {
-    return index === 0 ? "Capa do PDF" : `Página ${index + 1} do PDF`;
+    return index === 0 ? "Capa do PDF" : `Pagina ${index + 1} do PDF`;
   }
 
   return kind === "pdf"
-    ? "Prévia do PDF"
+    ? "Previa do PDF"
     : kind === "mp4"
-      ? "Vídeo pronto"
+      ? "Video pronto"
       : kind === "jpg" || kind === "jpeg" || kind === "png" || kind === "image"
         ? "Imagem pronta"
         : "Pronto para mover";
@@ -3738,7 +4225,7 @@ function createFilePreviewSurface(file, kind, tool, index, total) {
         : kind === "office"
           ? "Documento pronto"
           : kind === "text"
-            ? "Conteúdo pronto"
+            ? "Conteudo pronto"
             : "Arquivo pronto";
 
     fallbackCopy.append(fallbackTitle, fallbackHint);
@@ -3875,13 +4362,13 @@ function addStagedFiles(fileList, options = {}) {
   }
 
   if (isToolLocked(tool)) {
-    showBillingModal({ tool });
+    promptAccountPlanAccess(tool);
     return;
   }
 
   const nonEmptyFiles = incomingFiles.filter((file) => Number(file.size ?? 0) > 0);
   if (nonEmptyFiles.length !== incomingFiles.length) {
-    setStatus("Um dos arquivos enviados está vazio. Escolha um arquivo válido para continuar.");
+    setStatus("Um dos arquivos enviados esta vazio. Escolha um arquivo valido para continuar.");
   }
 
   const oversizedFiles = getFilesOverLimit(nonEmptyFiles);
@@ -3914,7 +4401,7 @@ function addStagedFiles(fileList, options = {}) {
   fileInput.value = "";
 
   if (discardedCount > 0) {
-    setStatus(`Essa conversão aceita no máximo ${maxFiles} arquivos por vez.`);
+    setStatus(`Essa conversao aceita no maximo ${maxFiles} arquivos por vez.`);
   }
 }
 
@@ -3935,6 +4422,10 @@ function renderStagedFiles() {
 
   fileStage.innerHTML = "";
   fileStage.hidden = files.length === 0;
+  if (dropzone) {
+    dropzone.hidden = false;
+    dropzone.setAttribute("aria-hidden", "false");
+  }
   syncPreviewUrlCache(files);
 
   if (!tool || files.length === 0) {
@@ -3943,9 +4434,6 @@ function renderStagedFiles() {
   }
 
   const canReorder = files.length > 1;
-  const maxFiles = tool.maxFiles ?? (tool.allowsMultipleFiles ? 10 : 1);
-  const canAddMore = Boolean(tool.allowsMultipleFiles && files.length < maxFiles);
-
   const header = document.createElement("div");
   header.className = "file-stage-head";
 
@@ -3962,8 +4450,8 @@ function renderStagedFiles() {
         ? "PDF pronto para dividir"
         : tool.id === "image-to-pdf"
           ? files.length > 1
-            ? "Páginas prontas para o PDF"
-            : "Primeira página pronta"
+            ? "Paginas prontas para o PDF"
+            : "Primeira pagina pronta"
           : files.length > 1
             ? "Arquivos prontos"
             : "Arquivo pronto";
@@ -3972,17 +4460,17 @@ function renderStagedFiles() {
   hint.textContent =
     tool.id === "pdf-merge"
       ? canReorder
-        ? "Arraste os cards para definir a sequência exata do PDF final."
+        ? "Arraste os cards para definir a sequencia exata do PDF final."
         : "Adicione outro PDF para montar a ordem final do documento."
       : tool.id === "pdf-split"
         ? "Revise o arquivo de origem e finalize os cortes na lateral."
         : tool.id === "image-to-pdf"
           ? canReorder
-            ? "Arraste as imagens para decidir a ordem das páginas do PDF."
-            : "Envie mais imagens se quiser montar um PDF com várias páginas."
+            ? "Arraste as imagens para decidir a ordem das paginas do PDF."
+            : "Envie mais imagens se quiser montar um PDF com varias paginas."
           : canReorder
             ? "Grade pronta para reorganizar, revisar e remover com poucos toques."
-            : "Confira a prévia do arquivo e continue quando quiser.";
+            : "Confira a previa do arquivo e continue quando quiser.";
 
   heading.append(title, hint);
 
@@ -4008,13 +4496,17 @@ function renderStagedFiles() {
 
   heading.append(meta);
 
+  const headerActions = document.createElement("div");
+  headerActions.className = "file-stage-head-actions";
+
   const clearButton = document.createElement("button");
   clearButton.type = "button";
   clearButton.className = "ghost-action";
   clearButton.textContent = "Limpar tudo";
   clearButton.addEventListener("click", clearStagedFiles);
+  headerActions.append(clearButton);
 
-  header.append(heading, clearButton);
+  header.append(heading, headerActions);
 
   const list = document.createElement("div");
   list.className = "file-stage-list";
@@ -4122,7 +4614,7 @@ function renderStagedFiles() {
               ? "Fecha o PDF"
               : `${index + 1}/${files.length}`
           : tool.id === "image-to-pdf"
-            ? `Página ${index + 1}`
+            ? `Pagina ${index + 1}`
             : `${index + 1}/${files.length}`;
       metaRow.append(orderMeta);
     }
@@ -4165,19 +4657,6 @@ function renderStagedFiles() {
     item.append(topBar, preview, copy, actions);
     list.append(item);
   });
-
-  if (canAddMore) {
-    const addCard = document.createElement("button");
-    addCard.type = "button";
-    addCard.className = "file-stage-add-card";
-    addCard.innerHTML = `
-      <span class="file-stage-add-icon" aria-hidden="true">${getAddIcon()}</span>
-      <strong>Adicionar arquivos</strong>
-      <span>Toque ou clique para completar sua grade.</span>
-    `;
-    addCard.addEventListener("click", () => fileInput.click());
-    list.append(addCard);
-  }
 
   fileStage.append(header, list);
   updateWorkspacePanels(tool);
@@ -4245,7 +4724,13 @@ function updateBackToTopVisibility() {
   backToTopButton.setAttribute("aria-hidden", String(!shouldShow));
 }
 
+function syncDialogPresentationMode() {
+  document.body.classList.toggle("android-fullscreen-dialogs", isAndroidUserAgent);
+}
+
 function syncResponsiveUi() {
+  document.body.classList.toggle("account-menu-screen-open", Boolean(accountPopover && !accountPopover.hidden && shouldUseFullscreenAccountMenu()));
+  syncDialogPresentationMode();
   renderTools();
   renderSearchResults();
 
@@ -4259,7 +4744,7 @@ function syncResponsiveUi() {
 function updateDropzonePrompt(tool) {
   if (isToolLocked(tool) && shouldRevealUpgradeContext(accessSession)) {
     dropzoneTitle.textContent = "Disponivel no Pro";
-    dropzoneCopy.textContent = `${tool.label} fica liberado assim que você ativar um plano ou código.`;
+    dropzoneCopy.textContent = `${tool.label} fica liberado assim que voce ativar um plano ou codigo.`;
     return;
   }
 
@@ -4868,27 +5353,6 @@ function createWorkspaceSpecialSection(title, copy = "") {
   return { section, body };
 }
 
-function createWorkspaceStats(items) {
-  const grid = document.createElement("div");
-  grid.className = "workspace-special-stats";
-
-  items.forEach((item) => {
-    const card = document.createElement("article");
-    card.className = "workspace-special-stat";
-
-    const value = document.createElement("strong");
-    value.textContent = item.value;
-
-    const label = document.createElement("span");
-    label.textContent = item.label;
-
-    card.append(value, label);
-    grid.append(card);
-  });
-
-  return grid;
-}
-
 function createWorkspaceInfoNote(title, copy, tone = "soft") {
   const note = document.createElement("article");
   note.className = `workspace-special-note workspace-special-note-${tone}`;
@@ -4912,7 +5376,7 @@ function createWorkspaceOrderList(tool, files) {
       createWorkspaceInfoNote(
         tool.id === "pdf-split" ? "Envie um PDF para continuar" : "Sua grade aparece aqui",
         tool.id === "pdf-split"
-          ? "Assim que você escolher um arquivo, mostramos o resumo do corte nesta lateral."
+          ? "Assim que voce escolher um arquivo, mostramos o resumo do corte nesta lateral."
           : "Depois do envio, a ordem final fica espelhada aqui e na grade central."
       )
     );
@@ -4936,7 +5400,7 @@ function createWorkspaceOrderList(tool, files) {
 
     const meta = document.createElement("span");
     if (tool.id === "image-to-pdf") {
-      meta.textContent = `${index === 0 ? "Capa" : `Página ${index + 1}`} · ${formatFileSize(file.size)}`;
+      meta.textContent = `${index === 0 ? "Capa" : `Pagina ${index + 1}`} · ${formatFileSize(file.size)}`;
     } else if (tool.id === "pdf-merge") {
       meta.textContent = `${index === 0 ? "Abre o PDF final" : index === files.length - 1 ? "Fecha o PDF final" : "Miolo do documento"} · ${formatFileSize(file.size)}`;
     } else {
@@ -4966,52 +5430,35 @@ function getSplitModeWorkspaceNote() {
   if (mode === "fixed_range") {
     return createWorkspaceInfoNote(
       "Partes automaticas",
-      "Defina quantas páginas cada parte deve ter. O app gera a sequência para você sem precisar escrever intervalos."
+      "Defina quantas paginas cada parte deve ter. O app gera a sequencia para voce sem precisar escrever intervalos."
     );
   }
 
   if (mode === "remove_pages") {
     return createWorkspaceInfoNote(
-      "PDF único sem páginas escolhidas",
-      "Use números ou intervalos, como 2-4,8. O retorno vem como um único PDF já limpo."
+      "PDF unico sem paginas escolhidas",
+      "Use numeros ou intervalos, como 2-4,8. O retorno vem como um unico PDF ja limpo."
     );
   }
 
   return createWorkspaceInfoNote(
     "Intervalos livres",
-    "Exemplos prontos: 1-3,5-8 ou 1,4,9. Se quiser, marque para reunir os trechos de novo em um único PDF."
+    "Exemplos prontos: 1-3,5-8 ou 1,4,9. Se quiser, marque para reunir os trechos de novo em um unico PDF."
   );
 }
 
 function renderMergeWorkspace(tool) {
   const files = getSelectedFiles();
-  const totalBytes = files.reduce((sum, file) => sum + Number(file.size || 0), 0);
   const canReorder = files.length > 1;
-  const canAddMore = files.length < getToolMaximumFiles(tool);
   const fragment = document.createDocumentFragment();
 
-  fragment.append(
-    createWorkspaceStats([
-      { value: `${files.length}`, label: files.length === 1 ? "PDF na pilha" : "PDFs na pilha" },
-      { value: formatFileSize(totalBytes || 0), label: "Peso total" },
-      { value: canReorder ? "Ativa" : "Aguardando", label: "Ordem final" }
-    ])
-  );
-
-  const actionsSection = createWorkspaceSpecialSection("Atalhos de montagem", "Use estes controles para fechar a ordem final mais rápido.");
+  const actionsSection = createWorkspaceSpecialSection("Atalhos de montagem", "Use estes controles para fechar a ordem final mais rapido.");
   const actions = document.createElement("div");
   actions.className = "workspace-special-actions";
   actions.append(
     createWorkspaceActionButton({
-      label: "Adicionar PDFs",
-      meta: canAddMore ? "Complete a pilha sem sair daqui" : "Você atingiu o limite desta ferramenta",
-      iconMarkup: getAddIcon(),
-      onClick: () => fileInput.click(),
-      disabled: !canAddMore
-    }),
-    createWorkspaceActionButton({
       label: "Inverter ordem",
-      meta: "Troca o primeiro pelo último",
+      meta: "Troca o primeiro pelo ultimo",
       iconMarkup: getOrderReverseIcon(),
       onClick: reverseStagedFiles,
       disabled: !canReorder
@@ -5027,14 +5474,10 @@ function renderMergeWorkspace(tool) {
   actionsSection.body.append(actions);
   fragment.append(actionsSection.section);
 
-  const orderSection = createWorkspaceSpecialSection("Espelho da ordem final", "A primeira linha abre o PDF unido e a última fecha o documento.");
-  orderSection.body.append(createWorkspaceOrderList(tool, files));
-  fragment.append(orderSection.section);
-
   fragment.append(
     createWorkspaceInfoNote(
-      "Dica rápida",
-      "Se precisar revisar visualmente, arraste os cards centrais. Esta lateral serve como espelho compacto da pilha final."
+      "Dica rapida",
+      "Use os atalhos acima para reorganizar mais rapido e mantenha a revisao visual apenas na grade central."
     )
   );
 
@@ -5043,25 +5486,16 @@ function renderMergeWorkspace(tool) {
 
 function renderSplitWorkspace(tool) {
   const fragment = document.createDocumentFragment();
-  const file = getSelectedFiles()[0] ?? null;
   const splitMode = readOptionFieldValue("splitMode") || "ranges";
 
-  fragment.append(
-    createWorkspaceStats([
-      { value: file ? "1 PDF" : "0", label: "Arquivo de origem" },
-      { value: splitMode === "remove_pages" ? "PDF" : "ZIP", label: "Saída prevista" },
-      { value: file ? formatFileSize(file.size) : "0 KB", label: "Peso atual" }
-    ])
-  );
-
-  const modeSection = createWorkspaceSpecialSection("Escolha o tipo de corte", "Comece pelo modo e o resto da lateral se adapta ao que você selecionou.");
+  const modeSection = createWorkspaceSpecialSection("Escolha o tipo de corte", "Comece pelo modo e o resto da lateral se adapta ao que voce selecionou.");
   const modeField = getToolOptionField(tool, "splitMode");
   if (modeField) {
     modeSection.body.append(createOptionFieldWrapper(tool, modeField));
   }
   fragment.append(modeSection.section);
 
-  const detailsSection = createWorkspaceSpecialSection("Detalhes da divisão", "Mostramos apenas os campos necessários para o modo atual.");
+  const detailsSection = createWorkspaceSpecialSection("Detalhes da divisao", "Mostramos apenas os campos necessarios para o modo atual.");
   appendSpecializedField(detailsSection.body, tool, "ranges");
   appendSpecializedField(detailsSection.body, tool, "fixedRange");
   appendSpecializedField(detailsSection.body, tool, "removePages");
@@ -5069,43 +5503,21 @@ function renderSplitWorkspace(tool) {
   detailsSection.body.append(getSplitModeWorkspaceNote());
   fragment.append(detailsSection.section);
 
-  const sourceSection = createWorkspaceSpecialSection("Arquivo de origem", "Aqui você acompanha o arquivo que será dividido antes de converter.");
-  sourceSection.body.append(createWorkspaceOrderList(tool, file ? [file] : []));
-  fragment.append(sourceSection.section);
-
   return fragment;
 }
 
 function renderImageToPdfWorkspace(tool) {
   const files = getSelectedFiles();
-  const totalBytes = files.reduce((sum, file) => sum + Number(file.size || 0), 0);
   const canReorder = files.length > 1;
-  const canAddMore = files.length < getToolMaximumFiles(tool);
-  const mergeAfter = readBooleanOptionFieldValue("imagePdfMergeAfter", true);
   const fragment = document.createDocumentFragment();
 
-  fragment.append(
-    createWorkspaceStats([
-      { value: `${files.length}`, label: files.length === 1 ? "Imagem pronta" : "Imagens prontas" },
-      { value: formatFileSize(totalBytes || 0), label: "Peso da grade" },
-      { value: mergeAfter ? "PDF único" : "Separado", label: "Saída" }
-    ])
-  );
-
-  const actionsSection = createWorkspaceSpecialSection("Atalhos da montagem", "Organize as páginas do PDF visualmente antes de gerar o arquivo final.");
+  const actionsSection = createWorkspaceSpecialSection("Atalhos da montagem", "Organize as paginas do PDF visualmente antes de gerar o arquivo final.");
   const actions = document.createElement("div");
   actions.className = "workspace-special-actions";
   actions.append(
     createWorkspaceActionButton({
-      label: "Adicionar imagens",
-      meta: canAddMore ? "Complete a grade em poucos toques" : "Você atingiu o limite desta ferramenta",
-      iconMarkup: getAddIcon(),
-      onClick: () => fileInput.click(),
-      disabled: !canAddMore
-    }),
-    createWorkspaceActionButton({
-      label: "Inverter páginas",
-      meta: "Troca capa e sequência",
+      label: "Inverter paginas",
+      meta: "Troca capa e sequencia",
       iconMarkup: getOrderReverseIcon(),
       onClick: reverseStagedFiles,
       disabled: !canReorder
@@ -5121,7 +5533,7 @@ function renderImageToPdfWorkspace(tool) {
   actionsSection.body.append(actions);
   fragment.append(actionsSection.section);
 
-  const layoutSection = createWorkspaceSpecialSection("Layout do documento", "Ajuste como as imagens viram páginas sem sair do fluxo principal.");
+  const layoutSection = createWorkspaceSpecialSection("Layout do documento", "Ajuste como as imagens viram paginas sem sair do fluxo principal.");
   const layoutGrid = document.createElement("div");
   layoutGrid.className = "workspace-special-fields";
   appendSpecializedField(layoutGrid, tool, "imagePdfOrientation");
@@ -5131,14 +5543,10 @@ function renderImageToPdfWorkspace(tool) {
   layoutSection.body.append(layoutGrid);
   fragment.append(layoutSection.section);
 
-  const orderSection = createWorkspaceSpecialSection("Ordem das páginas", "A primeira imagem vira a capa. O restante segue exatamente a sequência abaixo.");
-  orderSection.body.append(createWorkspaceOrderList(tool, files));
-  fragment.append(orderSection.section);
-
   fragment.append(
     createWorkspaceInfoNote(
       "Layout mais seguro",
-      "Use retrato para documentos verticais e paisagem quando suas imagens forem mais largas. A margem pode ser ajustada a qualquer momento."
+      "Use retrato para documentos verticais e paisagem quando suas imagens forem mais largas. Revise a ordem apenas na grade central."
     )
   );
 
@@ -5152,7 +5560,7 @@ function renderSpecializedWorkspace(tool) {
 
   workspaceSpecialStack.innerHTML = "";
 
-  if (!tool || !isSpecializedWorkspaceTool(tool)) {
+  if (!tool || !isSpecializedWorkspaceTool(tool) || stagedFiles.length === 0) {
     workspaceSpecialCard.hidden = true;
     return;
   }
@@ -5160,7 +5568,7 @@ function renderSpecializedWorkspace(tool) {
   const copy = specializedWorkspaceCopy[tool.id];
   workspaceSpecialKicker.textContent = copy?.kicker ?? "Fluxo guiado";
   workspaceSpecialTitle.textContent = copy?.title ?? "Workspace especializado";
-  workspaceSpecialCopy.textContent = copy?.copy ?? "Mostramos aqui os atalhos e ajustes que mais importam para esta operação.";
+  workspaceSpecialCopy.textContent = copy?.copy ?? "Mostramos aqui os atalhos e ajustes que mais importam para esta operacao.";
 
   if (tool.id === "pdf-merge") {
     workspaceSpecialStack.append(renderMergeWorkspace(tool));
@@ -5181,7 +5589,7 @@ function renderSpecializedWorkspace(tool) {
     workspaceSpecialStack.prepend(
       createWorkspaceInfoNote(
         "Disponivel no plano Pro",
-        "Esta lateral continua explicando o fluxo, mas os controles só liberam depois do upgrade.",
+        "Esta lateral continua explicando o fluxo, mas os controles so liberam depois do upgrade.",
         "upgrade"
       )
     );
@@ -5236,27 +5644,27 @@ function selectToolFromSearch(tool) {
   updateSearchClearButton();
   renderTools();
   hideSearchResults();
-  applyActiveTool(tool.id, { moveToUpload: true, resetFiles: true, syncHistory: true, syncSeo: true });
+  navigateToTool(tool);
 }
 
 function renderSearchResults() {
-  const matches = getSearchMatches().slice(0, 8);
+  const matches = getSearchMatches();
   if (!searchQuery || !isSearchResultsOpen) {
     hideSearchResults();
     return;
   }
 
+  searchResults.innerHTML = "";
   searchResults.hidden = false;
 
   if (matches.length === 0) {
     const empty = document.createElement("div");
     empty.className = "search-empty";
-    empty.textContent = "Nenhuma conversão encontrada.";
-    searchResults.replaceChildren(empty);
+    empty.textContent = "Nenhuma conversao encontrada.";
+    searchResults.append(empty);
     return;
   }
 
-  const fragment = document.createDocumentFragment();
   matches.forEach((tool) => {
     const item = document.createElement("button");
     item.type = "button";
@@ -5292,7 +5700,7 @@ function renderSearchResults() {
       ? "Desbloqueie no Pro"
       : isFavorite(tool.id)
         ? "Favorita"
-        : "Conversão pronta";
+        : "Conversao pronta";
 
     if (isPremiumTool(tool)) {
       const planMark = document.createElement("span");
@@ -5311,10 +5719,8 @@ function renderSearchResults() {
 
     item.append(top, title, meta);
     item.addEventListener("click", () => selectToolFromSearch(tool));
-    fragment.append(item);
+    searchResults.append(item);
   });
-
-  searchResults.replaceChildren(fragment);
 }
 
 function applyActiveTool(toolId, options = {}) {
@@ -5333,7 +5739,7 @@ function applyActiveTool(toolId, options = {}) {
   toolSelect.value = toolId;
 
   document.querySelectorAll(".tool-card").forEach((card) => {
-    card.classList.toggle("active", card.dataset.toolId === toolId);
+    card.classList.toggle("active", document.body.dataset.pageMode === "tool" && card.dataset.toolId === toolId);
   });
 
   const tool = tools.find((item) => item.id === toolId);
@@ -5341,8 +5747,12 @@ function applyActiveTool(toolId, options = {}) {
     return;
   }
 
-  activeToolTitle.textContent = tool.label;
-  activeToolDescription.textContent = getToolDescription(tool);
+  if (activeToolTitle) {
+    activeToolTitle.textContent = tool.label;
+  }
+  if (activeToolDescription) {
+    activeToolDescription.textContent = getToolDescription(tool);
+  }
   applyToolTheme(tool);
   updateFavoriteButton(tool.id);
   updateFileInputConfig(tool, { reset: resetFiles });
@@ -5392,9 +5802,18 @@ function applyActiveTool(toolId, options = {}) {
 
 function renderTools() {
   const visibleTools = getVisibleTools();
+  const directoryState = getVisibleDirectoryTools(visibleTools);
+  const toolsToRender = directoryState.tools;
+  const isCollapsedDirectoryRow = Boolean(directoryState.canCollapse && !isToolDirectoryExpanded);
+  toolGrid.innerHTML = "";
   updateToolTabs();
   updateToolbarCopy(visibleTools.length);
   toolEmpty.hidden = visibleTools.length > 0;
+  updateToolDirectoryToggleState(directoryState);
+  toolGrid.classList.toggle("is-collapsed-line", isCollapsedDirectoryRow);
+  toolGrid.classList.toggle("is-expanded-grid", !isCollapsedDirectoryRow);
+  toolGridWrap?.classList.toggle("is-collapsed-line", isCollapsedDirectoryRow);
+  toolGridWrap?.classList.toggle("is-expanded-grid", !isCollapsedDirectoryRow);
 
   if (!activeToolId && visibleTools[0]) {
     activeToolId = visibleTools[0].id;
@@ -5402,17 +5821,16 @@ function renderTools() {
     activeToolId = visibleTools[0].id;
   }
 
-  const fragment = document.createDocumentFragment();
-  visibleTools.forEach((tool) => {
-    const toolFragment = toolTemplate.content.cloneNode(true);
-    const card = toolFragment.querySelector(".tool-card");
-    const fromIcon = toolFragment.querySelector(".tool-icon-from");
-    const toIcon = toolFragment.querySelector(".tool-icon-to");
-    const label = toolFragment.querySelector(".tool-pill-label");
+  toolsToRender.forEach((tool) => {
+    const fragment = toolTemplate.content.cloneNode(true);
+    const card = fragment.querySelector(".tool-card");
+    const fromIcon = fragment.querySelector(".tool-icon-from");
+    const toIcon = fragment.querySelector(".tool-icon-to");
+    const label = fragment.querySelector(".tool-pill-label");
     const formats = getToolFormats(tool);
 
     card.dataset.toolId = tool.id;
-    card.setAttribute("aria-label", `${tool.label}. Abrir envio de arquivo com essa conversão.`);
+    card.setAttribute("aria-label", `${tool.label}. Abrir envio de arquivo com essa conversao.`);
     card.title = tool.fileHint ?? tool.label;
     label.textContent = tool.label;
     card.classList.toggle("favorite", isFavorite(tool.id));
@@ -5420,13 +5838,9 @@ function renderTools() {
     renderFormatBadge(formats.to, toIcon, "tool-icon-to");
     applyToolTheme(tool, card);
 
-    card.addEventListener("click", () =>
-      applyActiveTool(tool.id, { moveToUpload: true, resetFiles: true, syncHistory: true, syncSeo: true })
-    );
-    fragment.append(toolFragment);
+    card.addEventListener("click", () => navigateToTool(tool));
+    toolGrid.append(fragment);
   });
-
-  toolGrid.replaceChildren(fragment);
 
   if (activeToolId) {
     applyActiveTool(activeToolId, { syncSeo: false });
@@ -5444,11 +5858,7 @@ async function loadTools() {
       order: index
     }));
 
-    const routeToolId =
-      String(initialPageData.toolId ?? "").trim() ||
-      (window.location.pathname.startsWith("/ferramenta/")
-        ? decodeURIComponent(window.location.pathname.slice("/ferramenta/".length))
-        : "");
+    const routeToolId = getRouteToolIdFromLocation();
 
     if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
       activeToolId = routeToolId;
@@ -5459,11 +5869,14 @@ async function loadTools() {
     hasLoadedTools = true;
 
     if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
+      const routeTool = tools.find((tool) => tool.id === routeToolId);
       applyActiveTool(routeToolId, { resetFiles: false, syncSeo: true, syncHistory: false });
+      updatePageModeUi(routeTool);
       return;
     }
 
     syncSeoForTool(null);
+    updatePageModeUi(null);
   } finally {
     setToolsLoadingState(false);
   }
@@ -5482,7 +5895,7 @@ function openBillingTarget(button) {
 async function handleBillingOfferClick(button) {
   const offerId = button?.dataset?.offerId ?? "";
   if (!offerId) {
-    setBillingStatus("Escolha um plano válido para continuar.");
+    setBillingStatus("Escolha um plano valido para continuar.");
     return;
   }
 
@@ -5500,7 +5913,7 @@ async function handleBillingOfferClick(button) {
   try {
     const payload = await startCheckout(offerId);
     if (!payload.checkoutUrl) {
-      throw new Error("O checkout não retornou uma URL válida.");
+      throw new Error("O checkout nao retornou uma URL valida.");
     }
 
     if (payload.provider === "mercadopago") {
@@ -5515,7 +5928,7 @@ async function handleBillingOfferClick(button) {
       }
     });
   } catch (error) {
-    setBillingStatus(error instanceof Error ? error.message : "Não foi possível abrir o checkout.");
+    setBillingStatus(error instanceof Error ? error.message : "Nao foi possivel abrir o checkout.");
   } finally {
     button.textContent = previousLabel;
     updateAccessUi();
@@ -5536,8 +5949,8 @@ async function resumeCheckoutIfNeeded() {
   if (path === "/checkout/failure" && !paymentId) {
     clearPendingCheckout();
     showBillingModal({ tool: getToolById() });
-    setBillingStatus("O pagamento foi interrompido. Você pode tentar novamente quando quiser.");
-    setStatus("Pagamento não concluído.");
+    setBillingStatus("O pagamento foi interrompido. Voce pode tentar novamente quando quiser.");
+    setStatus("Pagamento nao concluido.");
     window.history.replaceState({}, "", "/");
     return;
   }
@@ -5550,8 +5963,8 @@ async function resumeCheckoutIfNeeded() {
     if (payload.status === "approved") {
       clearPendingCheckout();
       hideBillingModal();
-      setBillingStatus("Pagamento aprovado. Seu acesso premium já foi liberado.");
-      setStatus("Pagamento aprovado. Seu plano já está ativo.");
+      setBillingStatus("Pagamento aprovado. Seu acesso premium ja foi liberado.");
+      setStatus("Pagamento aprovado. Seu plano ja esta ativo.");
       const activeTool = getToolById();
       if (activeTool) {
         applyActiveTool(activeTool.id, { resetFiles: false });
@@ -5564,8 +5977,8 @@ async function resumeCheckoutIfNeeded() {
 
     if (payload.status === "pending") {
       showBillingModal({ tool: getToolById() });
-      setBillingStatus(payload.message ?? "Pagamento em análise. Assim que aprovar, o acesso será liberado aqui.");
-      setStatus("Pagamento aguardando confirmação.");
+      setBillingStatus(payload.message ?? "Pagamento em analise. Assim que aprovar, o acesso sera liberado aqui.");
+      setStatus("Pagamento aguardando confirmacao.");
       if (isCheckoutPath && path !== "/checkout/pending") {
         window.history.replaceState({}, "", "/checkout/pending");
       }
@@ -5573,7 +5986,7 @@ async function resumeCheckoutIfNeeded() {
   } catch (error) {
     clearPendingCheckout();
     showBillingModal({ tool: getToolById() });
-    const message = error instanceof Error ? error.message : "Não foi possível validar o pagamento.";
+    const message = error instanceof Error ? error.message : "Nao foi possivel validar o pagamento.";
     setBillingStatus(message);
     setStatus(message);
     if (isCheckoutPath) {
@@ -5582,10 +5995,7 @@ async function resumeCheckoutIfNeeded() {
   }
 }
 
-themeToggle.addEventListener("click", () => {
-  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  applyTheme(nextTheme);
-});
+themeToggle?.addEventListener("click", toggleThemePreference);
 
 reducedMotionQuery.addEventListener("change", () => {
   startSearchPlaceholderAnimation();
@@ -5599,21 +6009,22 @@ window.addEventListener("popstate", () => {
     return;
   }
 
-  const routeToolId = window.location.pathname.startsWith("/ferramenta/")
-    ? decodeURIComponent(window.location.pathname.slice("/ferramenta/".length))
-    : "";
+  const routeToolId = getRouteToolIdFromLocation();
 
   if (routeToolId && tools.some((tool) => tool.id === routeToolId)) {
+    const routeTool = tools.find((tool) => tool.id === routeToolId);
     applyActiveTool(routeToolId, {
       moveToUpload: false,
       resetFiles: false,
       syncHistory: false,
       syncSeo: true
     });
+    updatePageModeUi(routeTool);
     return;
   }
 
   syncSeoForTool(null);
+  updatePageModeUi(null);
 });
 
 window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
@@ -5623,10 +6034,6 @@ backToTopButton?.addEventListener("click", () => {
     top: 0,
     behavior: getPreferredScrollBehavior()
   });
-});
-
-openBillingButton?.addEventListener("click", () => {
-  showBillingModal({ tool: getToolById() });
 });
 
 accountLauncher?.addEventListener("click", () => {
@@ -5643,7 +6050,33 @@ openRedeemButton?.addEventListener("click", () => {
 });
 
 unlockToolButton?.addEventListener("click", () => {
-  showBillingModal({ tool: getToolById() });
+  promptAccountPlanAccess(getToolById());
+});
+
+convertButton?.addEventListener("click", () => {
+  showConversionModal(getToolById());
+});
+
+conversionModalCloseButton?.addEventListener("click", hideConversionModal);
+conversionModalCancelButton?.addEventListener("click", hideConversionModal);
+conversionModal?.addEventListener("click", (event) => {
+  if (event.target?.dataset?.closeConversion === "true") {
+    hideConversionModal();
+  }
+});
+conversionConfirmButton?.addEventListener("click", async () => {
+  await performConversion();
+});
+
+toolHelpButton?.addEventListener("click", () => {
+  showToolHelpModal(getToolById());
+});
+
+toolHelpCloseButton?.addEventListener("click", hideToolHelpModal);
+toolHelpModal?.addEventListener("click", (event) => {
+  if (event.target?.dataset?.closeToolHelp === "true") {
+    hideToolHelpModal();
+  }
 });
 
 accessLogoutButton?.addEventListener("click", async () => {
@@ -5694,6 +6127,8 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    hideConversionModal();
+    hideToolHelpModal();
     hideAccountModal();
     hideBillingModal();
     hideAccountMenu();
@@ -5709,6 +6144,7 @@ accountSwitchToRegisterButton?.addEventListener("click", () => showAccountModal(
 accountShortcutProfileButton?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
 accountShortcutSettingsButton?.addEventListener("click", () => showAccountModal({ focus: "settings" }));
 accountShortcutAdminButton?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
+accountPopoverCloseButton?.addEventListener("click", hideAccountMenu);
 accountMenuOverview?.addEventListener("click", () => {
   hideAccountMenu();
   showAccountModal({ focus: "close" });
@@ -5721,9 +6157,9 @@ accountPopoverPlanButton?.addEventListener("click", () => {
   hideAccountMenu();
   showBillingModal({ tool: getToolById() });
 });
-accountMenuSettings?.addEventListener("click", () => {
+accountMenuTheme?.addEventListener("click", () => {
   hideAccountMenu();
-  showAccountModal({ focus: "settings" });
+  toggleThemePreference();
 });
 accountMenuAdmin?.addEventListener("click", () => {
   hideAccountMenu();
@@ -5735,7 +6171,7 @@ accountMenuLogout?.addEventListener("click", async () => {
     await logoutAccount();
     setStatus("Conta encerrada neste navegador.");
   } catch (error) {
-    setStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
+    setStatus(error instanceof Error ? error.message : "Nao foi possivel sair da conta.");
   }
 });
 accountUpgradeButton?.addEventListener("click", () => {
@@ -5748,7 +6184,7 @@ accountLogoutButton?.addEventListener("click", async () => {
     hideAccountModal();
     setStatus("Conta encerrada neste navegador.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel sair da conta.");
   }
 });
 
@@ -5761,7 +6197,7 @@ accountRegisterForm?.addEventListener("submit", async (event) => {
     password: String(formData.get("password") ?? "")
   };
 
-  setAccountStatus("Enviando o código para confirmar sua conta...");
+  setAccountStatus("Enviando o codigo para confirmar sua conta...");
 
   try {
     const payload = await registerAccount(input);
@@ -5769,11 +6205,11 @@ accountRegisterForm?.addEventListener("submit", async (event) => {
       successMessage: "Conta confirmada com sucesso.",
       nextFocus: "overview"
     });
-    setAccountStatus(`Código enviado para ${payload.verification.destination}.`);
-    setStatus("Confira seu e-mail e confirme o código.");
+    setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
+    setStatus("Confira seu e-mail e confirme o codigo.");
     showAccountModal({ focus: "verify" });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível criar sua conta.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel criar sua conta.");
   }
 });
 
@@ -5794,7 +6230,7 @@ accountLoginForm?.addEventListener("submit", async (event) => {
     setStatus("Conta conectada com sucesso.");
     showAccountModal({ focus: "overview" });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível entrar na conta.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel entrar na conta.");
   }
 });
 
@@ -5810,7 +6246,7 @@ accountProfileForm?.addEventListener("submit", async (event) => {
   const nextEmail = input.email.toLowerCase();
   const changingEmail = Boolean(nextEmail && nextEmail !== currentEmail);
 
-  setAccountStatus(changingEmail ? "Enviando código para confirmar o novo e-mail..." : "Salvando seus dados...");
+  setAccountStatus(changingEmail ? "Enviando codigo para confirmar o novo e-mail..." : "Salvando seus dados...");
 
   try {
     if (changingEmail) {
@@ -5819,8 +6255,8 @@ accountProfileForm?.addEventListener("submit", async (event) => {
         successMessage: "Novo e-mail confirmado com sucesso.",
         nextFocus: "profile"
       });
-      setAccountStatus(`Código enviado para ${payload.verification.destination}.`);
-      setStatus("Confira seu e-mail e confirme o código.");
+      setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
+      setStatus("Confira seu e-mail e confirme o codigo.");
       showAccountModal({ focus: "verify" });
       return;
     }
@@ -5828,10 +6264,10 @@ accountProfileForm?.addEventListener("submit", async (event) => {
     await updateAccountProfile({
       displayName: input.displayName
     });
-    setAccountStatus("Dados atualizados com segurança.");
+    setAccountStatus("Dados atualizados com seguranca.");
     setStatus("Dados da conta atualizados.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível salvar seus dados.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel salvar seus dados.");
   }
 });
 
@@ -5843,7 +6279,7 @@ accountPasswordForm?.addEventListener("submit", async (event) => {
     newPassword: String(formData.get("newPassword") ?? "")
   };
 
-  setAccountStatus("Enviando código para confirmar sua nova senha...");
+  setAccountStatus("Enviando codigo para confirmar sua nova senha...");
 
   try {
     const payload = await updateAccountPassword(input);
@@ -5852,24 +6288,24 @@ accountPasswordForm?.addEventListener("submit", async (event) => {
       successMessage: "Senha atualizada com sucesso.",
       nextFocus: "profile"
     });
-    setAccountStatus(`Código enviado para ${payload.verification.destination}.`);
-    setStatus("Confira seu e-mail e confirme o código.");
+    setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
+    setStatus("Confira seu e-mail e confirme o codigo.");
     showAccountModal({ focus: "verify" });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar a senha.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar a senha.");
   }
 });
 
 accountVerificationForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!pendingAccountVerification?.verification?.id) {
-    setAccountStatus("Solicite um novo código para continuar.");
+    setAccountStatus("Solicite um novo codigo para continuar.");
     return;
   }
 
   const formData = new FormData(accountVerificationForm);
   const code = String(formData.get("code") ?? "").trim();
-  setAccountStatus("Conferindo o código...");
+  setAccountStatus("Conferindo o codigo...");
 
   try {
     if (pendingAccountVerification.purpose === "register") {
@@ -5898,25 +6334,25 @@ accountVerificationForm?.addEventListener("submit", async (event) => {
     setStatus(successMessage);
     showAccountModal({ focus: nextFocus });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível confirmar o código.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel confirmar o codigo.");
   }
 });
 
 accountVerificationResendButton?.addEventListener("click", async () => {
   if (!pendingAccountVerification?.verification?.id) {
-    setAccountStatus("Não há nenhum código pendente para reenviar.");
+    setAccountStatus("Nao ha nenhum codigo pendente para reenviar.");
     return;
   }
 
-  setAccountStatus("Reenviando código...");
+  setAccountStatus("Reenviando codigo...");
   try {
     const payload = await resendAccountVerification({
       verificationId: pendingAccountVerification.verification.id
     });
     setPendingVerification(payload.verification, pendingAccountVerification);
-    setAccountStatus(`Novo código enviado para ${payload.verification.destination}.`);
+    setAccountStatus(`Novo codigo enviado para ${payload.verification.destination}.`);
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível reenviar o código.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel reenviar o codigo.");
   }
 });
 
@@ -5952,7 +6388,7 @@ accountAvatarInput?.addEventListener("change", async () => {
     setAccountStatus("Foto de perfil atualizada com sucesso.");
     setStatus("Foto de perfil atualizada.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar a foto.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar a foto.");
   } finally {
     accountAvatarInput.value = "";
   }
@@ -5967,13 +6403,8 @@ accountAvatarRemoveButton?.addEventListener("click", async () => {
     setAccountStatus("Foto de perfil removida.");
     setStatus("Foto de perfil removida.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Não foi possível remover a foto.");
+    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel remover a foto.");
   }
-});
-
-accountThemeButton?.addEventListener("click", () => {
-  themeToggle?.click();
-  renderAccountUi();
 });
 
 adminRefreshUsersButton?.addEventListener("click", () => {
@@ -5998,68 +6429,68 @@ adminUserSearchInput?.addEventListener("input", () => {
 adminUserProfileForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuário para editar.");
+    setAdminStatus("Selecione um usuario para editar.");
     return;
   }
 
-  setAdminStatus("Salvando dados do usuário...");
+  setAdminStatus("Salvando dados do usuario...");
   try {
     await updateAdminUserProfile(adminState.selectedUserId, {
       displayName: String(adminUserDisplayNameInput?.value ?? "").trim(),
       email: String(adminUserEmailInput?.value ?? "").trim()
     });
-    setAdminStatus("Dados do usuário atualizados.");
+    setAdminStatus("Dados do usuario atualizados.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível salvar os dados do usuário.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel salvar os dados do usuario.");
   }
 });
 
 adminUserPlanForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuário para atualizar o plano.");
+    setAdminStatus("Selecione um usuario para atualizar o plano.");
     return;
   }
 
-  setAdminStatus("Atualizando plano do usuário...");
+  setAdminStatus("Atualizando plano do usuario...");
   try {
     await updateAdminUserPlan(adminState.selectedUserId, {
       plan: String(adminUserPlanInput?.value ?? "free"),
       accessDays: Number(adminUserPlanDaysInput?.value ?? 30)
     });
-    setAdminStatus("Plano do usuário atualizado.");
+    setAdminStatus("Plano do usuario atualizado.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar o plano.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar o plano.");
   }
 });
 
 adminUserCreditsForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuário para atualizar os créditos.");
+    setAdminStatus("Selecione um usuario para atualizar os creditos.");
     return;
   }
 
-  setAdminStatus("Atualizando créditos do usuário...");
+  setAdminStatus("Atualizando creditos do usuario...");
   try {
     await updateAdminUserCredits(adminState.selectedUserId, {
       mode: String(adminUserCreditsModeInput?.value ?? "add"),
       amount: Number(adminUserCreditsAmountInput?.value ?? 0)
     });
-    setAdminStatus("Créditos atualizados.");
+    setAdminStatus("Creditos atualizados.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar os créditos.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar os creditos.");
   }
 });
 
 adminUserDiscountForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuário para atualizar o desconto.");
+    setAdminStatus("Selecione um usuario para atualizar o desconto.");
     return;
   }
 
-  setAdminStatus("Atualizando desconto do usuário...");
+  setAdminStatus("Atualizando desconto do usuario...");
   try {
     await updateAdminUserDiscount(adminState.selectedUserId, {
       percent: Number(adminUserDiscountPercentInput?.value ?? 0),
@@ -6067,17 +6498,17 @@ adminUserDiscountForm?.addEventListener("submit", async (event) => {
     });
     setAdminStatus("Desconto atualizado.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar o desconto.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar o desconto.");
   }
 });
 
 adminUserDeleteButton?.addEventListener("click", async () => {
   if (!adminState.selectedUserId || !adminState.selectedUser) {
-    setAdminStatus("Selecione um usuário para remover.");
+    setAdminStatus("Selecione um usuario para remover.");
     return;
   }
 
-  if (!window.confirm(`Remover a conta ${adminState.selectedUser.email}? Essa ação apaga dados, plano e pagamentos vinculados.`)) {
+  if (!window.confirm(`Remover a conta ${adminState.selectedUser.email}? Essa acao apaga dados, plano e pagamentos vinculados.`)) {
     return;
   }
 
@@ -6086,14 +6517,14 @@ adminUserDeleteButton?.addEventListener("click", async () => {
     await deleteAdminUser(adminState.selectedUserId);
     setAdminStatus("Conta removida com sucesso.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível remover a conta.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel remover a conta.");
   }
 });
 
 adminPromoForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(adminPromoForm);
-  setAdminStatus("Criando código promocional...");
+  setAdminStatus("Criando codigo promocional...");
 
   try {
     const promo = await createAdminPromo({
@@ -6118,9 +6549,9 @@ adminPromoForm?.addEventListener("submit", async (event) => {
     if (document.getElementById("admin-promo-per-user")) {
       document.getElementById("admin-promo-per-user").value = "1";
     }
-    setAdminStatus(`Código ${promo?.code ?? "promocional"} criado com sucesso.`);
+    setAdminStatus(`Codigo ${promo?.code ?? "promocional"} criado com sucesso.`);
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Não foi possível criar o código.");
+    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel criar o codigo.");
   }
 });
 
@@ -6128,18 +6559,18 @@ redeemForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const code = String(redeemCodeInput?.value ?? "").trim();
   if (!code) {
-    setBillingStatus("Cole um código válido para ativar seu acesso.");
+    setBillingStatus("Cole um codigo valido para ativar seu acesso.");
     redeemCodeInput?.focus();
     return;
   }
 
   redeemSubmitButton.disabled = true;
-  setBillingStatus("Ativando seu código...");
+  setBillingStatus("Ativando seu codigo...");
 
   try {
     await redeemAccessCode(code);
     redeemCodeInput.value = "";
-    setBillingStatus("Código ativado com sucesso. Seu plano já foi atualizado.");
+    setBillingStatus("Codigo ativado com sucesso. Seu plano ja foi atualizado.");
     setStatus("Plano Pro ativado neste navegador.");
     const activeTool = getToolById();
     if (activeTool) {
@@ -6149,13 +6580,13 @@ redeemForm?.addEventListener("submit", async (event) => {
       hideBillingModal();
     }, 900);
   } catch (error) {
-    setBillingStatus(error instanceof Error ? error.message : "Não foi possível ativar o código.");
+    setBillingStatus(error instanceof Error ? error.message : "Nao foi possivel ativar o codigo.");
   } finally {
     redeemSubmitButton.disabled = false;
   }
 });
 
-favoriteToggle.addEventListener("click", () => {
+favoriteToggle?.addEventListener("click", () => {
   if (!activeToolId) {
     return;
   }
@@ -6175,6 +6606,7 @@ favoriteToggle.addEventListener("click", () => {
 toolTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     activeFilter = tab.dataset.filter ?? "all";
+    isToolDirectoryExpanded = false;
     renderTools();
     renderSearchResults();
   });
@@ -6183,6 +6615,9 @@ toolTabs.forEach((tab) => {
 searchInput.addEventListener("input", (event) => {
   searchQuery = event.currentTarget.value.trim();
   isSearchResultsOpen = searchQuery.length > 0;
+  if (searchQuery.length > 0) {
+    isToolDirectoryExpanded = false;
+  }
   updateSearchClearButton();
   renderTools();
   renderSearchResults();
@@ -6224,10 +6659,16 @@ searchClear.addEventListener("click", () => {
   searchInput.value = "";
   searchQuery = "";
   isSearchResultsOpen = false;
+  isToolDirectoryExpanded = false;
   updateSearchClearButton();
   renderTools();
   hideSearchResults();
   searchInput.focus();
+});
+
+toolDirectoryToggle?.addEventListener("click", () => {
+  isToolDirectoryExpanded = !isToolDirectoryExpanded;
+  renderTools();
 });
 
 dropzone.addEventListener("dragover", (event) => {
@@ -6263,46 +6704,7 @@ fileInput.addEventListener("change", () => {
   addStagedFiles(fileInput.files, { append: Boolean(getToolById()?.allowsMultipleFiles) });
 });
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const toolId = toolSelect.value;
-  const tool = getToolById(toolId);
-  const files = getSelectedFiles();
-
-  if (!toolId || !tool) {
-    setStatus("Selecione uma conversão antes de continuar.");
-    return;
-  }
-
-  if (isToolLocked(tool)) {
-    showBillingModal({ tool });
-    setStatus(`${tool.label} faz parte do plano Pro.`);
-    return;
-  }
-
-  if (files.length === 0) {
-    setStatus("Selecione uma ferramenta e um arquivo para continuar.");
-    return;
-  }
-
-  const minFiles = tool.minFiles ?? 1;
-  const maxFiles = tool.maxFiles ?? (tool.allowsMultipleFiles ? 10 : 1);
-
-  if (files.length < minFiles) {
-    setStatus(
-      minFiles === 1
-        ? "Envie um arquivo para continuar."
-        : `Envie pelo menos ${minFiles} arquivos para usar ${tool.label.toLowerCase()}.`
-    );
-    return;
-  }
-
-  if (files.length > maxFiles) {
-    setStatus(`Essa conversão aceita no máximo ${maxFiles} arquivos por vez.`);
-    return;
-  }
-
+function buildConversionFormData(toolId, files) {
   const formData = new FormData();
   formData.set("toolId", toolId);
 
@@ -6330,9 +6732,30 @@ form.addEventListener("submit", async (event) => {
     }
   });
 
+  return formData;
+}
+
+async function performConversion() {
+  let request;
+  try {
+    request = validateConversionRequest();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Nao foi possivel iniciar a conversao.";
+    setConversionModalStatus(message);
+    setStatus(message);
+    return;
+  }
+
+  const { toolId, tool, files } = request;
+  hideConversionModal();
+  const formData = buildConversionFormData(toolId, files);
   setStatus("Enviando seu arquivo...");
-  setProgress(4, "Preparando conversão...");
+  setProgress(4, "Preparando conversao...");
+  showUploadProgress();
   setWorkspaceLoadingState(true, "Convertendo");
+  if (conversionConfirmButton) {
+    conversionConfirmButton.disabled = true;
+  }
 
   try {
     const response = await new Promise((resolve, reject) => {
@@ -6352,7 +6775,7 @@ form.addEventListener("submit", async (event) => {
       });
 
       xhr.upload.addEventListener("load", () => {
-        startProcessingAnimation(72);
+        hideUploadProgress();
       });
 
       xhr.addEventListener("load", () => {
@@ -6362,11 +6785,13 @@ form.addEventListener("submit", async (event) => {
 
       xhr.addEventListener("error", () => {
         stopProgressAnimation();
-        reject(new Error("Falha de rede durante a conversão."));
+        hideUploadProgress();
+        reject(new Error("Falha de rede durante a conversao."));
       });
 
       xhr.addEventListener("abort", () => {
         stopProgressAnimation();
+        hideUploadProgress();
         reject(new Error("Conversao cancelada."));
       });
 
@@ -6381,7 +6806,7 @@ form.addEventListener("submit", async (event) => {
           return { message: "Falha inesperada." };
         }
       });
-      setProgress(0, "Falha na conversão");
+      setProgress(0, "Falha na conversao");
       throw new Error(payload.message ?? "Falha inesperada.");
     }
 
@@ -6395,7 +6820,6 @@ form.addEventListener("submit", async (event) => {
     anchor.href = url;
     anchor.download = filename;
     document.body.append(anchor);
-    setProgress(100, "Tudo pronto");
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
@@ -6413,17 +6837,30 @@ form.addEventListener("submit", async (event) => {
     setStatus("Conversao concluida. Download iniciado.");
   } catch (error) {
     stopProgressAnimation();
-    const message = error instanceof Error ? error.message : "Não foi possível concluir a conversão.";
+    hideUploadProgress();
+    const message = error instanceof Error ? error.message : "Nao foi possivel concluir a conversao.";
     if (/plano pro|premium|limite gratuito/iu.test(message)) {
-      showBillingModal({ tool });
+      promptAccountPlanAccess(tool);
     }
+    setConversionModalStatus(message);
     setStatus(message);
   } finally {
+    hideUploadProgress();
+    if (conversionConfirmButton) {
+      conversionConfirmButton.disabled = false;
+    }
     setWorkspaceLoadingState(false);
   }
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  showConversionModal(getToolById());
 });
 
 initializeTheme();
+syncDialogPresentationMode();
+hideUploadProgress();
 setProgress(0, "Aguardando arquivo");
 updateSearchClearButton();
 startSearchPlaceholderAnimation();
@@ -6433,7 +6870,7 @@ Promise.allSettled([loadTools(), refreshAccessSession()]).then((results) => {
   const [toolsResult, accessResult] = results;
 
   if (toolsResult.status === "rejected") {
-    setStatus("Não foi possível carregar o catálogo de ferramentas.");
+    setStatus("Nao foi possivel carregar o catalogo de ferramentas.");
     return;
   }
 

@@ -220,26 +220,6 @@ export async function createApp(options: AppOptions = {}) {
     }
   });
 
-  app.addHook("onSend", async (request, reply, payload) => {
-    reply.header("Referrer-Policy", "strict-origin-when-cross-origin");
-    reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), browsing-topics=()");
-
-    if (request.url.startsWith("/api/")) {
-      reply.header("X-Content-Type-Options", "nosniff");
-    }
-
-    if (
-      request.url === "/api/access/session" ||
-      request.url.startsWith("/api/account") ||
-      request.url.startsWith("/api/admin") ||
-      request.url.startsWith("/api/billing")
-    ) {
-      reply.header("Cache-Control", "no-store");
-    }
-
-    return payload;
-  });
-
   app.get("/health", async (request, reply) => {
     const integrationHealth =
       typeof (conversionService as { getHealthSnapshot?: () => Promise<unknown> }).getHealthSnapshot === "function"
@@ -309,7 +289,7 @@ export async function createApp(options: AppOptions = {}) {
 
   app.setNotFoundHandler(async (request, reply) => {
     if (request.url.startsWith("/api/")) {
-      return reply.code(404).send({ message: "Recurso não encontrado." });
+      return reply.code(404).send({ message: "Recurso nao encontrado." });
     }
 
     return reply.sendFile("index.html");
@@ -326,7 +306,7 @@ export async function createApp(options: AppOptions = {}) {
 
     if (error instanceof ZodError) {
       return reply.code(400).send({
-        message: "Dados inválidos.",
+        message: "Dados invalidos.",
         issues: error.flatten()
       });
     }
@@ -350,7 +330,7 @@ export async function createApp(options: AppOptions = {}) {
       const message =
         typeof (error as { message?: unknown }).message === "string"
           ? (error as { message: string }).message
-          : "Requisição inválida.";
+          : "Requisicao invalida.";
       if (statusCode >= 400 && statusCode < 500) {
         return reply.code(statusCode).send({
           message
