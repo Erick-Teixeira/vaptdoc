@@ -362,7 +362,21 @@ const passiveToastPatterns = [
   /^Conta carregada com sucesso\.?$/i,
   /^Dados atualizados com seguranÃ§a\.?$/i,
   /^Foto de perfil atualizada com sucesso\.?$/i,
-  /^Foto de perfil removida\.?$/i
+  /^Foto de perfil removida\.?$/i,
+  /^Confira seu e-mail e confirme o c[oÃ³]digo\.?$/i,
+  /^Conta conectada com sucesso\.?$/i,
+  /^Dados da conta atualizados\.?$/i,
+  /^Foto de perfil atualizada\.?$/i,
+  /^Foto de perfil removida\.?$/i,
+  /^Conta encerrada neste navegador\.?$/i,
+  /^Acesso premium encerrado neste navegador\.?$/i,
+  /^Pagamento n[Ãa]o conclu[ií]do\.?$/i,
+  /^Pagamento aguardando confirma[Ãc][Ãa]o\.?$/i,
+  /^Selecione um usu[aá]rio\b/i,
+  /^Cole um c[oó]digo v[aá]lido\b/i,
+  /^Solicite um novo c[oó]digo\b/i,
+  /^N[Ãa]o h[aá] nenhum c[oó]digo pendente\b/i,
+  /^Adicione um link de pagamento ou suporte\b/i
 ];
 const sensitiveToastPatterns = [
   /\b(password|senha|token|secret|secreto|credential|credencial|credenciais)\b/i,
@@ -6318,7 +6332,7 @@ toolHelpModal?.addEventListener("click", (event) => {
 
 accessLogoutButton?.addEventListener("click", async () => {
   await logoutAccess();
-  setStatus("Acesso premium encerrado neste navegador.");
+  setStatus("Acesso premium encerrado neste navegador.", { toast: false });
 });
 
 billingCloseButton?.addEventListener("click", hideBillingModal);
@@ -6407,7 +6421,7 @@ accountMenuLogout?.addEventListener("click", async () => {
   hideAccountMenu();
   try {
     await logoutAccount();
-    setStatus("Conta encerrada neste navegador.");
+    setStatus("Conta encerrada neste navegador.", { toast: false });
   } catch (error) {
     setStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
   }
@@ -6423,7 +6437,7 @@ accountLogoutButton?.addEventListener("click", async () => {
     await logoutAccount();
     setAccountStatus("Sua conta foi encerrada neste navegador.");
     hideAccountModal();
-    setStatus("Conta encerrada neste navegador.");
+    setStatus("Conta encerrada neste navegador.", { toast: false });
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
   }
@@ -6468,7 +6482,7 @@ accountLoginForm?.addEventListener("submit", async (event) => {
     await loginAccount(input);
     accountLoginForm.reset();
     setAccountStatus("Conta carregada com sucesso.", { toast: false });
-    setStatus("Conta conectada com sucesso.");
+    setStatus("Conta conectada com sucesso.", { toast: false });
     showAccountModal({ focus: "overview" });
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível entrar na conta.");
@@ -6506,7 +6520,7 @@ accountProfileForm?.addEventListener("submit", async (event) => {
       displayName: input.displayName
     });
     setAccountStatus("Dados atualizados com segurança.", { toast: false });
-    setStatus("Dados da conta atualizados.");
+    setStatus("Dados da conta atualizados.", { toast: false });
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível salvar seus dados.");
   }
@@ -6627,7 +6641,7 @@ accountAvatarInput?.addEventListener("change", async () => {
     await updateAccountAvatar(file);
     toggleAvatarActionReveal(true);
     setAccountStatus("Foto de perfil atualizada com sucesso.", { toast: false });
-    setStatus("Foto de perfil atualizada.");
+    setStatus("Foto de perfil atualizada.", { toast: false });
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar a foto.");
   } finally {
@@ -6642,7 +6656,7 @@ accountAvatarRemoveButton?.addEventListener("click", async () => {
     await removeAccountAvatar();
     toggleAvatarActionReveal(false);
     setAccountStatus("Foto de perfil removida.", { toast: false });
-    setStatus("Foto de perfil removida.");
+    setStatus("Foto de perfil removida.", { toast: false });
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível remover a foto.");
   }
