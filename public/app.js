@@ -1536,6 +1536,7 @@ function clearPendingCheckout() {
 function setBillingStatus(message, options = {}) {
   if (billingStatus) {
     billingStatus.textContent = message;
+    billingStatus.hidden = !String(message ?? "").trim();
   }
   announceToast(message, options);
 }
@@ -2033,11 +2034,7 @@ function showBillingModal(options = {}) {
   billingModal.hidden = false;
   updateBodyScrollLock();
 
-  if (tool && isPremiumTool(tool)) {
-    setBillingStatus(`${tool.label} faz parte do Pro. Escolha um plano ou ative um código para liberar essa conversão.`);
-  } else {
-    setBillingStatus("Escolha um plano ou ative um código para liberar suas conversões premium.");
-  }
+  setBillingStatus("", { toast: false });
 
   window.setTimeout(() => {
     if (focusCode) {
