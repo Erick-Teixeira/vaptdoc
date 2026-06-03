@@ -2013,6 +2013,7 @@ function showBillingModal(options = {}) {
   }
 
   hideAccountMenu();
+  hideAccountPaneModals();
   hideConversionModal();
   hideToolHelpModal();
   billingModal.hidden = false;
