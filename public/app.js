@@ -78,11 +78,11 @@ const accountPopoverPlanCopy = document.getElementById("account-popover-plan-cop
 const accountPopoverProgressFill = document.getElementById("account-popover-progress-fill");
 const accountPopoverProgressLabel = document.getElementById("account-popover-progress-label");
 const accountPopoverProgressMeta = document.getElementById("account-popover-progress-meta");
-const accountPopoverPlanButton = document.getElementById("account-popover-plan-button");
 const accountPopoverCloseButton = document.getElementById("account-popover-close");
 const accountMenuOverview = document.getElementById("account-menu-overview");
 const accountMenuOverviewLabel = document.getElementById("account-menu-overview-label");
 const accountMenuProfile = document.getElementById("account-menu-profile");
+const accountMenuSubscription = document.getElementById("account-menu-subscription");
 const accountMenuTheme = document.getElementById("account-menu-theme");
 const accountMenuThemeLabel = document.getElementById("account-menu-theme-label");
 const accountMenuAdmin = document.getElementById("account-menu-admin");
@@ -342,6 +342,24 @@ const statusSilencePatterns = [
   /^Digite o código enviado\b/i,
   /^Sua conta está protegida\b/i,
   /^Sua conta do dono está protegida\b/i
+];
+const passiveToastPatterns = [
+  /^Painel administrativo atualizado\.?$/i,
+  /^Carregando os detalhes do usuÃ¡rio\.?$/i,
+  /^UsuÃ¡rio carregado com sucesso\.?$/i,
+  /^Carregando Painel Administrativo\.?$/i,
+  /^Conta carregada com sucesso\.?$/i,
+  /^Dados atualizados com seguranÃ§a\.?$/i,
+  /^Foto de perfil atualizada com sucesso\.?$/i,
+  /^Foto de perfil removida\.?$/i
+];
+const sensitiveToastPatterns = [
+  /\b(password|senha|token|secret|secreto|credential|credencial|credenciais)\b/i,
+  /\b(api[-_\s]?key|access[-_\s]?token|refresh[-_\s]?token|client[-_\s]?(id|secret))\b/i,
+  /\b(authorization|bearer|cookie|session|sess[aÃ£]o|smtp|dkim|dmarc)\b/i,
+  /\b(brevo|mercadopago|railway|admin_owner_emails)\b/i,
+  /\b(referenceerror|syntaxerror|typeerror|exception|stack|trace|zoderror)\b/i,
+  /\b(sqlite|sql|prisma|node:|econn|etimedout|eai_again|fetch failed|failed to fetch)\b/i
 ];
 const quietStatusMessages = new Set([
   "Pronto para converter.",
@@ -1049,15 +1067,15 @@ function renderToolHelp(tool) {
   });
 }
 
-function setStatus(message) {
+function setStatus(message, options = {}) {
   if (!statusText) {
-    announceToast(message);
+    announceToast(message, options);
     return;
   }
 
   statusText.textContent = message;
   statusText.hidden = !message || quietStatusMessages.has(message);
-  announceToast(message);
+  announceToast(message, options);
 }
 
 function setProgress(value, label) {
@@ -1490,11 +1508,11 @@ function clearPendingCheckout() {
   }
 }
 
-function setBillingStatus(message) {
+function setBillingStatus(message, options = {}) {
   if (billingStatus) {
     billingStatus.textContent = message;
   }
-  announceToast(message);
+  announceToast(message, options);
 }
 
 function setAccountStatus(message, options = {}) {
@@ -1520,12 +1538,31 @@ function getToastTone(message, explicitTone) {
   return "info";
 }
 
+function sanitizeToastMessage(message, options = {}) {
+  const safeMessage = String(options.toastMessage ?? message ?? "").trim();
+  if (!safeMessage) {
+    return "";
+  }
+
+  if (!sensitiveToastPatterns.some((pattern) => pattern.test(safeMessage))) {
+    return safeMessage;
+  }
+
+  return getToastTone(safeMessage, options.tone) === "error"
+    ? "NÃ£o foi possÃ­vel concluir esta aÃ§Ã£o. Revise os dados e tente novamente."
+    : null;
+}
+
 function shouldShowToast(message, options = {}) {
   if (options.toast === false || !message) {
     return false;
   }
 
   if (quietStatusMessages.has(message)) {
+    return false;
+  }
+
+  if (passiveToastPatterns.some((pattern) => pattern.test(message))) {
     return false;
   }
 
@@ -1560,14 +1597,15 @@ function removeToast(toast, immediate = false) {
 }
 
 function announceToast(message, options = {}) {
-  if (!shouldShowToast(message, options)) {
+  const safeMessage = sanitizeToastMessage(message, options);
+  if (!shouldShowToast(safeMessage, options)) {
     return;
   }
 
   if (toastLiveRegion) {
     toastLiveRegion.textContent = "";
     window.setTimeout(() => {
-      toastLiveRegion.textContent = message;
+      toastLiveRegion.textContent = safeMessage;
     }, 10);
   }
 
@@ -1575,7 +1613,7 @@ function announceToast(message, options = {}) {
     return;
   }
 
-  const existingToast = Array.from(toastViewport.children).find((node) => node.dataset?.toastMessage === message);
+  const existingToast = Array.from(toastViewport.children).find((node) => node.dataset?.toastMessage === safeMessage);
   if (existingToast) {
     clearToastTimer(existingToast.dataset.toastId);
     existingToast.classList.remove("is-leaving");
@@ -1586,12 +1624,12 @@ function announceToast(message, options = {}) {
     return;
   }
 
-  const tone = getToastTone(message, options.tone);
+  const tone = getToastTone(safeMessage, options.tone);
   const toastId = `toast-${Date.now()}-${++toastSequence}`;
   const toast = document.createElement("article");
   toast.className = `toast toast-${tone}`;
   toast.dataset.toastId = toastId;
-  toast.dataset.toastMessage = message;
+  toast.dataset.toastMessage = safeMessage;
   toast.setAttribute("role", tone === "error" ? "alert" : "status");
 
   const copy = document.createElement("div");
@@ -1601,7 +1639,7 @@ function announceToast(message, options = {}) {
   heading.textContent = tone === "error" ? "Atenção" : tone === "success" ? "Concluído" : "Aviso";
 
   const text = document.createElement("p");
-  text.textContent = message;
+  text.textContent = safeMessage;
   copy.append(heading, text);
 
   const closeButton = document.createElement("button");
@@ -2271,10 +2309,7 @@ function renderAccountUi() {
   if (accountPopoverProgressMeta) {
     accountPopoverProgressMeta.textContent = usageProgress.meta;
   }
-  if (accountPopoverPlanButton) {
-    accountPopoverPlanButton.textContent = accessSession?.premium ? "Gerenciar" : "Pro";
-  }
-  for (const menuButton of [accountMenuProfile, accountMenuTheme, accountMenuLogout]) {
+  for (const menuButton of [accountMenuProfile, accountMenuSubscription, accountMenuTheme, accountMenuLogout]) {
     if (menuButton) {
       menuButton.hidden = !authenticated;
     }
@@ -2728,11 +2763,11 @@ async function logoutAccount() {
   return payload;
 }
 
-function setAdminStatus(message) {
+function setAdminStatus(message, options = {}) {
   if (adminStatus) {
     adminStatus.textContent = message;
   }
-  announceToast(message);
+  announceToast(message, options);
 }
 
 function renderAdminPaneState() {
@@ -3132,12 +3167,12 @@ async function fetchAdminPromos() {
 async function selectAdminUser(userId) {
   adminState.selectedUserId = userId;
   renderAdminUserList();
-  setAdminStatus("Carregando os detalhes do usuário...");
+  setAdminStatus("Carregando os detalhes do usuário...", { toast: false });
 
   try {
     adminState.selectedUser = await fetchAdminUserDetail(userId);
     renderAdminUi();
-    setAdminStatus("Usuário carregado com sucesso.");
+    setAdminStatus("Usuário carregado com sucesso.", { toast: false });
   } catch (error) {
     adminState.selectedUser = null;
     renderAdminUi();
@@ -3150,7 +3185,7 @@ async function loadAdminPanel() {
     return;
   }
 
-  setAdminStatus("Carregando Painel Administrativo...");
+  setAdminStatus("Carregando Painel Administrativo...", { toast: false });
   try {
     const [dashboard, users, promos] = await Promise.all([
       fetchAdminDashboard(),
@@ -3167,7 +3202,7 @@ async function loadAdminPanel() {
     adminState.selectedUserId = selectedUserId;
     adminState.selectedUser = selectedUserId ? await fetchAdminUserDetail(selectedUserId) : null;
     renderAdminUi();
-    setAdminStatus("Painel administrativo atualizado.");
+    setAdminStatus("Painel administrativo atualizado.", { toast: false });
   } catch (error) {
     setAdminStatus(error instanceof Error ? error.message : "Não foi possível carregar o painel administrativo.");
   }
@@ -6070,7 +6105,7 @@ async function handleBillingOfferClick(button) {
   billingMonthlyButton.disabled = true;
   billingYearlyButton.disabled = true;
   billingStarterButton.disabled = true;
-  setBillingStatus("Preparando checkout seguro...");
+  setBillingStatus("Preparando checkout seguro...", { toast: false });
 
   try {
     const payload = await startCheckout(offerId);
@@ -6111,13 +6146,13 @@ async function resumeCheckoutIfNeeded() {
   if (path === "/checkout/failure" && !paymentId) {
     clearPendingCheckout();
     showBillingModal({ tool: getToolById() });
-    setBillingStatus("O pagamento foi interrompido. Você pode tentar novamente quando quiser.");
+    setBillingStatus("O pagamento foi interrompido. Você pode tentar novamente quando quiser.", { toast: false });
     setStatus("Pagamento não concluído.");
     window.history.replaceState({}, "", "/");
     return;
   }
 
-  setBillingStatus("Confirmando pagamento...");
+  setBillingStatus("Confirmando pagamento...", { toast: false });
 
   try {
     const payload = await confirmCheckoutReturn(paymentId);
@@ -6125,7 +6160,7 @@ async function resumeCheckoutIfNeeded() {
     if (payload.status === "approved") {
       clearPendingCheckout();
       hideBillingModal();
-      setBillingStatus("Pagamento aprovado. Seu acesso premium já foi liberado.");
+      setBillingStatus("Pagamento aprovado. Seu acesso premium já foi liberado.", { toast: false });
       setStatus("Pagamento aprovado. Seu plano já está ativo.");
       const activeTool = getToolById();
       if (activeTool) {
@@ -6139,7 +6174,7 @@ async function resumeCheckoutIfNeeded() {
 
     if (payload.status === "pending") {
       showBillingModal({ tool: getToolById() });
-      setBillingStatus(payload.message ?? "Pagamento em analise. Assim que aprovar, o acesso sera liberado aqui.");
+      setBillingStatus(payload.message ?? "Pagamento em analise. Assim que aprovar, o acesso sera liberado aqui.", { toast: false });
       setStatus("Pagamento aguardando confirmação.");
       if (isCheckoutPath && path !== "/checkout/pending") {
         window.history.replaceState({}, "", "/checkout/pending");
@@ -6149,7 +6184,7 @@ async function resumeCheckoutIfNeeded() {
     clearPendingCheckout();
     showBillingModal({ tool: getToolById() });
     const message = error instanceof Error ? error.message : "Não foi possível validar o pagamento.";
-    setBillingStatus(message);
+    setBillingStatus(message, { toast: false });
     setStatus(message);
     if (isCheckoutPath) {
       window.history.replaceState({}, "", "/");
@@ -6315,7 +6350,7 @@ accountMenuProfile?.addEventListener("click", () => {
   hideAccountMenu();
   showAccountModal({ focus: "profile" });
 });
-accountPopoverPlanButton?.addEventListener("click", () => {
+accountMenuSubscription?.addEventListener("click", () => {
   hideAccountMenu();
   showBillingModal({ tool: getToolById() });
 });
@@ -6359,7 +6394,7 @@ accountRegisterForm?.addEventListener("submit", async (event) => {
     password: String(formData.get("password") ?? "")
   };
 
-  setAccountStatus("Enviando o código para confirmar sua conta...");
+  setAccountStatus("Enviando o código para confirmar sua conta...", { toast: false });
 
   try {
     const payload = await registerAccount(input);
@@ -6367,7 +6402,7 @@ accountRegisterForm?.addEventListener("submit", async (event) => {
       successMessage: "Conta confirmada com sucesso.",
       nextFocus: "overview"
     });
-    setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
+    setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`, { toast: false });
     setStatus("Confira seu e-mail e confirme o código.");
     showAccountModal({ focus: "verify" });
   } catch (error) {
@@ -6383,12 +6418,12 @@ accountLoginForm?.addEventListener("submit", async (event) => {
     password: String(formData.get("password") ?? "")
   };
 
-  setAccountStatus("Entrando na sua conta...");
+  setAccountStatus("Entrando na sua conta...", { toast: false });
 
   try {
     await loginAccount(input);
     accountLoginForm.reset();
-    setAccountStatus("Conta carregada com sucesso.");
+    setAccountStatus("Conta carregada com sucesso.", { toast: false });
     setStatus("Conta conectada com sucesso.");
     showAccountModal({ focus: "overview" });
   } catch (error) {
@@ -6408,7 +6443,7 @@ accountProfileForm?.addEventListener("submit", async (event) => {
   const nextEmail = input.email.toLowerCase();
   const changingEmail = Boolean(nextEmail && nextEmail !== currentEmail);
 
-  setAccountStatus(changingEmail ? "Enviando código para confirmar o novo e-mail..." : "Salvando seus dados...");
+  setAccountStatus(changingEmail ? "Enviando código para confirmar o novo e-mail..." : "Salvando seus dados...", { toast: false });
 
   try {
     if (changingEmail) {
@@ -6417,7 +6452,7 @@ accountProfileForm?.addEventListener("submit", async (event) => {
         successMessage: "Novo e-mail confirmado com sucesso.",
         nextFocus: "profile"
       });
-      setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
+      setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`, { toast: false });
       setStatus("Confira seu e-mail e confirme o código.");
       showAccountModal({ focus: "verify" });
       return;
@@ -6426,7 +6461,7 @@ accountProfileForm?.addEventListener("submit", async (event) => {
     await updateAccountProfile({
       displayName: input.displayName
     });
-    setAccountStatus("Dados atualizados com segurança.");
+    setAccountStatus("Dados atualizados com segurança.", { toast: false });
     setStatus("Dados da conta atualizados.");
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível salvar seus dados.");
@@ -6441,7 +6476,7 @@ accountPasswordForm?.addEventListener("submit", async (event) => {
     newPassword: String(formData.get("newPassword") ?? "")
   };
 
-  setAccountStatus("Enviando código para confirmar sua nova senha...");
+  setAccountStatus("Enviando código para confirmar sua nova senha...", { toast: false });
 
   try {
     const payload = await updateAccountPassword(input);
@@ -6450,7 +6485,7 @@ accountPasswordForm?.addEventListener("submit", async (event) => {
       successMessage: "Senha atualizada com sucesso.",
       nextFocus: "profile"
     });
-    setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
+    setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`, { toast: false });
     setStatus("Confira seu e-mail e confirme o código.");
     showAccountModal({ focus: "verify" });
   } catch (error) {
@@ -6492,7 +6527,7 @@ accountVerificationForm?.addEventListener("submit", async (event) => {
     const nextFocus = pendingAccountVerification.nextFocus ?? "overview";
     accountVerificationForm.reset();
     clearPendingVerification();
-    setAccountStatus(successMessage);
+    setAccountStatus(successMessage, { toast: false });
     setStatus(successMessage);
     showAccountModal({ focus: nextFocus });
   } catch (error) {
@@ -6506,7 +6541,7 @@ accountVerificationResendButton?.addEventListener("click", async () => {
     return;
   }
 
-  setAccountStatus("Reenviando código...");
+  setAccountStatus("Reenviando código...", { toast: false });
   try {
     const payload = await resendAccountVerification({
       verificationId: pendingAccountVerification.verification.id
@@ -6542,12 +6577,12 @@ accountAvatarInput?.addEventListener("change", async () => {
     return;
   }
 
-  setAccountStatus("Atualizando sua foto de perfil...");
+  setAccountStatus("Atualizando sua foto de perfil...", { toast: false });
 
   try {
     await updateAccountAvatar(file);
     toggleAvatarActionReveal(true);
-    setAccountStatus("Foto de perfil atualizada com sucesso.");
+    setAccountStatus("Foto de perfil atualizada com sucesso.", { toast: false });
     setStatus("Foto de perfil atualizada.");
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar a foto.");
@@ -6557,12 +6592,12 @@ accountAvatarInput?.addEventListener("change", async () => {
 });
 
 accountAvatarRemoveButton?.addEventListener("click", async () => {
-  setAccountStatus("Removendo sua foto de perfil...");
+  setAccountStatus("Removendo sua foto de perfil...", { toast: false });
 
   try {
     await removeAccountAvatar();
     toggleAvatarActionReveal(false);
-    setAccountStatus("Foto de perfil removida.");
+    setAccountStatus("Foto de perfil removida.", { toast: false });
     setStatus("Foto de perfil removida.");
   } catch (error) {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível remover a foto.");
