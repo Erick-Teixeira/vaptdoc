@@ -1990,6 +1990,13 @@ html[data-theme="dark"] .theme-toggle-icon-sun {
   backdrop-filter: blur(20px);
 }
 
+.tool-grid-wrap,
+.site-footer,
+.doc-panel {
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
+}
+
 .hero-panel {
   display: grid;
   justify-items: center;
@@ -5575,5 +5582,44 @@ html[data-theme="dark"] .choice-chip {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 960px), (hover: none) and (pointer: coarse) {
+  .hero-panel,
+  .tool-grid-wrap,
+  .convert-panel,
+  .quick-benefit,
+  .comfort-card,
+  .account-popover,
+  .billing-dialog,
+  .doc-panel,
+  .workspace-loading,
+  .progress-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .button,
+  .ghost-action,
+  .mini-action,
+  .tool-card,
+  .choice-card,
+  .choice-chip,
+  .account-popover-action,
+  .account-shortcut-card,
+  .file-stage-item,
+  .dropzone,
+  .billing-dialog {
+    transition: none !important;
+  }
+
+  .tool-skeleton-card,
+  .tool-icon-skeleton,
+  .workspace-loading-badge,
+  .workspace-loading-block,
+  .workspace-loading-block-wide,
+  .workspace-loading-block-tall {
+    animation: none !important;
   }
 }

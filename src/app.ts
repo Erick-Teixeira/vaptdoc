@@ -283,13 +283,25 @@ export async function createApp(options: AppOptions = {}) {
     usageTracker
   });
 
+  app.addHook("onSend", async (request, reply) => {
+    if (!reply.hasHeader("Referrer-Policy")) {
+      reply.header("Referrer-Policy", "strict-origin-when-cross-origin");
+    }
+    if (!reply.hasHeader("Permissions-Policy")) {
+      reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), browsing-topics=()");
+    }
+    if (request.url.startsWith("/api/") && !reply.hasHeader("Cache-Control")) {
+      reply.header("Cache-Control", "no-store");
+    }
+  });
+
   app.addHook("onClose", async () => {
     accountService.close();
   });
 
   app.setNotFoundHandler(async (request, reply) => {
     if (request.url.startsWith("/api/")) {
-      return reply.code(404).send({ message: "Recurso nao encontrado." });
+      return reply.code(404).send({ message: "Recurso não encontrado." });
     }
 
     return reply.sendFile("index.html");
@@ -306,7 +318,7 @@ export async function createApp(options: AppOptions = {}) {
 
     if (error instanceof ZodError) {
       return reply.code(400).send({
-        message: "Dados invalidos.",
+        message: "Dados inválidos.",
         issues: error.flatten()
       });
     }
@@ -330,7 +342,7 @@ export async function createApp(options: AppOptions = {}) {
       const message =
         typeof (error as { message?: unknown }).message === "string"
           ? (error as { message: string }).message
-          : "Requisicao invalida.";
+          : "Requisição inválida.";
       if (statusCode >= 400 && statusCode < 500) {
         return reply.code(statusCode).send({
           message

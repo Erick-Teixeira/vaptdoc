@@ -61,31 +61,31 @@ function buildHeadline(purpose: EmailVerificationPurpose) {
 
 function buildCopy(purpose: EmailVerificationPurpose) {
   if (purpose === "register") {
-    return "Use este codigo para terminar a criacao da sua conta com seguranca.";
+    return "Use este código para terminar a criação da sua conta com segurança.";
   }
 
   if (purpose === "email-change") {
-    return "Use este codigo para confirmar a alteracao do e-mail da sua conta.";
+    return "Use este código para confirmar a alteração do e-mail da sua conta.";
   }
 
-  return "Use este codigo para confirmar a troca da senha da sua conta.";
+  return "Use este código para confirmar a troca da senha da sua conta.";
 }
 
 function buildTextMessage(payload: VerificationEmailPayload) {
   return [
     buildHeadline(payload.purpose),
     "",
-    `Codigo: ${payload.code}`,
+    `Código: ${payload.code}`,
     `Validade: ${payload.expiresInMinutes} minutos`,
     "",
     buildCopy(payload.purpose),
     "",
-    "Se voce nao solicitou essa acao, ignore este e-mail."
+    "Se você não solicitou esta ação, ignore este e-mail."
   ].join("\n");
 }
 
 function buildHtmlMessage(payload: VerificationEmailPayload) {
-  const safeName = payload.displayName ? `<p style="margin:0 0 16px;">Ola, ${escapeHtml(payload.displayName)}.</p>` : "";
+  const safeName = payload.displayName ? `<p style="margin:0 0 16px;">Olá, ${escapeHtml(payload.displayName)}.</p>` : "";
 
   return `
     <div style="font-family:Plus Jakarta Sans,Arial,sans-serif;background:#f4f3ff;padding:24px;color:#141f26;">
@@ -95,11 +95,11 @@ function buildHtmlMessage(payload: VerificationEmailPayload) {
         ${safeName}
         <p style="margin:0 0 18px;line-height:1.6;color:#4d5b66;">${escapeHtml(buildCopy(payload.purpose))}</p>
         <div style="margin:0 0 18px;padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,#18bcff 0%,#7d38ff 100%);color:#ffffff;text-align:center;">
-          <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.88;margin-bottom:8px;">Codigo de verificacao</div>
+          <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.88;margin-bottom:8px;">Código de verificação</div>
           <div style="font-size:34px;line-height:1;font-weight:800;letter-spacing:.18em;">${escapeHtml(payload.code)}</div>
         </div>
         <p style="margin:0 0 8px;line-height:1.5;color:#4d5b66;">Validade: <strong>${payload.expiresInMinutes} minutos</strong></p>
-        <p style="margin:0;line-height:1.5;color:#72808a;">Se voce nao solicitou essa acao, ignore este e-mail.</p>
+        <p style="margin:0;line-height:1.5;color:#72808a;">Se você não solicitou esta ação, ignore este e-mail.</p>
       </div>
     </div>
   `;
@@ -124,7 +124,7 @@ class DisabledEmailService implements EmailService {
   }
 
   async sendVerificationCode() {
-    throw new Error("O envio de e-mail ainda nao foi configurado neste ambiente.");
+    throw new Error("O envio de e-mail ainda não foi configurado neste ambiente.");
   }
 }
 
@@ -251,7 +251,7 @@ export function createEmailService(config: EmailServiceConfig = {}): EmailServic
   }
 
   if (!smtpHost || !fromEmail) {
-    config.logger?.warn?.("[vaptdoc] Servico de e-mail nao configurado. Verificacao por codigo ficara indisponivel.");
+    config.logger?.warn?.("[vaptdoc] Serviço de e-mail não configurado. Verificação por código ficará indisponível.");
     return new DisabledEmailService();
   }
 

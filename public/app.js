@@ -118,6 +118,7 @@ const billingMonthlyPrice = document.getElementById("billing-monthly-price");
 const billingMonthlyMeta = document.getElementById("billing-monthly-meta");
 const billingYearlyPrice = document.getElementById("billing-yearly-price");
 const billingYearlyMeta = document.getElementById("billing-yearly-meta");
+const inertableSurfaces = Array.from(document.querySelectorAll(".shell, .site-footer"));
 const billingStarterPrice = document.getElementById("billing-starter-price");
 const billingStarterMeta = document.getElementById("billing-starter-meta");
 const redeemForm = document.getElementById("redeem-form");
@@ -477,23 +478,23 @@ const toolSupportCopy = {
   "jpeg-to-png": "Transforme sua imagem JPEG em PNG em poucos toques.",
   "png-to-jpg": "Transforme sua imagem PNG em JPG com rapidez.",
   "png-to-jpeg": "Transforme sua imagem PNG em JPEG com rapidez.",
-  "mp4-to-mp3": "Envie seu video e receba somente o audio em MP3.",
+  "mp4-to-mp3": "Envie seu vídeo e receba somente o áudio em MP3.",
   "pdf-to-text": "Extraia o texto do PDF para ler, copiar ou editar.",
-  "3d-convert": "Envie um modelo 3D e escolha o formato de saida para converter com o motor Aspose 3D."
+  "3d-convert": "Envie um modelo 3D e escolha o formato de saída para converter com o motor Aspose 3D."
 };
 
 const toolHelpContent = {
   "3d-convert": {
     title: "Ajuda do conversor 3D",
-    copy: "Cada formato 3D prioriza uma necessidade diferente. Esta lateral evita que voce precise adivinhar a melhor saida.",
+    copy: "Cada formato 3D prioriza uma necessidade diferente. Este guia evita que você precise adivinhar a melhor saída.",
     items: [
       {
         title: "Escolha pela finalidade",
-        copy: "STL e OBJ sao mais comuns para impressao e modelagem leve. GLB e GLTF funcionam melhor para visualizacao em apps e web."
+        copy: "STL e OBJ são mais comuns para impressão e modelagem leve. GLB e GLTF funcionam melhor para visualização em apps e web."
       },
       {
-        title: "Revise a orientacao",
-        copy: "Se o modelo vier de CAD ou escaneamento, confira a previa e mantenha o formato mais estavel para nao perder detalhes."
+        title: "Revise a orientação",
+        copy: "Se o modelo vier de CAD ou escaneamento, confira a prévia e mantenha o formato mais estável para não perder detalhes."
       },
       {
         title: "Arquivos maiores demoram mais",
@@ -502,16 +503,16 @@ const toolHelpContent = {
     ]
   },
   "pdf-extract": {
-    title: "Ajuda da extracao avancada",
-    copy: "Use a extracao simples quando quiser texto corrido e a avancada quando precisar organizar blocos ou planilhas depois.",
+    title: "Ajuda da extração avançada",
+    copy: "Use a extração simples quando quiser texto corrido e a avançada quando precisar organizar blocos ou planilhas depois.",
     items: [
       {
         title: "CSV detalhado",
-        copy: "Ative quando precisar reusar o conteudo em planilhas, pipelines ou revisao por colunas."
+        copy: "Ative quando precisar reutilizar o conteúdo em planilhas, pipelines ou revisão por colunas."
       },
       {
         title: "Separar por palavra",
-        copy: "Ideal para analise fina, mas gera saidas maiores e mais detalhadas."
+        copy: "Ideal para análise fina, mas gera saídas maiores e mais detalhadas."
       },
       {
         title: "PDF escaneado",
@@ -520,11 +521,11 @@ const toolHelpContent = {
     ]
   },
   "pdf-validate-pdfa": {
-    title: "Ajuda da validacao PDF/A",
-    copy: "Esta ferramenta nao converte o arquivo. Ela confirma se o PDF ja segue o nivel de arquivamento que voce espera.",
+    title: "Ajuda da validação PDF/A",
+    copy: "Esta ferramenta não converte o arquivo. Ela confirma se o PDF já segue o nível de arquivamento que você espera.",
     items: [
       {
-        title: "Relatorio em vez de conversao",
+        title: "Relatório em vez de conversão",
         copy: "O resultado mostra a conformidade atual para ajudar na checagem antes de enviar documentos."
       },
       {
@@ -537,9 +538,9 @@ const toolHelpContent = {
 
 const defaultSeoModel = {
   siteName: "vaptdoc",
-  title: "vaptdoc | Converta arquivos sem complicacao",
+    title: "vaptdoc | Converta arquivos sem complicação",
   description:
-    "Converta PDF, DOCX, imagens, audio, video e modelos 3D com rapidez, seguranca e uma experiencia limpa em qualquer dispositivo.",
+    "Converta PDF, DOCX, imagens, áudio, vídeo e modelos 3D com rapidez, segurança e uma experiência limpa em qualquer dispositivo.",
   imagePath: "/assets/vaptdoc-logo-transparent.png"
 };
 
@@ -599,8 +600,8 @@ const specializedWorkspaceTools = new Set(["pdf-merge", "pdf-split", "image-to-p
 
 const workspaceBlueprints = {
   default: {
-    canvasTitle: "Monte sua mesa de conversao",
-    canvasCopy: "Envie, arraste, revise e troque arquivos sem sair desta area.",
+    canvasTitle: "Monte sua mesa de conversão",
+    canvasCopy: "Envie, arraste, revise e troque arquivos sem sair desta área.",
     submitTitle: "Converter e baixar",
     submitCopy: "Acompanhe o progresso e baixe o arquivo assim que ele estiver pronto."
   },
@@ -608,17 +609,17 @@ const workspaceBlueprints = {
     canvasTitle: "Monte a ordem final do PDF",
     canvasCopy: "Cada card representa um PDF na pilha final. Reordene, remova e complete a grade antes de unir.",
     submitTitle: "Unir e baixar",
-    submitCopy: "Quando a ordem estiver certa, junte tudo em um unico PDF pronto para download."
+    submitCopy: "Quando a ordem estiver certa, junte tudo em um único PDF pronto para download."
   },
   "pdf-split": {
     canvasTitle: "Escolha o PDF que sera dividido",
     canvasCopy: "Use a lateral para decidir o modo de corte e deixe o arquivo de origem aqui no centro para revisar.",
     submitTitle: "Dividir e baixar",
-    submitCopy: "O resultado sai como ZIP ou PDF unico, conforme o tipo de divisao escolhido."
+    submitCopy: "O resultado sai como ZIP ou PDF único, conforme o tipo de divisão escolhido."
   },
   "image-to-pdf": {
-    canvasTitle: "Organize as paginas do novo PDF",
-    canvasCopy: "Cada imagem vira uma pagina. Ajuste a ordem, complete a grade e refine o layout na lateral.",
+    canvasTitle: "Organize as páginas do novo PDF",
+    canvasCopy: "Cada imagem vira uma página. Ajuste a ordem, complete a grade e refine o layout na lateral.",
     submitTitle: "Gerar PDF e baixar",
     submitCopy: "Feche a montagem do documento e baixe o PDF com o layout escolhido."
   }
@@ -626,19 +627,19 @@ const workspaceBlueprints = {
 
 const specializedWorkspaceCopy = {
   "pdf-merge": {
-    kicker: "Mesa de uniao",
+    kicker: "Mesa de união",
     title: "Ordem final dos PDFs",
-    copy: "Atalhos rapidos para organizar a pilha, revisar o peso total e fechar a uniao com menos cliques."
+    copy: "Atalhos rápidos para organizar a pilha, revisar o peso total e fechar a união com menos cliques."
   },
   "pdf-split": {
     kicker: "Corte guiado",
-    title: "Defina como o PDF sera dividido",
-    copy: "Escolha o tipo de divisao aqui na lateral e receba so os campos necessarios para esse modo."
+    title: "Defina como o PDF será dividido",
+    copy: "Escolha o tipo de divisão aqui na lateral e receba só os campos necessários para esse modo."
   },
   "image-to-pdf": {
     kicker: "Montagem visual",
-    title: "Transforme imagens em paginas",
-    copy: "Controle ordem, orientacao, tamanho e margem do PDF sem ficar preso a um formulario tecnico."
+    title: "Transforme imagens em páginas",
+    copy: "Controle ordem, orientação, tamanho e margem do PDF sem ficar preso a um formulário técnico."
   }
 };
 
@@ -646,35 +647,35 @@ const optionPresentation = {
   target3dFormat: {
     variant: "cards",
     choices: {
-      stl: { label: "STL", hint: "Impressao 3D e slicers" },
+      stl: { label: "STL", hint: "Impressão 3D e slicers" },
       obj: { label: "OBJ", hint: "Modelagem e textura" },
-      fbx: { label: "FBX", hint: "Animacao e cena" },
-      glb: { label: "GLB", hint: "Visualizacao rapida" },
+      fbx: { label: "FBX", hint: "Animação e cena" },
+      glb: { label: "GLB", hint: "Visualização rápida" },
       gltf: { label: "GLTF", hint: "Web e apps 3D" },
       dae: { label: "DAE", hint: "Collada" },
       ply: { label: "PLY", hint: "Malha e scan" },
-      amf: { label: "AMF", hint: "Impressao 3D" },
+      amf: { label: "AMF", hint: "Impressão 3D" },
       "3ds": { label: "3DS", hint: "Formato legado" },
       u3d: { label: "U3D", hint: "PDF 3D" },
       drc: { label: "DRC", hint: "Draco compactado" },
       rvm: { label: "RVM", hint: "Plantas industriais" },
-      pdf: { label: "PDF 3D", hint: "Visualizacao em PDF" }
+      pdf: { label: "PDF 3D", hint: "Visualização em PDF" }
     }
   },
   splitMode: {
     variant: "cards",
     choices: {
-      ranges: { label: "Separar trechos", hint: "Voce escolhe os intervalos" },
-      fixed_range: { label: "Dividir em partes", hint: "Mesmo numero de paginas" },
-      remove_pages: { label: "Remover paginas", hint: "Retira paginas e devolve 1 PDF" }
+      ranges: { label: "Separar trechos", hint: "Você escolhe os intervalos" },
+      fixed_range: { label: "Dividir em partes", hint: "Mesmo número de páginas" },
+      remove_pages: { label: "Remover páginas", hint: "Retira páginas e devolve 1 PDF" }
     }
   },
   compressionLevel: {
     variant: "cards",
     choices: {
-      low: { label: "Mais qualidade", hint: "Menos compressao" },
+      low: { label: "Mais qualidade", hint: "Menos compressão" },
       recommended: { label: "Equilibrado", hint: "Qualidade e tamanho" },
-      extreme: { label: "Arquivo menor", hint: "Maxima compressao" }
+      extreme: { label: "Arquivo menor", hint: "Máxima compressão" }
     }
   },
   rotateAngle: {
@@ -802,7 +803,7 @@ function updatePageModeUi(tool) {
   }
 
   if (routeKicker) {
-    routeKicker.textContent = isToolPage ? "Ferramenta exclusiva" : "Conversor online rapido e leve";
+    routeKicker.textContent = isToolPage ? "Ferramenta exclusiva" : "Conversor online rápido e leve";
   }
 
   if (routeTitle) {
@@ -811,7 +812,7 @@ function updatePageModeUi(tool) {
 
   if (routeCopy) {
     routeCopy.textContent = tool
-      ? `${getToolDescription(tool)} Envie o arquivo para liberar so os ajustes necessarios desta conversao.`
+      ? `${getToolDescription(tool)} Envie o arquivo para liberar só os ajustes necessários desta conversão.`
       : "Escolha uma ferramenta, envie seu arquivo e baixe o resultado sem um painel carregado.";
   }
 
@@ -890,13 +891,13 @@ function syncSeoForTool(tool) {
           : `Envie um arquivo no formato ${tool.inputKinds.map((kind) => String(kind).toUpperCase()).join(", ")}.`,
         Array.isArray(tool.optionFields) && tool.optionFields.length > 0
           ? "Revise os ajustes visiveis no painel lateral antes de converter."
-          : "Revise a previa e siga direto para a conversao.",
+          : "Revise a prévia e siga direto para a conversão.",
         `Baixe o resultado em ${String(tool.outputExtension ?? "").toUpperCase()}.`
       ]
     : [
-        "Escolha a conversao ideal na grade principal.",
-        "Envie seu arquivo e organize a ordem quando necessario.",
-        "Revise os ajustes visiveis e inicie a conversao.",
+        "Escolha a conversão ideal na grade principal.",
+        "Envie seu arquivo e organize a ordem quando necessário.",
+        "Revise os ajustes visíveis e inicie a conversão.",
         "Baixe o resultado assim que o processamento terminar."
       ];
 
@@ -1201,12 +1202,12 @@ function getAccessUsageLabel(session) {
   }
 
   if (session.plan === "team") {
-    return "Uso liberado para equipe e operacao continua.";
+    return "Uso liberado para equipe e operação contínua.";
   }
 
   if (session.plan === "pro") {
     if (session.remainingToday === null) {
-      return "Tudo liberado hoje para conversoes premium.";
+      return "Tudo liberado hoje para conversões premium.";
     }
 
     return `${session.remainingToday} convers${session.remainingToday === 1 ? "ao" : "oes"} restantes hoje no Pro.`;
@@ -1217,10 +1218,10 @@ function getAccessUsageLabel(session) {
   }
 
   if (session.remainingToday <= 0) {
-    return "Suas conversoes gratis acabaram hoje. Faca upgrade para continuar.";
+    return "Suas conversões grátis acabaram hoje. Faça upgrade para continuar.";
   }
 
-  return `${session.remainingToday} de ${session.dailyLimit} convers${session.dailyLimit === 1 ? "ao gratis" : "oes gratis"} restantes hoje.`;
+  return `${session.remainingToday} de ${session.dailyLimit} convers${session.dailyLimit === 1 ? "ão grátis" : "ões grátis"} restantes hoje.`;
 }
 
 function getSupportUrl() {
@@ -1479,7 +1480,7 @@ function setAccountStatus(message) {
 
 function buildVerificationUiState(verification, context = {}) {
   const purpose = verification?.purpose ?? "register";
-  const submitLabel = purpose === "password-change" ? "Atualizar senha" : "Confirmar codigo";
+  const submitLabel = purpose === "password-change" ? "Atualizar senha" : "Confirmar código";
   const successMessage =
     context.successMessage ??
     (purpose === "register"
@@ -1498,7 +1499,7 @@ function buildVerificationUiState(verification, context = {}) {
       nextFocus: context.nextFocus ?? "profile",
       kicker: "Novo e-mail",
       title: "Confirme seu novo e-mail",
-      copy: "Enviamos um codigo numerico para o novo endereco informado. Digite os 6 digitos para concluir a troca."
+      copy: "Enviamos um código numérico para o novo endereço informado. Digite os 6 dígitos para concluir a troca."
     };
   }
 
@@ -1512,7 +1513,7 @@ function buildVerificationUiState(verification, context = {}) {
       nextFocus: context.nextFocus ?? "profile",
       kicker: "Troca de senha",
       title: "Confirme sua nova senha",
-      copy: "Enviamos um codigo numerico para o e-mail da sua conta. Digite os 6 digitos para concluir a troca."
+      copy: "Enviamos um código numérico para o e-mail da sua conta. Digite os 6 dígitos para concluir a troca."
     };
   }
 
@@ -1525,7 +1526,7 @@ function buildVerificationUiState(verification, context = {}) {
     nextFocus: context.nextFocus ?? "overview",
     kicker: "Criar conta",
     title: "Confirme sua conta",
-    copy: "Enviamos um codigo numerico para o e-mail informado. Digite os 6 digitos para liberar sua conta com seguranca."
+    copy: "Enviamos um código numérico para o e-mail informado. Digite os 6 dígitos para liberar sua conta com segurança."
   };
 }
 
@@ -1567,6 +1568,15 @@ function hideAccountMenu() {
   syncAccountMenu(false);
 }
 
+function syncBackgroundInteractivity(isBlocked) {
+  inertableSurfaces.forEach((surface) => {
+    if (!surface || !("inert" in surface)) {
+      return;
+    }
+    surface.inert = Boolean(isBlocked);
+  });
+}
+
 function updateBodyScrollLock() {
   const hasOpenModal =
     (conversionModal && !conversionModal.hidden) ||
@@ -1576,6 +1586,7 @@ function updateBodyScrollLock() {
     (accountPopover && !accountPopover.hidden && shouldUseFullscreenAccountMenu());
 
   document.body.style.overflow = hasOpenModal ? "hidden" : "";
+  syncBackgroundInteractivity(hasOpenModal);
 }
 
 function restoreConversionModalCards() {
@@ -1631,7 +1642,7 @@ function renderConversionModalCards(tool) {
     emptyState.className = "conversion-modal-empty";
     emptyState.innerHTML = `
       <strong>Sem ajustes extras</strong>
-      <p>Essa conversao ja esta pronta. Clique em converter para iniciar o envio real do arquivo.</p>
+      <p>Essa conversão já está pronta. Clique em converter para iniciar o envio real do arquivo.</p>
     `;
     conversionModalBody.append(emptyState);
     return;
@@ -1651,8 +1662,8 @@ function syncConversionModalSummary(tool, files) {
 
   if (conversionModalCopy) {
     conversionModalCopy.textContent = tool
-      ? "Ajuste apenas o necessario, confirme as opcoes desta ferramenta e conclua a conversao real."
-      : "Revise os ajustes necessarios antes de converter.";
+      ? "Ajuste apenas o necessário, confirme as opções desta ferramenta e conclua a conversão real."
+      : "Revise os ajustes necessários antes de converter.";
   }
 
   if (conversionSummaryFiles) {
@@ -1686,7 +1697,7 @@ function validateConversionRequest() {
   const files = getSelectedFiles();
 
   if (!toolId || !tool) {
-    throw new Error("Selecione uma conversao antes de continuar.");
+    throw new Error("Selecione uma conversão antes de continuar.");
   }
 
   if (isToolLocked(tool)) {
@@ -1710,7 +1721,7 @@ function validateConversionRequest() {
   }
 
   if (files.length > maxFiles) {
-    throw new Error(`Essa conversao aceita no maximo ${maxFiles} arquivos por vez.`);
+    throw new Error(`Essa conversão aceita no máximo ${maxFiles} arquivos por vez.`);
   }
 
   return { toolId, tool, files };
@@ -1725,7 +1736,7 @@ function showConversionModal(tool = getToolById()) {
   try {
     request = validateConversionRequest();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Nao foi possivel abrir os ajustes.";
+    const message = error instanceof Error ? error.message : "Não foi possível abrir os ajustes.";
     setStatus(message);
     return;
   }
@@ -1809,9 +1820,9 @@ function showBillingModal(options = {}) {
   updateBodyScrollLock();
 
   if (tool && isPremiumTool(tool)) {
-    setBillingStatus(`${tool.label} faz parte do Pro. Escolha um plano ou ative um codigo para liberar essa conversao.`);
+    setBillingStatus(`${tool.label} faz parte do Pro. Escolha um plano ou ative um código para liberar essa conversão.`);
   } else {
-    setBillingStatus("Escolha um plano ou ative um codigo para liberar suas conversoes premium.");
+    setBillingStatus("Escolha um plano ou ative um código para liberar suas conversões premium.");
   }
 
   window.setTimeout(() => {
@@ -1840,7 +1851,7 @@ function promptAccountPlanAccess(tool = getToolById()) {
 
   if (isAccountAuthenticated()) {
     showAccountModal({ focus: "overview" });
-    setAccountStatus(`${toolLabel} faz parte do Pro. Gerencie plano, creditos e codigos pela sua conta.`);
+    setAccountStatus(`${toolLabel} faz parte do Pro. Gerencie plano, créditos e códigos pela sua conta.`);
     return;
   }
 
@@ -1981,7 +1992,7 @@ function renderBillingOffers() {
     billingStarterPrice.textContent = formatCurrencyBRL(starterOffer?.amountBRL ?? 9.9);
   }
   if (billingStarterMeta) {
-    billingStarterMeta.textContent = `${starterOffer?.accessDays ?? 7} dias de acesso rapido`;
+    billingStarterMeta.textContent = `${starterOffer?.accessDays ?? 7} dias de acesso rápido`;
   }
 }
 
@@ -2007,10 +2018,10 @@ function getAccountPlanDescription() {
   }
 
   if (accessSession?.premium && !accountState.plan) {
-    return "Voce tem acesso premium ativo neste navegador. Entre em um checkout logado para vincular o plano a conta.";
+    return "Você tem acesso premium ativo neste navegador. Entre em um checkout logado para vincular o plano à conta.";
   }
 
-  return "Crie ou atualize um plano para liberar OCR, PDF avancado e conversoes 3D.";
+  return "Crie ou atualize um plano para liberar OCR, PDF avançado e conversões 3D.";
 }
 
 function getPopoverPlanBadgeLabel() {
@@ -2034,18 +2045,18 @@ function getPopoverUsageProgress() {
     return {
       percent: accessSession?.premium ? 16 : 10,
       label: accessSession?.premium ? "Acesso premium ativo" : "Pronto para usar",
-      meta: accessSession?.premium ? "Seu plano nao depende do limite diario gratis." : "Escolha uma conversao e comece agora."
+      meta: accessSession?.premium ? "Seu plano não depende do limite diário grátis." : "Escolha uma conversão e comece agora."
     };
   }
 
   const percent = Math.max(6, Math.min(100, Math.round((usedToday / dailyLimit) * 100)));
   const remainingLabel =
-    remainingToday === 1 ? "1 conversao livre hoje" : `${remainingToday} conversoes livres hoje`;
+    remainingToday === 1 ? "1 conversão livre hoje" : `${remainingToday} conversões livres hoje`;
 
   return {
     percent,
     label: remainingLabel,
-    meta: `${usedToday} de ${dailyLimit} conversoes usadas hoje`
+    meta: `${usedToday} de ${dailyLimit} conversões usadas hoje`
   };
 }
 
@@ -2060,7 +2071,7 @@ function getPopoverPlanMeta() {
     return "Premium ativo neste dispositivo";
   }
 
-  return "Uso rapido no navegador";
+  return "Uso rápido no navegador";
 }
 
 function renderAccountUi() {
@@ -2148,7 +2159,7 @@ function renderAccountUi() {
       accountVerificationDestination.textContent = pendingAccountVerification.verification.destination;
     }
     if (accountVerificationExpiry) {
-      accountVerificationExpiry.textContent = `Valido ate ${formatDateTime(pendingAccountVerification.verification.expiresAt)}.`;
+      accountVerificationExpiry.textContent = `Válido até ${formatDateTime(pendingAccountVerification.verification.expiresAt)}.`;
     }
     if (accountVerificationSubmitButton) {
       accountVerificationSubmitButton.textContent = pendingAccountVerification.submitLabel;
@@ -2158,13 +2169,13 @@ function renderAccountUi() {
   if (!authenticated) {
     hideAccountMenu();
     if (accountSettingsTitle) {
-      accountSettingsTitle.textContent = "Preferencias e seguranca";
+      accountSettingsTitle.textContent = "Preferências e segurança";
     }
     if (accountSettingsCopy) {
-      accountSettingsCopy.textContent = "Entre para salvar suas preferencias, trocar foto e proteger seus dados.";
+      accountSettingsCopy.textContent = "Entre para salvar suas preferências, trocar foto e proteger seus dados.";
     }
     if (accountCreditsDisplay) {
-      accountCreditsDisplay.textContent = "0,00 creditos";
+      accountCreditsDisplay.textContent = "0,00 créditos";
     }
     if (accountDiscountDisplay) {
       accountDiscountDisplay.textContent = "Nenhum desconto ativo no momento.";
@@ -2177,7 +2188,7 @@ function renderAccountUi() {
     }
     setAccountStatus(
       pendingAccountVerification?.verification
-        ? `Digite o codigo enviado para ${pendingAccountVerification.verification.destination}.`
+        ? `Digite o código enviado para ${pendingAccountVerification.verification.destination}.`
         : "Entre ou crie sua conta para continuar."
     );
     return;
@@ -2205,7 +2216,7 @@ function renderAccountUi() {
       : "Conta ativa agora.";
   }
   if (accountCreditsDisplay) {
-    accountCreditsDisplay.textContent = `${wallet.creditBalance.toFixed(2).replace(".", ",")} creditos`;
+    accountCreditsDisplay.textContent = `${wallet.creditBalance.toFixed(2).replace(".", ",")} créditos`;
   }
   if (accountDiscountDisplay) {
     accountDiscountDisplay.textContent = getAccountDiscountCopy();
@@ -2214,14 +2225,14 @@ function renderAccountUi() {
     accountShortcutAdminButton.hidden = !isAdmin;
   }
   if (accountSettingsTitle) {
-    accountSettingsTitle.textContent = "Sessao e seguranca";
+    accountSettingsTitle.textContent = "Sessão e segurança";
   }
   if (accountSettingsCopy) {
     accountSettingsCopy.textContent = isAdmin
-      ? "Sua conta controla o painel do dono. Revise a sessao deste navegador e volte ao painel quando quiser."
+      ? "Sua conta controla o Painel Administrativo. Revise a sessão deste navegador e volte ao painel quando quiser."
       : accountState.user?.hasAvatar
-        ? "Sua conta esta personalizada. Revise a sessao deste navegador sempre que precisar sair com seguranca."
-        : "Sua conta esta protegida. Use este modal para encerrar a sessao deste navegador.";
+        ? "Sua conta está personalizada. Revise a sessão deste navegador sempre que precisar sair com segurança."
+        : "Sua conta está protegida. Use este modal para encerrar a sessão deste navegador.";
   }
   if (accountDisplayNameInput) {
     accountDisplayNameInput.value = accountState.user?.displayName ?? "";
@@ -2240,8 +2251,8 @@ function renderAccountUi() {
   }
 
   setAccountStatus(isAdmin
-    ? "Sua conta do dono esta protegida. Abra o painel admin para gerenciar usuarios, creditos e promocoes."
-    : "Sua conta esta protegida. Atualize dados ou siga para um upgrade quando quiser.");
+      ? "Sua conta do dono está protegida. Abra o Painel Administrativo para gerenciar usuários, créditos e promoções."
+      : "Sua conta está protegida. Atualize dados ou siga para um upgrade quando quiser.");
 }
 
 function updateAccessUi() {
@@ -2312,9 +2323,9 @@ async function redeemAccessCode(code) {
     body: JSON.stringify({ code })
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel ativar o codigo." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível ativar o código." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel ativar o codigo.");
+    throw new Error(payload.message ?? "Não foi possível ativar o código.");
   }
 
   applySessionPayload(payload);
@@ -2344,9 +2355,9 @@ async function registerAccount(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel criar a conta." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível criar a conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel criar a conta.");
+    throw new Error(payload.message ?? "Não foi possível criar a conta.");
   }
 
   return payload;
@@ -2363,9 +2374,9 @@ async function confirmAccountRegistration(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar sua conta." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar sua conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel confirmar sua conta.");
+    throw new Error(payload.message ?? "Não foi possível confirmar sua conta.");
   }
 
   applySessionPayload(payload);
@@ -2383,9 +2394,9 @@ async function loginAccount(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel entrar na conta." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível entrar na conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel entrar na conta.");
+    throw new Error(payload.message ?? "Não foi possível entrar na conta.");
   }
 
   applySessionPayload(payload);
@@ -2403,9 +2414,9 @@ async function updateAccountProfile(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel salvar seus dados." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível salvar seus dados." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel salvar seus dados.");
+    throw new Error(payload.message ?? "Não foi possível salvar seus dados.");
   }
 
   applySessionPayload(payload);
@@ -2423,9 +2434,9 @@ async function requestAccountEmailChange(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel enviar o codigo para o novo e-mail." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível enviar o código para o novo e-mail." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel enviar o codigo para o novo e-mail.");
+    throw new Error(payload.message ?? "Não foi possível enviar o código para o novo e-mail.");
   }
 
   return payload;
@@ -2442,9 +2453,9 @@ async function confirmAccountEmailChange(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar o novo e-mail." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar o novo e-mail." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel confirmar o novo e-mail.");
+    throw new Error(payload.message ?? "Não foi possível confirmar o novo e-mail.");
   }
 
   applySessionPayload(payload);
@@ -2462,9 +2473,9 @@ async function updateAccountPassword(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar a senha." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar a senha." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel atualizar a senha.");
+    throw new Error(payload.message ?? "Não foi possível atualizar a senha.");
   }
 
   return payload;
@@ -2481,9 +2492,9 @@ async function confirmAccountPassword(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar a nova senha." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar a nova senha." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel confirmar a nova senha.");
+    throw new Error(payload.message ?? "Não foi possível confirmar a nova senha.");
   }
 
   applySessionPayload(payload);
@@ -2501,9 +2512,9 @@ async function resendAccountVerification(input) {
     body: JSON.stringify(input)
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel reenviar o codigo." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível reenviar o código." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel reenviar o codigo.");
+    throw new Error(payload.message ?? "Não foi possível reenviar o código.");
   }
 
   return payload;
@@ -2522,9 +2533,9 @@ async function updateAccountAvatar(file) {
     body: formData
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar a foto de perfil." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar a foto de perfil." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel atualizar a foto de perfil.");
+    throw new Error(payload.message ?? "Não foi possível atualizar a foto de perfil.");
   }
 
   applySessionPayload(payload);
@@ -2540,9 +2551,9 @@ async function removeAccountAvatar() {
     }
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel remover a foto de perfil." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível remover a foto de perfil." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel remover a foto de perfil.");
+    throw new Error(payload.message ?? "Não foi possível remover a foto de perfil.");
   }
 
   applySessionPayload(payload);
@@ -2558,9 +2569,9 @@ async function logoutAccount() {
     }
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel encerrar a conta." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível encerrar a conta." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel encerrar a conta.");
+    throw new Error(payload.message ?? "Não foi possível encerrar a conta.");
   }
 
   applySessionPayload(payload);
@@ -2610,7 +2621,7 @@ function formatAdminWallet(user) {
   };
 
   return {
-    credits: `${Number(wallet.creditBalance ?? 0).toFixed(2).replace(".", ",")} creditos`,
+    credits: `${Number(wallet.creditBalance ?? 0).toFixed(2).replace(".", ",")} créditos`,
     discount: wallet.discountPercent && wallet.discountExpiresAt
       ? `${wallet.discountPercent}% ate ${formatDateTime(wallet.discountExpiresAt)}`
       : "Sem desconto ativo."
@@ -2671,7 +2682,7 @@ function renderAdminUserList() {
           <div class="admin-user-topline">
             <strong>${escapeHtml(user.displayName)}</strong>
             <div class="admin-badge-row">
-              <span class="admin-badge" data-tone="${user.plan?.plan ?? "muted"}">${escapeHtml(user.plan?.plan === "team" ? "Team" : user.plan?.plan === "pro" ? "Pro" : "Gratis")}</span>
+              <span class="admin-badge" data-tone="${user.plan?.plan ?? "muted"}">${escapeHtml(user.plan?.plan === "team" ? "Team" : user.plan?.plan === "pro" ? "Pro" : "Grátis")}</span>
               ${user.isAdmin ? '<span class="admin-badge" data-tone="danger">Dono</span>' : ""}
             </div>
           </div>
@@ -2728,10 +2739,10 @@ function applyAdminSelectionToForms() {
   if (adminSelectedUserMeta) {
     adminSelectedUserMeta.textContent = user
       ? `${user.email} • criada em ${formatDateTime(user.createdAt)}`
-      : "Abra um usuario para ver seus detalhes completos.";
+      : "Abra um usuário para ver seus detalhes completos.";
   }
   if (adminSelectedUserWallet) {
-    adminSelectedUserWallet.textContent = user ? wallet.credits : "0 creditos";
+    adminSelectedUserWallet.textContent = user ? wallet.credits : "0 créditos";
     adminSelectedUserWallet.dataset.tone = user && Number(user.wallet?.creditBalance ?? 0) > 0 ? "pro" : "muted";
   }
   if (adminSelectedUserDiscount) {
@@ -2779,7 +2790,7 @@ function applyAdminSelectionToForms() {
   renderAdminMiniList(
     adminUserPayments,
     user?.recentPayments ?? [],
-    "Nenhum pagamento recente para este usuario.",
+    "Nenhum pagamento recente para este usuário.",
     (item) => `
       <strong>${escapeHtml(item.offerId)}</strong>
       <span>${escapeHtml(formatCurrencyBRL(item.amountBRL))} • ${escapeHtml(item.status)} • ${escapeHtml(formatDateTime(item.approvedAt))}</span>
@@ -2789,12 +2800,12 @@ function applyAdminSelectionToForms() {
   renderAdminMiniList(
     adminUserPromos,
     user?.promoRedemptions ?? [],
-    "Nenhum codigo usado nesta conta.",
+    "Nenhum código usado nesta conta.",
     (item) => `
       <strong>${escapeHtml(item.code)}</strong>
       <span>${escapeHtml(
         [
-          item.creditAmount > 0 ? `${item.creditAmount.toFixed(2).replace(".", ",")} creditos` : "",
+          item.creditAmount > 0 ? `${item.creditAmount.toFixed(2).replace(".", ",")} créditos` : "",
           item.discountPercent > 0 ? `${item.discountPercent}%` : "",
           item.accessDays > 0 ? `${item.accessDays} dias ${item.accessPlan ?? "pro"}` : ""
         ].filter(Boolean).join(" • ") || "Sem beneficios registrados"
@@ -2818,7 +2829,7 @@ function renderAdminPromoList() {
     const item = document.createElement("article");
     item.className = "admin-promo-item";
     const rewards = [
-      promo.creditAmount > 0 ? `${promo.creditAmount.toFixed(2).replace(".", ",")} creditos` : "",
+      promo.creditAmount > 0 ? `${promo.creditAmount.toFixed(2).replace(".", ",")} créditos` : "",
       promo.discountPercent > 0 ? `${promo.discountPercent}% por ${promo.discountDays} dia(s)` : "",
       promo.accessDays > 0 ? `${promo.accessDays} dia(s) ${promo.accessPlan ?? "pro"}` : ""
     ].filter(Boolean).join(" • ");
@@ -2837,7 +2848,7 @@ function renderAdminPromoList() {
       <span class="account-copy">${escapeHtml(promo.description || rewards || "Codigo promocional do vaptdoc")}</span>
       <span class="account-copy">${escapeHtml(rewards || "Sem beneficios configurados")}</span>
       <div class="admin-promo-actions">
-        <button type="button" class="ghost-action" data-admin-copy-promo="${escapeHtml(promo.code)}">Copiar codigo</button>
+        <button type="button" class="ghost-action" data-admin-copy-promo="${escapeHtml(promo.code)}">Copiar código</button>
         <button type="button" class="ghost-action" data-admin-toggle-promo="${escapeHtml(promo.code)}">${promo.active ? "Pausar" : "Reativar"}</button>
         <button type="button" class="ghost-action danger" data-admin-delete-promo="${escapeHtml(promo.code)}">Excluir</button>
       </div>
@@ -2852,7 +2863,7 @@ function renderAdminPromoList() {
         await navigator.clipboard.writeText(code);
         setAdminStatus(`Codigo ${code} copiado.`);
       } catch {
-        setAdminStatus(`Nao foi possivel copiar ${code}.`);
+        setAdminStatus(`Não foi possível copiar ${code}.`);
       }
     });
   });
@@ -2869,7 +2880,7 @@ function renderAdminPromoList() {
         await updateAdminPromo(code, { active: !promo.active });
         setAdminStatus(`Codigo ${code} atualizado.`);
       } catch (error) {
-        setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar o codigo.");
+        setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar o código.");
       }
     });
   });
@@ -2877,7 +2888,7 @@ function renderAdminPromoList() {
   adminPromoList.querySelectorAll("[data-admin-delete-promo]").forEach((button) => {
     button.addEventListener("click", async () => {
       const code = button.getAttribute("data-admin-delete-promo") ?? "";
-      if (!window.confirm(`Excluir o codigo ${code}?`)) {
+      if (!window.confirm(`Excluir o código ${code}?`)) {
         return;
       }
 
@@ -2885,7 +2896,7 @@ function renderAdminPromoList() {
         await deleteAdminPromo(code);
         setAdminStatus(`Codigo ${code} removido.`);
       } catch (error) {
-        setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel remover o codigo.");
+        setAdminStatus(error instanceof Error ? error.message : "Não foi possível remover o código.");
       }
     });
   });
@@ -2909,9 +2920,9 @@ async function fetchAdminDashboard() {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar o painel." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar o painel." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel carregar o painel.");
+    throw new Error(payload.message ?? "Não foi possível carregar o painel.");
   }
 
   return payload.dashboard ?? null;
@@ -2929,9 +2940,9 @@ async function fetchAdminUsers(query = "") {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar os usuarios." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar os usuários." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel carregar os usuarios.");
+    throw new Error(payload.message ?? "Não foi possível carregar os usuários.");
   }
 
   return Array.isArray(payload.users) ? payload.users : [];
@@ -2944,9 +2955,9 @@ async function fetchAdminUserDetail(userId) {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar o usuario." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar o usuário." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel carregar o usuario.");
+    throw new Error(payload.message ?? "Não foi possível carregar o usuário.");
   }
 
   return payload.user ?? null;
@@ -2959,9 +2970,9 @@ async function fetchAdminPromos() {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel carregar os codigos promocionais." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível carregar os códigos promocionais." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel carregar os codigos promocionais.");
+    throw new Error(payload.message ?? "Não foi possível carregar os códigos promocionais.");
   }
 
   return Array.isArray(payload.promos) ? payload.promos : [];
@@ -2970,16 +2981,16 @@ async function fetchAdminPromos() {
 async function selectAdminUser(userId) {
   adminState.selectedUserId = userId;
   renderAdminUserList();
-  setAdminStatus("Carregando os detalhes do usuario...");
+  setAdminStatus("Carregando os detalhes do usuário...");
 
   try {
     adminState.selectedUser = await fetchAdminUserDetail(userId);
     renderAdminUi();
-    setAdminStatus("Usuario carregado com sucesso.");
+    setAdminStatus("Usuário carregado com sucesso.");
   } catch (error) {
     adminState.selectedUser = null;
     renderAdminUi();
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel abrir este usuario.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível abrir este usuário.");
   }
 }
 
@@ -2988,7 +2999,7 @@ async function loadAdminPanel() {
     return;
   }
 
-  setAdminStatus("Carregando painel administrativo...");
+  setAdminStatus("Carregando Painel Administrativo...");
   try {
     const [dashboard, users, promos] = await Promise.all([
       fetchAdminDashboard(),
@@ -3007,7 +3018,7 @@ async function loadAdminPanel() {
     renderAdminUi();
     setAdminStatus("Painel administrativo atualizado.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel carregar o painel administrativo.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível carregar o painel administrativo.");
   }
 }
 
@@ -3021,9 +3032,9 @@ async function updateAdminUserProfile(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel salvar os dados do usuario." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível salvar os dados do usuário." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel salvar os dados do usuario.");
+    throw new Error(payload.message ?? "Não foi possível salvar os dados do usuário.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -3040,9 +3051,9 @@ async function updateAdminUserPlan(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar o plano." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar o plano." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel atualizar o plano.");
+    throw new Error(payload.message ?? "Não foi possível atualizar o plano.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -3060,9 +3071,9 @@ async function updateAdminUserCredits(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar os creditos." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar os créditos." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel atualizar os creditos.");
+    throw new Error(payload.message ?? "Não foi possível atualizar os créditos.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -3080,9 +3091,9 @@ async function updateAdminUserDiscount(userId, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar o desconto." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar o desconto." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel atualizar o desconto.");
+    throw new Error(payload.message ?? "Não foi possível atualizar o desconto.");
   }
 
   adminState.selectedUser = payload.user ?? null;
@@ -3098,9 +3109,9 @@ async function deleteAdminUser(userId) {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel remover o usuario." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível remover o usuário." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel remover o usuario.");
+    throw new Error(payload.message ?? "Não foi possível remover o usuário.");
   }
 
   adminState.selectedUser = null;
@@ -3118,9 +3129,9 @@ async function createAdminPromo(input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel criar o codigo." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível criar o código." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel criar o codigo.");
+    throw new Error(payload.message ?? "Não foi possível criar o código.");
   }
 
   await loadAdminPanel();
@@ -3137,9 +3148,9 @@ async function updateAdminPromo(code, input) {
     },
     body: JSON.stringify(input)
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel atualizar o codigo." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar o código." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel atualizar o codigo.");
+    throw new Error(payload.message ?? "Não foi possível atualizar o código.");
   }
 
   await loadAdminPanel();
@@ -3154,9 +3165,9 @@ async function deleteAdminPromo(code) {
       ...internalClientHeader
     }
   });
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel remover o codigo." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível remover o código." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel remover o codigo.");
+    throw new Error(payload.message ?? "Não foi possível remover o código.");
   }
 
   await loadAdminPanel();
@@ -3173,9 +3184,9 @@ async function startCheckout(offerId) {
     body: JSON.stringify({ offerId })
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel abrir o checkout." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível abrir o checkout." }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel abrir o checkout.");
+    throw new Error(payload.message ?? "Não foi possível abrir o checkout.");
   }
 
   return payload;
@@ -3192,13 +3203,13 @@ async function confirmCheckoutReturn(paymentId = "") {
     body: JSON.stringify(paymentId ? { paymentId } : {})
   });
 
-  const payload = await response.json().catch(() => ({ message: "Nao foi possivel confirmar o pagamento." }));
+  const payload = await response.json().catch(() => ({ message: "Não foi possível confirmar o pagamento." }));
   if (response.status === 202) {
     return payload;
   }
 
   if (!response.ok) {
-    throw new Error(payload.message ?? "Nao foi possivel confirmar o pagamento.");
+    throw new Error(payload.message ?? "Não foi possível confirmar o pagamento.");
   }
 
   applySessionPayload(payload.session ?? {});
@@ -3480,7 +3491,7 @@ function updateToolTabs() {
 
 function updateToolbarCopy(visibleCount) {
   if (isCompactViewport() && activeFilter === "all" && !searchQuery) {
-    toolToolbarCopy.textContent = "Toque numa opcao para ir ao envio";
+    toolToolbarCopy.textContent = "Toque numa opção para ir ao envio";
     return;
   }
 
@@ -3494,7 +3505,7 @@ function updateToolbarCopy(visibleCount) {
     toolToolbarCopy.textContent =
       visibleCount > 0
         ? `${visibleCount} convers${visibleCount > 1 ? "oes" : "ao"} 3D pronta${visibleCount > 1 ? "s" : ""}`
-        : "Nenhuma conversao 3D encontrada";
+        : "Nenhuma conversão 3D encontrada";
     return;
   }
 
@@ -3512,8 +3523,8 @@ function updateToolbarCopy(visibleCount) {
   const favoriteCount = favoriteToolIds.size;
   toolToolbarCopy.textContent =
     favoriteCount > 0
-      ? `${tools.length} conversoes, ${favoriteCount} favorita${favoriteCount > 1 ? "s" : ""}`
-      : "Conversoes prontas para voce";
+      ? `${tools.length} conversões, ${favoriteCount} favorita${favoriteCount > 1 ? "s" : ""}`
+      : "Conversões prontas para você";
 }
 
 function updateFavoriteButton(toolId) {
@@ -3524,7 +3535,7 @@ function updateFavoriteButton(toolId) {
   const favorite = isFavorite(toolId);
   favoriteToggle.classList.toggle("active", favorite);
   favoriteToggle.setAttribute("aria-pressed", String(favorite));
-  favoriteToggle.setAttribute("aria-label", favorite ? "Remover dos favoritos" : "Favoritar conversao");
+  favoriteToggle.setAttribute("aria-label", favorite ? "Remover dos favoritos" : "Favoritar conversão");
   favoriteToggleCopy.textContent = favorite ? "Favorita" : "Favoritar";
 }
 
@@ -3636,19 +3647,19 @@ function getWorkspaceGuideCopy(tool) {
   }
 
   if (tool.id === "pdf-merge") {
-    return "Monte a pilha final do PDF na grade e use a lateral para acelerar organizacao e revisao.";
+    return "Monte a pilha final do PDF na grade e use a lateral para acelerar organização e revisão.";
   }
 
   if (tool.id === "pdf-split") {
-    return "Deixe o PDF no centro e use a lateral para escolher o corte sem abrir campos desnecessarios.";
+    return "Deixe o PDF no centro e use a lateral para escolher o corte sem abrir campos desnecessários.";
   }
 
   if (tool.id === "image-to-pdf") {
-    return "Trate cada imagem como pagina, organize a ordem e ajuste o layout no inspetor lateral.";
+    return "Trate cada imagem como página, organize a ordem e ajuste o layout no inspetor lateral.";
   }
 
   if (tool.category === "3d") {
-    return "Modelos 3D ficam mais confortaveis de revisar quando a previa e os ajustes vivem no mesmo workspace.";
+    return "Modelos 3D ficam mais confortáveis de revisar quando a prévia e os ajustes vivem no mesmo workspace.";
   }
 
   if (tool.allowsMultipleFiles || getToolMaximumFiles(tool) > 1 || getToolMinimumFiles(tool) > 1) {
@@ -3659,7 +3670,7 @@ function getWorkspaceGuideCopy(tool) {
     return "Ajuste o layout do texto no painel lateral e acompanhe o resultado sem trocar de tela.";
   }
 
-  return "Envie um arquivo, revise a previa e baixe o resultado em um fluxo mais claro.";
+  return "Envie um arquivo, revise a prévia e baixe o resultado em um fluxo mais claro.";
 }
 
 function getWorkspaceModeLabel(tool) {
@@ -3676,7 +3687,7 @@ function getWorkspaceModeLabel(tool) {
   }
 
   if (tool.id === "image-to-pdf") {
-    return "Paginas por imagem";
+    return "Páginas por imagem";
   }
 
   if (tool.category === "3d") {
@@ -3723,7 +3734,7 @@ function shouldShowWorkspaceOptionsCard(tool = getToolById()) {
 
 function getWorkspaceOptionsTitle(tool) {
   if (!tool) {
-    return "Ajustes desta conversao";
+    return "Ajustes desta conversão";
   }
 
   if (tool.id === "pdf-rotate") {
@@ -3738,7 +3749,7 @@ function getWorkspaceOptionsTitle(tool) {
     return "Formato e detalhes do modelo";
   }
 
-  return "Ajustes desta conversao";
+  return "Ajustes desta conversão";
 }
 
 function getWorkspaceOptionsCopy(tool) {
@@ -3747,7 +3758,7 @@ function getWorkspaceOptionsCopy(tool) {
   }
 
   if (tool.id === "pdf-rotate") {
-    return "Arraste, toque ou use os botoes para girar visualmente antes de converter.";
+    return "Arraste, toque ou use os botões para girar visualmente antes de converter.";
   }
 
   if (tool.textLayoutSupport?.enabled && !hasVisibleOptionFields()) {
@@ -3755,10 +3766,10 @@ function getWorkspaceOptionsCopy(tool) {
   }
 
   if (tool.category === "3d") {
-    return "Escolha o formato de saida e deixe o restante do fluxo visual por conta da grade.";
+    return "Escolha o formato de saída e deixe o restante do fluxo visual por conta da grade.";
   }
 
-  return "Os ajustes aparecem aqui apenas quando forem necessarios para a conversao escolhida.";
+  return "Os ajustes aparecem aqui apenas quando forem necessários para a conversão escolhida.";
 }
 
 function getWorkspaceFilesBadgeLabel(tool) {
@@ -3797,7 +3808,7 @@ function getWorkspaceFlowLabel(tool) {
 
   if (tool.id === "pdf-split") {
     const mode = readOptionFieldValue("splitMode") || "ranges";
-    return mode === "remove_pages" ? "Saida em PDF unico" : "Saida em pacote ZIP";
+    return mode === "remove_pages" ? "Saida em PDF único" : "Saída em pacote ZIP";
   }
 
   if (tool.id === "image-to-pdf") {
@@ -3912,7 +3923,7 @@ function updateWorkspacePanels(tool = getToolById()) {
   if (workspaceCanvasCopy) {
     workspaceCanvasCopy.textContent = hasFiles
       ? blueprint.canvasCopy
-      : "Depois do envio, mostramos apenas os ajustes e a acao final desta conversao.";
+      : "Depois do envio, mostramos apenas os ajustes e a ação final desta conversão.";
   }
   if (workspaceSubmitTitle) {
     workspaceSubmitTitle.textContent = blueprint.submitTitle;
@@ -4006,7 +4017,7 @@ function getDropzoneTitleForTool(tool) {
   }
 
   if (from === "mp4") {
-    return "Envie seu video";
+    return "Envie seu vídeo";
   }
 
   if (from === "model3d") {
@@ -4148,7 +4159,7 @@ function getFilePreviewOverlayLabel(tool, kind, index, total) {
   }
 
   if (tool?.id === "image-to-pdf" && ["jpg", "jpeg", "png", "image"].includes(kind)) {
-    return index === 0 ? "Capa do PDF" : `Pagina ${index + 1} do PDF`;
+    return index === 0 ? "Capa do PDF" : `Página ${index + 1} do PDF`;
   }
 
   return kind === "pdf"
@@ -4368,7 +4379,7 @@ function addStagedFiles(fileList, options = {}) {
 
   const nonEmptyFiles = incomingFiles.filter((file) => Number(file.size ?? 0) > 0);
   if (nonEmptyFiles.length !== incomingFiles.length) {
-    setStatus("Um dos arquivos enviados esta vazio. Escolha um arquivo valido para continuar.");
+    setStatus("Um dos arquivos enviados está vazio. Escolha um arquivo válido para continuar.");
   }
 
   const oversizedFiles = getFilesOverLimit(nonEmptyFiles);
@@ -4401,7 +4412,7 @@ function addStagedFiles(fileList, options = {}) {
   fileInput.value = "";
 
   if (discardedCount > 0) {
-    setStatus(`Essa conversao aceita no maximo ${maxFiles} arquivos por vez.`);
+    setStatus(`Essa conversão aceita no máximo ${maxFiles} arquivos por vez.`);
   }
 }
 
@@ -4450,8 +4461,8 @@ function renderStagedFiles() {
         ? "PDF pronto para dividir"
         : tool.id === "image-to-pdf"
           ? files.length > 1
-            ? "Paginas prontas para o PDF"
-            : "Primeira pagina pronta"
+            ? "Páginas prontas para o PDF"
+            : "Primeira página pronta"
           : files.length > 1
             ? "Arquivos prontos"
             : "Arquivo pronto";
@@ -4466,11 +4477,11 @@ function renderStagedFiles() {
         ? "Revise o arquivo de origem e finalize os cortes na lateral."
         : tool.id === "image-to-pdf"
           ? canReorder
-            ? "Arraste as imagens para decidir a ordem das paginas do PDF."
-            : "Envie mais imagens se quiser montar um PDF com varias paginas."
+            ? "Arraste as imagens para decidir a ordem das páginas do PDF."
+            : "Envie mais imagens se quiser montar um PDF com várias páginas."
           : canReorder
             ? "Grade pronta para reorganizar, revisar e remover com poucos toques."
-            : "Confira a previa do arquivo e continue quando quiser.";
+            : "Confira a prévia do arquivo e continue quando quiser.";
 
   heading.append(title, hint);
 
@@ -4614,7 +4625,7 @@ function renderStagedFiles() {
               ? "Fecha o PDF"
               : `${index + 1}/${files.length}`
           : tool.id === "image-to-pdf"
-            ? `Pagina ${index + 1}`
+            ? `Página ${index + 1}`
             : `${index + 1}/${files.length}`;
       metaRow.append(orderMeta);
     }
@@ -4744,7 +4755,7 @@ function syncResponsiveUi() {
 function updateDropzonePrompt(tool) {
   if (isToolLocked(tool) && shouldRevealUpgradeContext(accessSession)) {
     dropzoneTitle.textContent = "Disponivel no Pro";
-    dropzoneCopy.textContent = `${tool.label} fica liberado assim que voce ativar um plano ou codigo.`;
+    dropzoneCopy.textContent = `${tool.label} fica liberado assim que você ativar um plano ou código.`;
     return;
   }
 
@@ -5376,7 +5387,7 @@ function createWorkspaceOrderList(tool, files) {
       createWorkspaceInfoNote(
         tool.id === "pdf-split" ? "Envie um PDF para continuar" : "Sua grade aparece aqui",
         tool.id === "pdf-split"
-          ? "Assim que voce escolher um arquivo, mostramos o resumo do corte nesta lateral."
+          ? "Assim que você escolher um arquivo, mostramos o resumo do corte nesta lateral."
           : "Depois do envio, a ordem final fica espelhada aqui e na grade central."
       )
     );
@@ -5400,7 +5411,7 @@ function createWorkspaceOrderList(tool, files) {
 
     const meta = document.createElement("span");
     if (tool.id === "image-to-pdf") {
-      meta.textContent = `${index === 0 ? "Capa" : `Pagina ${index + 1}`} · ${formatFileSize(file.size)}`;
+      meta.textContent = `${index === 0 ? "Capa" : `Página ${index + 1}`} · ${formatFileSize(file.size)}`;
     } else if (tool.id === "pdf-merge") {
       meta.textContent = `${index === 0 ? "Abre o PDF final" : index === files.length - 1 ? "Fecha o PDF final" : "Miolo do documento"} · ${formatFileSize(file.size)}`;
     } else {
@@ -5430,20 +5441,20 @@ function getSplitModeWorkspaceNote() {
   if (mode === "fixed_range") {
     return createWorkspaceInfoNote(
       "Partes automaticas",
-      "Defina quantas paginas cada parte deve ter. O app gera a sequencia para voce sem precisar escrever intervalos."
+      "Defina quantas páginas cada parte deve ter. O app gera a sequência para você sem precisar escrever intervalos."
     );
   }
 
   if (mode === "remove_pages") {
     return createWorkspaceInfoNote(
-      "PDF unico sem paginas escolhidas",
-      "Use numeros ou intervalos, como 2-4,8. O retorno vem como um unico PDF ja limpo."
+      "PDF único sem páginas escolhidas",
+      "Use números ou intervalos, como 2-4,8. O retorno vem como um único PDF já limpo."
     );
   }
 
   return createWorkspaceInfoNote(
     "Intervalos livres",
-    "Exemplos prontos: 1-3,5-8 ou 1,4,9. Se quiser, marque para reunir os trechos de novo em um unico PDF."
+    "Exemplos prontos: 1-3,5-8 ou 1,4,9. Se quiser, marque para reunir os trechos de novo em um único PDF."
   );
 }
 
@@ -5452,7 +5463,7 @@ function renderMergeWorkspace(tool) {
   const canReorder = files.length > 1;
   const fragment = document.createDocumentFragment();
 
-  const actionsSection = createWorkspaceSpecialSection("Atalhos de montagem", "Use estes controles para fechar a ordem final mais rapido.");
+  const actionsSection = createWorkspaceSpecialSection("Atalhos de montagem", "Use estes controles para fechar a ordem final mais rápido.");
   const actions = document.createElement("div");
   actions.className = "workspace-special-actions";
   actions.append(
@@ -5476,8 +5487,8 @@ function renderMergeWorkspace(tool) {
 
   fragment.append(
     createWorkspaceInfoNote(
-      "Dica rapida",
-      "Use os atalhos acima para reorganizar mais rapido e mantenha a revisao visual apenas na grade central."
+      "Dica rápida",
+      "Use os atalhos acima para reorganizar mais rápido e mantenha a revisão visual apenas na grade central."
     )
   );
 
@@ -5488,14 +5499,14 @@ function renderSplitWorkspace(tool) {
   const fragment = document.createDocumentFragment();
   const splitMode = readOptionFieldValue("splitMode") || "ranges";
 
-  const modeSection = createWorkspaceSpecialSection("Escolha o tipo de corte", "Comece pelo modo e o resto da lateral se adapta ao que voce selecionou.");
+  const modeSection = createWorkspaceSpecialSection("Escolha o tipo de corte", "Comece pelo modo e o resto da lateral se adapta ao que você selecionou.");
   const modeField = getToolOptionField(tool, "splitMode");
   if (modeField) {
     modeSection.body.append(createOptionFieldWrapper(tool, modeField));
   }
   fragment.append(modeSection.section);
 
-  const detailsSection = createWorkspaceSpecialSection("Detalhes da divisao", "Mostramos apenas os campos necessarios para o modo atual.");
+  const detailsSection = createWorkspaceSpecialSection("Detalhes da divisão", "Mostramos apenas os campos necessários para o modo atual.");
   appendSpecializedField(detailsSection.body, tool, "ranges");
   appendSpecializedField(detailsSection.body, tool, "fixedRange");
   appendSpecializedField(detailsSection.body, tool, "removePages");
@@ -5511,12 +5522,12 @@ function renderImageToPdfWorkspace(tool) {
   const canReorder = files.length > 1;
   const fragment = document.createDocumentFragment();
 
-  const actionsSection = createWorkspaceSpecialSection("Atalhos da montagem", "Organize as paginas do PDF visualmente antes de gerar o arquivo final.");
+  const actionsSection = createWorkspaceSpecialSection("Atalhos da montagem", "Organize as páginas do PDF visualmente antes de gerar o arquivo final.");
   const actions = document.createElement("div");
   actions.className = "workspace-special-actions";
   actions.append(
     createWorkspaceActionButton({
-      label: "Inverter paginas",
+      label: "Inverter páginas",
       meta: "Troca capa e sequencia",
       iconMarkup: getOrderReverseIcon(),
       onClick: reverseStagedFiles,
@@ -5533,7 +5544,7 @@ function renderImageToPdfWorkspace(tool) {
   actionsSection.body.append(actions);
   fragment.append(actionsSection.section);
 
-  const layoutSection = createWorkspaceSpecialSection("Layout do documento", "Ajuste como as imagens viram paginas sem sair do fluxo principal.");
+  const layoutSection = createWorkspaceSpecialSection("Layout do documento", "Ajuste como as imagens viram páginas sem sair do fluxo principal.");
   const layoutGrid = document.createElement("div");
   layoutGrid.className = "workspace-special-fields";
   appendSpecializedField(layoutGrid, tool, "imagePdfOrientation");
@@ -5568,7 +5579,7 @@ function renderSpecializedWorkspace(tool) {
   const copy = specializedWorkspaceCopy[tool.id];
   workspaceSpecialKicker.textContent = copy?.kicker ?? "Fluxo guiado";
   workspaceSpecialTitle.textContent = copy?.title ?? "Workspace especializado";
-  workspaceSpecialCopy.textContent = copy?.copy ?? "Mostramos aqui os atalhos e ajustes que mais importam para esta operacao.";
+  workspaceSpecialCopy.textContent = copy?.copy ?? "Mostramos aqui os atalhos e ajustes que mais importam para esta operação.";
 
   if (tool.id === "pdf-merge") {
     workspaceSpecialStack.append(renderMergeWorkspace(tool));
@@ -5660,7 +5671,7 @@ function renderSearchResults() {
   if (matches.length === 0) {
     const empty = document.createElement("div");
     empty.className = "search-empty";
-    empty.textContent = "Nenhuma conversao encontrada.";
+    empty.textContent = "Nenhuma conversão encontrada.";
     searchResults.append(empty);
     return;
   }
@@ -5700,7 +5711,7 @@ function renderSearchResults() {
       ? "Desbloqueie no Pro"
       : isFavorite(tool.id)
         ? "Favorita"
-        : "Conversao pronta";
+        : "Conversão pronta";
 
     if (isPremiumTool(tool)) {
       const planMark = document.createElement("span");
@@ -5830,7 +5841,7 @@ function renderTools() {
     const formats = getToolFormats(tool);
 
     card.dataset.toolId = tool.id;
-    card.setAttribute("aria-label", `${tool.label}. Abrir envio de arquivo com essa conversao.`);
+    card.setAttribute("aria-label", `${tool.label}. Abrir envio de arquivo com essa conversão.`);
     card.title = tool.fileHint ?? tool.label;
     label.textContent = tool.label;
     card.classList.toggle("favorite", isFavorite(tool.id));
@@ -5895,7 +5906,7 @@ function openBillingTarget(button) {
 async function handleBillingOfferClick(button) {
   const offerId = button?.dataset?.offerId ?? "";
   if (!offerId) {
-    setBillingStatus("Escolha um plano valido para continuar.");
+    setBillingStatus("Escolha um plano válido para continuar.");
     return;
   }
 
@@ -5913,7 +5924,7 @@ async function handleBillingOfferClick(button) {
   try {
     const payload = await startCheckout(offerId);
     if (!payload.checkoutUrl) {
-      throw new Error("O checkout nao retornou uma URL valida.");
+      throw new Error("O checkout não retornou uma URL válida.");
     }
 
     if (payload.provider === "mercadopago") {
@@ -5928,7 +5939,7 @@ async function handleBillingOfferClick(button) {
       }
     });
   } catch (error) {
-    setBillingStatus(error instanceof Error ? error.message : "Nao foi possivel abrir o checkout.");
+    setBillingStatus(error instanceof Error ? error.message : "Não foi possível abrir o checkout.");
   } finally {
     button.textContent = previousLabel;
     updateAccessUi();
@@ -5949,8 +5960,8 @@ async function resumeCheckoutIfNeeded() {
   if (path === "/checkout/failure" && !paymentId) {
     clearPendingCheckout();
     showBillingModal({ tool: getToolById() });
-    setBillingStatus("O pagamento foi interrompido. Voce pode tentar novamente quando quiser.");
-    setStatus("Pagamento nao concluido.");
+    setBillingStatus("O pagamento foi interrompido. Você pode tentar novamente quando quiser.");
+    setStatus("Pagamento não concluído.");
     window.history.replaceState({}, "", "/");
     return;
   }
@@ -5963,8 +5974,8 @@ async function resumeCheckoutIfNeeded() {
     if (payload.status === "approved") {
       clearPendingCheckout();
       hideBillingModal();
-      setBillingStatus("Pagamento aprovado. Seu acesso premium ja foi liberado.");
-      setStatus("Pagamento aprovado. Seu plano ja esta ativo.");
+      setBillingStatus("Pagamento aprovado. Seu acesso premium já foi liberado.");
+      setStatus("Pagamento aprovado. Seu plano já está ativo.");
       const activeTool = getToolById();
       if (activeTool) {
         applyActiveTool(activeTool.id, { resetFiles: false });
@@ -5978,7 +5989,7 @@ async function resumeCheckoutIfNeeded() {
     if (payload.status === "pending") {
       showBillingModal({ tool: getToolById() });
       setBillingStatus(payload.message ?? "Pagamento em analise. Assim que aprovar, o acesso sera liberado aqui.");
-      setStatus("Pagamento aguardando confirmacao.");
+      setStatus("Pagamento aguardando confirmação.");
       if (isCheckoutPath && path !== "/checkout/pending") {
         window.history.replaceState({}, "", "/checkout/pending");
       }
@@ -5986,7 +5997,7 @@ async function resumeCheckoutIfNeeded() {
   } catch (error) {
     clearPendingCheckout();
     showBillingModal({ tool: getToolById() });
-    const message = error instanceof Error ? error.message : "Nao foi possivel validar o pagamento.";
+    const message = error instanceof Error ? error.message : "Não foi possível validar o pagamento.";
     setBillingStatus(message);
     setStatus(message);
     if (isCheckoutPath) {
@@ -6171,7 +6182,7 @@ accountMenuLogout?.addEventListener("click", async () => {
     await logoutAccount();
     setStatus("Conta encerrada neste navegador.");
   } catch (error) {
-    setStatus(error instanceof Error ? error.message : "Nao foi possivel sair da conta.");
+    setStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
   }
 });
 accountUpgradeButton?.addEventListener("click", () => {
@@ -6184,7 +6195,7 @@ accountLogoutButton?.addEventListener("click", async () => {
     hideAccountModal();
     setStatus("Conta encerrada neste navegador.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel sair da conta.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
   }
 });
 
@@ -6197,7 +6208,7 @@ accountRegisterForm?.addEventListener("submit", async (event) => {
     password: String(formData.get("password") ?? "")
   };
 
-  setAccountStatus("Enviando o codigo para confirmar sua conta...");
+  setAccountStatus("Enviando o código para confirmar sua conta...");
 
   try {
     const payload = await registerAccount(input);
@@ -6206,10 +6217,10 @@ accountRegisterForm?.addEventListener("submit", async (event) => {
       nextFocus: "overview"
     });
     setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
-    setStatus("Confira seu e-mail e confirme o codigo.");
+    setStatus("Confira seu e-mail e confirme o código.");
     showAccountModal({ focus: "verify" });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel criar sua conta.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível criar sua conta.");
   }
 });
 
@@ -6230,7 +6241,7 @@ accountLoginForm?.addEventListener("submit", async (event) => {
     setStatus("Conta conectada com sucesso.");
     showAccountModal({ focus: "overview" });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel entrar na conta.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível entrar na conta.");
   }
 });
 
@@ -6246,7 +6257,7 @@ accountProfileForm?.addEventListener("submit", async (event) => {
   const nextEmail = input.email.toLowerCase();
   const changingEmail = Boolean(nextEmail && nextEmail !== currentEmail);
 
-  setAccountStatus(changingEmail ? "Enviando codigo para confirmar o novo e-mail..." : "Salvando seus dados...");
+  setAccountStatus(changingEmail ? "Enviando código para confirmar o novo e-mail..." : "Salvando seus dados...");
 
   try {
     if (changingEmail) {
@@ -6256,7 +6267,7 @@ accountProfileForm?.addEventListener("submit", async (event) => {
         nextFocus: "profile"
       });
       setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
-      setStatus("Confira seu e-mail e confirme o codigo.");
+      setStatus("Confira seu e-mail e confirme o código.");
       showAccountModal({ focus: "verify" });
       return;
     }
@@ -6264,10 +6275,10 @@ accountProfileForm?.addEventListener("submit", async (event) => {
     await updateAccountProfile({
       displayName: input.displayName
     });
-    setAccountStatus("Dados atualizados com seguranca.");
+    setAccountStatus("Dados atualizados com segurança.");
     setStatus("Dados da conta atualizados.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel salvar seus dados.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível salvar seus dados.");
   }
 });
 
@@ -6279,7 +6290,7 @@ accountPasswordForm?.addEventListener("submit", async (event) => {
     newPassword: String(formData.get("newPassword") ?? "")
   };
 
-  setAccountStatus("Enviando codigo para confirmar sua nova senha...");
+  setAccountStatus("Enviando código para confirmar sua nova senha...");
 
   try {
     const payload = await updateAccountPassword(input);
@@ -6289,23 +6300,23 @@ accountPasswordForm?.addEventListener("submit", async (event) => {
       nextFocus: "profile"
     });
     setAccountStatus(`Codigo enviado para ${payload.verification.destination}.`);
-    setStatus("Confira seu e-mail e confirme o codigo.");
+    setStatus("Confira seu e-mail e confirme o código.");
     showAccountModal({ focus: "verify" });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar a senha.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar a senha.");
   }
 });
 
 accountVerificationForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!pendingAccountVerification?.verification?.id) {
-    setAccountStatus("Solicite um novo codigo para continuar.");
+    setAccountStatus("Solicite um novo código para continuar.");
     return;
   }
 
   const formData = new FormData(accountVerificationForm);
   const code = String(formData.get("code") ?? "").trim();
-  setAccountStatus("Conferindo o codigo...");
+  setAccountStatus("Conferindo o código...");
 
   try {
     if (pendingAccountVerification.purpose === "register") {
@@ -6334,25 +6345,25 @@ accountVerificationForm?.addEventListener("submit", async (event) => {
     setStatus(successMessage);
     showAccountModal({ focus: nextFocus });
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel confirmar o codigo.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível confirmar o código.");
   }
 });
 
 accountVerificationResendButton?.addEventListener("click", async () => {
   if (!pendingAccountVerification?.verification?.id) {
-    setAccountStatus("Nao ha nenhum codigo pendente para reenviar.");
+    setAccountStatus("Não há nenhum código pendente para reenviar.");
     return;
   }
 
-  setAccountStatus("Reenviando codigo...");
+  setAccountStatus("Reenviando código...");
   try {
     const payload = await resendAccountVerification({
       verificationId: pendingAccountVerification.verification.id
     });
     setPendingVerification(payload.verification, pendingAccountVerification);
-    setAccountStatus(`Novo codigo enviado para ${payload.verification.destination}.`);
+    setAccountStatus(`Novo código enviado para ${payload.verification.destination}.`);
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel reenviar o codigo.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível reenviar o código.");
   }
 });
 
@@ -6388,7 +6399,7 @@ accountAvatarInput?.addEventListener("change", async () => {
     setAccountStatus("Foto de perfil atualizada com sucesso.");
     setStatus("Foto de perfil atualizada.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar a foto.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar a foto.");
   } finally {
     accountAvatarInput.value = "";
   }
@@ -6403,7 +6414,7 @@ accountAvatarRemoveButton?.addEventListener("click", async () => {
     setAccountStatus("Foto de perfil removida.");
     setStatus("Foto de perfil removida.");
   } catch (error) {
-    setAccountStatus(error instanceof Error ? error.message : "Nao foi possivel remover a foto.");
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível remover a foto.");
   }
 });
 
@@ -6429,49 +6440,49 @@ adminUserSearchInput?.addEventListener("input", () => {
 adminUserProfileForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuario para editar.");
+    setAdminStatus("Selecione um usuário para editar.");
     return;
   }
 
-  setAdminStatus("Salvando dados do usuario...");
+  setAdminStatus("Salvando dados do usuário...");
   try {
     await updateAdminUserProfile(adminState.selectedUserId, {
       displayName: String(adminUserDisplayNameInput?.value ?? "").trim(),
       email: String(adminUserEmailInput?.value ?? "").trim()
     });
-    setAdminStatus("Dados do usuario atualizados.");
+    setAdminStatus("Dados do usuário atualizados.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel salvar os dados do usuario.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível salvar os dados do usuário.");
   }
 });
 
 adminUserPlanForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuario para atualizar o plano.");
+    setAdminStatus("Selecione um usuário para atualizar o plano.");
     return;
   }
 
-  setAdminStatus("Atualizando plano do usuario...");
+  setAdminStatus("Atualizando plano do usuário...");
   try {
     await updateAdminUserPlan(adminState.selectedUserId, {
       plan: String(adminUserPlanInput?.value ?? "free"),
       accessDays: Number(adminUserPlanDaysInput?.value ?? 30)
     });
-    setAdminStatus("Plano do usuario atualizado.");
+    setAdminStatus("Plano do usuário atualizado.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar o plano.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar o plano.");
   }
 });
 
 adminUserCreditsForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuario para atualizar os creditos.");
+    setAdminStatus("Selecione um usuário para atualizar os créditos.");
     return;
   }
 
-  setAdminStatus("Atualizando creditos do usuario...");
+  setAdminStatus("Atualizando créditos do usuário...");
   try {
     await updateAdminUserCredits(adminState.selectedUserId, {
       mode: String(adminUserCreditsModeInput?.value ?? "add"),
@@ -6479,18 +6490,18 @@ adminUserCreditsForm?.addEventListener("submit", async (event) => {
     });
     setAdminStatus("Creditos atualizados.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar os creditos.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar os créditos.");
   }
 });
 
 adminUserDiscountForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!adminState.selectedUserId) {
-    setAdminStatus("Selecione um usuario para atualizar o desconto.");
+    setAdminStatus("Selecione um usuário para atualizar o desconto.");
     return;
   }
 
-  setAdminStatus("Atualizando desconto do usuario...");
+  setAdminStatus("Atualizando desconto do usuário...");
   try {
     await updateAdminUserDiscount(adminState.selectedUserId, {
       percent: Number(adminUserDiscountPercentInput?.value ?? 0),
@@ -6498,13 +6509,13 @@ adminUserDiscountForm?.addEventListener("submit", async (event) => {
     });
     setAdminStatus("Desconto atualizado.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel atualizar o desconto.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível atualizar o desconto.");
   }
 });
 
 adminUserDeleteButton?.addEventListener("click", async () => {
   if (!adminState.selectedUserId || !adminState.selectedUser) {
-    setAdminStatus("Selecione um usuario para remover.");
+    setAdminStatus("Selecione um usuário para remover.");
     return;
   }
 
@@ -6517,14 +6528,14 @@ adminUserDeleteButton?.addEventListener("click", async () => {
     await deleteAdminUser(adminState.selectedUserId);
     setAdminStatus("Conta removida com sucesso.");
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel remover a conta.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível remover a conta.");
   }
 });
 
 adminPromoForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(adminPromoForm);
-  setAdminStatus("Criando codigo promocional...");
+  setAdminStatus("Criando código promocional...");
 
   try {
     const promo = await createAdminPromo({
@@ -6551,7 +6562,7 @@ adminPromoForm?.addEventListener("submit", async (event) => {
     }
     setAdminStatus(`Codigo ${promo?.code ?? "promocional"} criado com sucesso.`);
   } catch (error) {
-    setAdminStatus(error instanceof Error ? error.message : "Nao foi possivel criar o codigo.");
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível criar o código.");
   }
 });
 
@@ -6559,18 +6570,18 @@ redeemForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const code = String(redeemCodeInput?.value ?? "").trim();
   if (!code) {
-    setBillingStatus("Cole um codigo valido para ativar seu acesso.");
+    setBillingStatus("Cole um código válido para ativar seu acesso.");
     redeemCodeInput?.focus();
     return;
   }
 
   redeemSubmitButton.disabled = true;
-  setBillingStatus("Ativando seu codigo...");
+  setBillingStatus("Ativando seu código...");
 
   try {
     await redeemAccessCode(code);
     redeemCodeInput.value = "";
-    setBillingStatus("Codigo ativado com sucesso. Seu plano ja foi atualizado.");
+    setBillingStatus("Código ativado com sucesso. Seu plano já foi atualizado.");
     setStatus("Plano Pro ativado neste navegador.");
     const activeTool = getToolById();
     if (activeTool) {
@@ -6580,7 +6591,7 @@ redeemForm?.addEventListener("submit", async (event) => {
       hideBillingModal();
     }, 900);
   } catch (error) {
-    setBillingStatus(error instanceof Error ? error.message : "Nao foi possivel ativar o codigo.");
+    setBillingStatus(error instanceof Error ? error.message : "Não foi possível ativar o código.");
   } finally {
     redeemSubmitButton.disabled = false;
   }
@@ -6740,7 +6751,7 @@ async function performConversion() {
   try {
     request = validateConversionRequest();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Nao foi possivel iniciar a conversao.";
+    const message = error instanceof Error ? error.message : "Não foi possível iniciar a conversão.";
     setConversionModalStatus(message);
     setStatus(message);
     return;
@@ -6750,7 +6761,7 @@ async function performConversion() {
   hideConversionModal();
   const formData = buildConversionFormData(toolId, files);
   setStatus("Enviando seu arquivo...");
-  setProgress(4, "Preparando conversao...");
+  setProgress(4, "Preparando conversão...");
   showUploadProgress();
   setWorkspaceLoadingState(true, "Convertendo");
   if (conversionConfirmButton) {
@@ -6786,7 +6797,7 @@ async function performConversion() {
       xhr.addEventListener("error", () => {
         stopProgressAnimation();
         hideUploadProgress();
-        reject(new Error("Falha de rede durante a conversao."));
+        reject(new Error("Falha de rede durante a conversão."));
       });
 
       xhr.addEventListener("abort", () => {
@@ -6806,7 +6817,7 @@ async function performConversion() {
           return { message: "Falha inesperada." };
         }
       });
-      setProgress(0, "Falha na conversao");
+      setProgress(0, "Falha na conversão");
       throw new Error(payload.message ?? "Falha inesperada.");
     }
 
@@ -6838,7 +6849,7 @@ async function performConversion() {
   } catch (error) {
     stopProgressAnimation();
     hideUploadProgress();
-    const message = error instanceof Error ? error.message : "Nao foi possivel concluir a conversao.";
+    const message = error instanceof Error ? error.message : "Não foi possível concluir a conversão.";
     if (/plano pro|premium|limite gratuito/iu.test(message)) {
       promptAccountPlanAccess(tool);
     }
@@ -6870,7 +6881,7 @@ Promise.allSettled([loadTools(), refreshAccessSession()]).then((results) => {
   const [toolsResult, accessResult] = results;
 
   if (toolsResult.status === "rejected") {
-    setStatus("Nao foi possivel carregar o catalogo de ferramentas.");
+    setStatus("Não foi possível carregar o catálogo de ferramentas.");
     return;
   }
 

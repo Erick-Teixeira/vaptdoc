@@ -96,10 +96,10 @@ export const toolCatalog = {
     accent: "coral",
     headline: "Editable OCR workflow",
     description:
-      "Converte PDF em DOCX editavel com OCR via iLovePDF quando necessario e recompilacao local orientada a layout.",
+      "Converte PDF em DOCX editável com OCR via iLovePDF quando necessário e recompilação local orientada a layout.",
     providerHint: "iLovePDF OCR + DOCX local",
     accept: ".pdf,application/pdf",
-    fileHint: "Escolha um PDF para transformar em DOCX editavel.",
+    fileHint: "Escolha um PDF para transformar em DOCX editável.",
     textLayoutSupport: {
       enabled: true,
       defaultMode: "blocks"
@@ -115,9 +115,9 @@ export const toolCatalog = {
     outputMime: "application/octet-stream",
     category: "3d",
     accent: "sky",
-    headline: "Impressao 3D e modelos",
+    headline: "Impressão 3D e modelos",
     description:
-      "Converte modelos 3D e arquivos de impressao com motor Aspose 3D dedicado e fallback cloud quando necessario.",
+      "Converte modelos 3D e arquivos de impressão com motor Aspose 3D dedicado e fallback cloud quando necessário.",
     providerHint: "Aspose 3D local + cloud",
     accept:
       ".stl,.obj,.step,.stp,.fbx,.dae,.amf,.ply,.glb,.gltf,.3ds,.u3d,.drc,.rvm,.usd,.usdz,model/stl,model/obj,model/gltf-binary,model/gltf+json,model/vnd.collada+xml,application/octet-stream",
@@ -204,7 +204,7 @@ export const toolCatalog = {
     category: "imagens",
     accent: "cyan",
     headline: "Lossless image swap",
-    description: "Mesmo pipeline do JPG para PNG, exposto como ferramenta dedicada para descoberta mais rapida.",
+    description: "Mesmo pipeline do JPG para PNG, exposto como ferramenta dedicada para descoberta mais rápida.",
     providerHint: "Engine local com Sharp",
     accept: ".jpg,.jpeg,image/jpeg",
     fileHint: "Escolha uma imagem JPEG."
@@ -219,7 +219,7 @@ export const toolCatalog = {
     category: "imagens",
     accent: "teal",
     headline: "Compressed export",
-    description: "Converte PNG para JPG com compressao controlada e fundo branco para areas transparentes.",
+    description: "Converte PNG para JPG com compressão controlada e fundo branco para áreas transparentes.",
     providerHint: "Engine local com Sharp",
     accept: ".png,image/png",
     fileHint: "Escolha uma imagem PNG."
@@ -234,7 +234,7 @@ export const toolCatalog = {
     category: "imagens",
     accent: "teal",
     headline: "Compressed export",
-    description: "Variante da exportacao PNG para JPEG para quem busca nomenclatura explicita.",
+    description: "Variante da exportação PNG para JPEG para quem busca nomenclatura explícita.",
     providerHint: "Engine local com Sharp",
     accept: ".png,image/png",
     fileHint: "Escolha uma imagem PNG."
@@ -249,10 +249,10 @@ export const toolCatalog = {
     category: "audio",
     accent: "lime",
     headline: "Fast audio extraction",
-    description: "Extrai audio de MP4 em MP3 com bitrate alto usando FFmpeg em processo isolado.",
+    description: "Extrai áudio de MP4 em MP3 com bitrate alto usando FFmpeg em processo isolado.",
     providerHint: "Engine local com FFmpeg",
     accept: ".mp4,video/mp4",
-    fileHint: "Escolha um video MP4 para extrair o audio."
+    fileHint: "Escolha um vídeo MP4 para extrair o áudio."
   },
   "pdf-to-text": {
     id: "pdf-to-text",
@@ -264,7 +264,7 @@ export const toolCatalog = {
     category: "extracao",
     accent: "sand",
     headline: "Text extraction",
-    description: "Extrai texto de PDFs com leitura nativa e OCR automatico para digitalizacoes.",
+    description: "Extrai texto de PDFs com leitura nativa e OCR automático para digitalizações.",
     providerHint: "Parser local + iLovePDF OCR",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF para extrair o texto.",
@@ -284,7 +284,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "coral",
     headline: "Merge files",
-    description: "Junta dois ou mais PDFs em um unico arquivo com a ordem enviada.",
+    description: "Junta dois ou mais PDFs em um único arquivo com a ordem enviada.",
     providerHint: "iLovePDF Merge",
     accept: ".pdf,application/pdf",
     allowsMultipleFiles: true,
@@ -303,7 +303,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "sky",
     headline: "Split pages",
-    description: "Divide um PDF por intervalos, por quantidade fixa de paginas ou removendo paginas.",
+    description: "Divide um PDF por intervalos, por quantidade fixa de páginas ou removendo páginas.",
     providerHint: "iLovePDF Split",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF para dividir.",
@@ -315,8 +315,8 @@ export const toolCatalog = {
         defaultValue: "ranges",
         choices: [
           { value: "ranges", label: "Por intervalos" },
-          { value: "fixed_range", label: "A cada N paginas" },
-          { value: "remove_pages", label: "Remover paginas" }
+          { value: "fixed_range", label: "A cada N páginas" },
+          { value: "remove_pages", label: "Remover páginas" }
         ]
       },
       {
@@ -330,7 +330,7 @@ export const toolCatalog = {
       {
         name: "fixedRange",
         type: "number",
-        label: "Paginas por arquivo",
+        label: "Páginas por arquivo",
         min: 1,
         max: 500,
         step: 1,
@@ -340,15 +340,15 @@ export const toolCatalog = {
       {
         name: "removePages",
         type: "text",
-        label: "Paginas para remover",
+        label: "Páginas para remover",
         placeholder: "2-4,8",
-        help: "O resultado volta como um unico PDF sem essas paginas.",
+        help: "O resultado volta como um único PDF sem essas páginas.",
         showWhen: { field: "splitMode", values: ["remove_pages"] }
       },
       {
         name: "mergeAfter",
         type: "checkbox",
-        label: "Unir os intervalos novamente em um unico PDF",
+        label: "Unir os intervalos novamente em um único PDF",
         defaultValue: false,
         showWhen: { field: "splitMode", values: ["ranges"] }
       }
@@ -365,7 +365,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "sand",
     headline: "Smaller file size",
-    description: "Reduz o tamanho do PDF mantendo o melhor equilibrio possivel entre qualidade e peso.",
+    description: "Reduz o tamanho do PDF mantendo o melhor equilíbrio possível entre qualidade e peso.",
     providerHint: "iLovePDF Compress",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF para compactar.",
@@ -373,12 +373,12 @@ export const toolCatalog = {
       {
         name: "compressionLevel",
         type: "select",
-        label: "Nivel de compressao",
+        label: "Nível de compressão",
         defaultValue: "recommended",
         choices: [
-          { value: "low", label: "Baixa compressao" },
+          { value: "low", label: "Baixa compressão" },
           { value: "recommended", label: "Equilibrada" },
-          { value: "extreme", label: "Maxima compressao" }
+          { value: "extreme", label: "Máxima compressão" }
         ]
       }
     ]
@@ -394,7 +394,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "amber",
     headline: "Searchable PDF",
-    description: "Converte um PDF escaneado em um PDF pesquisavel com OCR oficial do iLovePDF.",
+    description: "Converte um PDF escaneado em um PDF pesquisável com OCR oficial do iLovePDF.",
     providerHint: "iLovePDF OCR PDF",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF escaneado para aplicar OCR."
@@ -410,7 +410,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "coral",
     headline: "Page rendering",
-    description: "Converte paginas do PDF em imagens JPG ou extrai as imagens internas do arquivo.",
+    description: "Converte páginas do PDF em imagens JPG ou extrai as imagens internas do arquivo.",
     providerHint: "iLovePDF PDF to JPG",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF para converter em imagens.",
@@ -421,14 +421,14 @@ export const toolCatalog = {
         label: "Modo",
         defaultValue: "pages",
         choices: [
-          { value: "pages", label: "Renderizar paginas" },
+          { value: "pages", label: "Renderizar páginas" },
           { value: "extract", label: "Extrair imagens internas" }
         ]
       },
       {
         name: "dpi",
         type: "number",
-        label: "Resolucao (DPI)",
+        label: "Resolução (DPI)",
         min: 72,
         max: 300,
         step: 1,
@@ -448,18 +448,18 @@ export const toolCatalog = {
     category: "pdf",
     accent: "teal",
     headline: "Images to PDF",
-    description: "Transforma uma ou varias imagens em PDF usando o conversor oficial do iLovePDF.",
+    description: "Transforma uma ou várias imagens em PDF usando o conversor oficial do iLovePDF.",
     providerHint: "iLovePDF Image to PDF",
     accept: ".jpg,.jpeg,.png,.tif,.tiff,image/jpeg,image/png,image/tiff",
     allowsMultipleFiles: true,
     minFiles: 1,
     maxFiles: 10,
-    fileHint: "Selecione uma ou varias imagens para gerar um PDF.",
+    fileHint: "Selecione uma ou várias imagens para gerar um PDF.",
     optionFields: [
       {
         name: "imagePdfOrientation",
         type: "select",
-        label: "Orientacao",
+        label: "Orientação",
         defaultValue: "portrait",
         choices: [
           { value: "portrait", label: "Retrato" },
@@ -469,10 +469,10 @@ export const toolCatalog = {
       {
         name: "imagePdfPageSize",
         type: "select",
-        label: "Tamanho da pagina",
+        label: "Tamanho da página",
         defaultValue: "fit",
         choices: [
-          { value: "fit", label: "Ajustar ao conteudo" },
+          { value: "fit", label: "Ajustar ao conteúdo" },
           { value: "A4", label: "A4" },
           { value: "letter", label: "Letter" }
         ]
@@ -489,7 +489,7 @@ export const toolCatalog = {
       {
         name: "imagePdfMergeAfter",
         type: "checkbox",
-        label: "Gerar um unico PDF",
+        label: "Gerar um único PDF",
         defaultValue: true
       }
     ]
@@ -505,7 +505,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "sky",
     headline: "Archive-ready PDF",
-    description: "Converte seu PDF para um formato PDF/A voltado a preservacao e arquivamento.",
+    description: "Converte seu PDF para um formato PDF/A voltado a preservação e arquivamento.",
     providerHint: "iLovePDF PDF/A",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF para converter em PDF/A.",
@@ -529,7 +529,7 @@ export const toolCatalog = {
       {
         name: "allowDowngrade",
         type: "checkbox",
-        label: "Permitir ajuste automatico de conformidade",
+        label: "Permitir ajuste automático de conformidade",
         defaultValue: true
       }
     ]
@@ -553,13 +553,13 @@ export const toolCatalog = {
       {
         name: "htmlSinglePage",
         type: "checkbox",
-        label: "Tentar gerar em pagina unica",
+        label: "Tentar gerar em página única",
         defaultValue: false
       },
       {
         name: "htmlPageSize",
         type: "select",
-        label: "Tamanho da pagina",
+        label: "Tamanho da página",
         defaultValue: "A4",
         choices: [
           { value: "A3", label: "A3" },
@@ -572,7 +572,7 @@ export const toolCatalog = {
       {
         name: "htmlPageOrientation",
         type: "select",
-        label: "Orientacao",
+        label: "Orientação",
         defaultValue: "portrait",
         choices: [
           { value: "portrait", label: "Retrato" },
@@ -601,7 +601,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "sky",
     headline: "Compliance report",
-    description: "Gera um relatorio de conformidade PDF/A em vez de converter o arquivo.",
+    description: "Gera um relatório de conformidade PDF/A em vez de converter o arquivo.",
     providerHint: "iLovePDF Validate PDF/A",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF para validar em PDF/A.",
@@ -635,7 +635,7 @@ export const toolCatalog = {
     category: "pdf",
     accent: "teal",
     headline: "Quick rotation",
-    description: "Gira todas as paginas do PDF de forma uniforme.",
+    description: "Gira todas as páginas do PDF de forma uniforme.",
     providerHint: "iLovePDF Rotate",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF para girar.",
@@ -643,7 +643,7 @@ export const toolCatalog = {
       {
         name: "rotateAngle",
         type: "select",
-        label: "Rotacao",
+        label: "Rotação",
         defaultValue: "90",
         choices: [
           { value: "90", label: "90 graus" },
@@ -664,7 +664,7 @@ export const toolCatalog = {
     category: "seguranca",
     accent: "sky",
     headline: "Remove password",
-    description: "Remove a senha de abertura de um PDF quando voce possui a senha atual.",
+    description: "Remove a senha de abertura de um PDF quando você possui a senha atual.",
     providerHint: "iLovePDF Unlock",
     accept: ".pdf,application/pdf",
     fileHint: "Escolha um PDF protegido e informe a senha atual, se houver.",
@@ -697,7 +697,7 @@ export const toolCatalog = {
         name: "protectPassword",
         type: "password",
         label: "Nova senha",
-        placeholder: "Minimo de 4 caracteres"
+        placeholder: "Mínimo de 4 caracteres"
       }
     ]
   },
@@ -727,25 +727,25 @@ export const toolCatalog = {
       {
         name: "watermarkPages",
         type: "text",
-        label: "Paginas",
+        label: "Páginas",
         placeholder: "Todas ou ex.: 1-3,5",
         help: "Deixe vazio para aplicar em todas."
       },
       {
         name: "watermarkVerticalPosition",
         type: "select",
-        label: "Posicao vertical",
+        label: "Posição vertical",
         defaultValue: "middle",
         choices: [
           { value: "top", label: "Topo" },
           { value: "middle", label: "Meio" },
-          { value: "bottom", label: "Rodape" }
+          { value: "bottom", label: "Rodapé" }
         ]
       },
       {
         name: "watermarkHorizontalPosition",
         type: "select",
-        label: "Posicao horizontal",
+        label: "Posição horizontal",
         defaultValue: "center",
         choices: [
           { value: "left", label: "Esquerda" },
@@ -756,7 +756,7 @@ export const toolCatalog = {
       {
         name: "watermarkRotation",
         type: "number",
-        label: "Rotacao",
+        label: "Rotação",
         min: 0,
         max: 360,
         step: 1,
@@ -775,7 +775,7 @@ export const toolCatalog = {
   },
   "pdf-page-numbers": {
     id: "pdf-page-numbers",
-    label: "Numerar paginas",
+    label: "Numerar páginas",
     shortLabel: "Page Numbers",
     access: "pro",
     inputKinds: ["pdf"],
@@ -784,10 +784,10 @@ export const toolCatalog = {
     category: "pdf",
     accent: "sky",
     headline: "Page numbering",
-    description: "Adiciona numeracao automatica ao PDF.",
+    description: "Adiciona numeração automática ao PDF.",
     providerHint: "iLovePDF Page Numbers",
     accept: ".pdf,application/pdf",
-    fileHint: "Escolha um PDF para adicionar numeros de pagina.",
+    fileHint: "Escolha um PDF para adicionar números de página.",
     optionFields: [
       {
         name: "pageNumbersStartingNumber",
@@ -801,24 +801,24 @@ export const toolCatalog = {
       {
         name: "pageNumbersPages",
         type: "text",
-        label: "Paginas",
+        label: "Páginas",
         placeholder: "Todas ou ex.: 1-3,5",
         help: "Deixe vazio para numerar todas."
       },
       {
         name: "pageNumbersVerticalPosition",
         type: "select",
-        label: "Posicao vertical",
+        label: "Posição vertical",
         defaultValue: "bottom",
         choices: [
           { value: "top", label: "Topo" },
-          { value: "bottom", label: "Rodape" }
+          { value: "bottom", label: "Rodapé" }
         ]
       },
       {
         name: "pageNumbersHorizontalPosition",
         type: "select",
-        label: "Posicao horizontal",
+        label: "Posição horizontal",
         defaultValue: "center",
         choices: [
           { value: "left", label: "Esquerda" },
@@ -830,7 +830,7 @@ export const toolCatalog = {
         name: "pageNumbersText",
         type: "text",
         label: "Texto opcional",
-        placeholder: "Ex.: Pagina"
+        placeholder: "Ex.: Página"
       }
     ]
   },
@@ -852,7 +852,7 @@ export const toolCatalog = {
   },
   "pdf-extract": {
     id: "pdf-extract",
-    label: "Extracao avancada",
+    label: "Extração avançada",
     shortLabel: "Extract PDF",
     access: "pro",
     inputKinds: ["pdf"],
@@ -861,10 +861,10 @@ export const toolCatalog = {
     category: "extracao",
     accent: "sand",
     headline: "Detailed extraction",
-    description: "Extrai texto nativo do PDF pela API oficial do iLovePDF, com opcao de CSV detalhado.",
+    description: "Extrai texto nativo do PDF pela API oficial do iLovePDF, com opção de CSV detalhado.",
     providerHint: "iLovePDF Extract",
     accept: ".pdf,application/pdf",
-    fileHint: "Escolha um PDF para extracao textual detalhada.",
+    fileHint: "Escolha um PDF para extração textual detalhada.",
     optionFields: [
       {
         name: "extractDetailed",
@@ -892,39 +892,39 @@ export const toolCatalog = {
     category: "pdf",
     accent: "amber",
     headline: "Stamp custom text",
-    description: "Insere um texto editavel em posicao predefinida no PDF usando o editor do iLovePDF.",
+    description: "Insere um texto editável em posição predefinida no PDF usando o editor do iLovePDF.",
     providerHint: "iLovePDF Edit PDF",
     accept: ".pdf,application/pdf",
-    fileHint: "Escolha um PDF para inserir texto editavel.",
+    fileHint: "Escolha um PDF para inserir texto editável.",
     optionFields: [
       {
         name: "editText",
         type: "text",
         label: "Texto para inserir",
         defaultValue: "Editado com vaptdoc",
-        placeholder: "Digite o texto que sera inserido",
+        placeholder: "Digite o texto que será inserido",
         fullWidth: true
       },
       {
         name: "editPages",
         type: "text",
-        label: "Paginas",
+        label: "Páginas",
         placeholder: "1 ou 1-3",
-        help: "Deixe vazio para aplicar na primeira pagina."
+        help: "Deixe vazio para aplicar na primeira página."
       },
       {
         name: "editPosition",
         type: "select",
-        label: "Posicao",
+        label: "Posição",
         defaultValue: "bottom-center",
         choices: [
           { value: "top-left", label: "Topo esquerdo" },
           { value: "top-center", label: "Topo centro" },
           { value: "top-right", label: "Topo direito" },
           { value: "middle-center", label: "Centro" },
-          { value: "bottom-left", label: "Rodape esquerdo" },
-          { value: "bottom-center", label: "Rodape centro" },
-          { value: "bottom-right", label: "Rodape direito" }
+          { value: "bottom-left", label: "Rodapé esquerdo" },
+          { value: "bottom-center", label: "Rodapé centro" },
+          { value: "bottom-right", label: "Rodapé direito" }
         ]
       },
       {
@@ -939,7 +939,7 @@ export const toolCatalog = {
       {
         name: "editRotation",
         type: "number",
-        label: "Rotacao",
+        label: "Rotação",
         min: 0,
         max: 360,
         step: 1,
