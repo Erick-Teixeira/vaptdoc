@@ -25,6 +25,8 @@ const dropzoneTitle = document.getElementById("dropzone-title");
 const dropzoneCopy = document.getElementById("dropzone-copy");
 const fileStage = document.getElementById("file-stage");
 const statusText = document.getElementById("status-text");
+const toastLiveRegion = document.getElementById("toast-live-region");
+const toastViewport = document.getElementById("toast-viewport");
 const textLayoutField = document.getElementById("text-layout-field");
 const textLayoutHint = document.getElementById("text-layout-hint");
 const toolOptions = document.getElementById("tool-options");
@@ -323,11 +325,31 @@ const browserThemeColors = {
   light: "#7d38ff",
   dark: "#5d31c7"
 };
+const statusSilencePatterns = [
+  /^Carregando\b/i,
+  /^Preparando\b/i,
+  /^Enviando\b/i,
+  /^Confirmando\b/i,
+  /^Atualizando\b/i,
+  /^Salvando\b/i,
+  /^Removendo\b/i,
+  /^Criando\b/i,
+  /^Entrando\b/i,
+  /^Conferindo\b/i,
+  /^Reenviando\b/i,
+  /^Ativando\b/i,
+  /^Entre ou crie sua conta\b/i,
+  /^Digite o código enviado\b/i,
+  /^Sua conta está protegida\b/i,
+  /^Sua conta do dono está protegida\b/i
+];
 const quietStatusMessages = new Set([
   "Pronto para converter.",
   "Aguardando arquivo",
   "Enviando seu arquivo..."
 ]);
+const toastTimers = new Map();
+let toastSequence = 0;
 const defaultSiteUrl = window.location.origin || "https://transmutalab.up.railway.app";
 const initialPageData = (() => {
   try {
@@ -1029,11 +1051,13 @@ function renderToolHelp(tool) {
 
 function setStatus(message) {
   if (!statusText) {
+    announceToast(message);
     return;
   }
 
   statusText.textContent = message;
   statusText.hidden = !message || quietStatusMessages.has(message);
+  announceToast(message);
 }
 
 function setProgress(value, label) {
@@ -1470,12 +1494,138 @@ function setBillingStatus(message) {
   if (billingStatus) {
     billingStatus.textContent = message;
   }
+  announceToast(message);
 }
 
-function setAccountStatus(message) {
+function setAccountStatus(message, options = {}) {
   accountStatusOutputs.forEach((element) => {
     element.textContent = message;
   });
+  announceToast(message, options);
+}
+
+function getToastTone(message, explicitTone) {
+  if (explicitTone) {
+    return explicitTone;
+  }
+
+  if (/(não foi possível|nao foi possivel|falha|erro|inválid|invalido|ultrapassa|máximo|maximo|selecione|escolha|faz parte do plano pro|não há nenhum código|nao ha nenhum codigo)/i.test(message)) {
+    return "error";
+  }
+
+  if (/(aprovad|atualizad|ativad|copiad|removid|conectad|encerrad|confirmad|concluíd|concluid|liberad|enviado|salvo|pronto)/i.test(message)) {
+    return "success";
+  }
+
+  return "info";
+}
+
+function shouldShowToast(message, options = {}) {
+  if (options.toast === false || !message) {
+    return false;
+  }
+
+  if (quietStatusMessages.has(message)) {
+    return false;
+  }
+
+  return !statusSilencePatterns.some((pattern) => pattern.test(message));
+}
+
+function clearToastTimer(toastId) {
+  const timer = toastTimers.get(toastId);
+  if (timer) {
+    clearTimeout(timer);
+    toastTimers.delete(toastId);
+  }
+}
+
+function removeToast(toast, immediate = false) {
+  if (!toast) {
+    return;
+  }
+
+  clearToastTimer(toast.dataset.toastId);
+
+  if (immediate) {
+    toast.remove();
+    return;
+  }
+
+  toast.classList.remove("is-visible");
+  toast.classList.add("is-leaving");
+  window.setTimeout(() => {
+    toast.remove();
+  }, 180);
+}
+
+function announceToast(message, options = {}) {
+  if (!shouldShowToast(message, options)) {
+    return;
+  }
+
+  if (toastLiveRegion) {
+    toastLiveRegion.textContent = "";
+    window.setTimeout(() => {
+      toastLiveRegion.textContent = message;
+    }, 10);
+  }
+
+  if (!toastViewport) {
+    return;
+  }
+
+  const existingToast = Array.from(toastViewport.children).find((node) => node.dataset?.toastMessage === message);
+  if (existingToast) {
+    clearToastTimer(existingToast.dataset.toastId);
+    existingToast.classList.remove("is-leaving");
+    existingToast.classList.add("is-visible");
+    const duration = options.duration ?? (existingToast.classList.contains("toast-error") ? 6200 : 4200);
+    const timer = window.setTimeout(() => removeToast(existingToast), duration);
+    toastTimers.set(existingToast.dataset.toastId, timer);
+    return;
+  }
+
+  const tone = getToastTone(message, options.tone);
+  const toastId = `toast-${Date.now()}-${++toastSequence}`;
+  const toast = document.createElement("article");
+  toast.className = `toast toast-${tone}`;
+  toast.dataset.toastId = toastId;
+  toast.dataset.toastMessage = message;
+  toast.setAttribute("role", tone === "error" ? "alert" : "status");
+
+  const copy = document.createElement("div");
+  copy.className = "toast-copy";
+
+  const heading = document.createElement("strong");
+  heading.textContent = tone === "error" ? "Atenção" : tone === "success" ? "Concluído" : "Aviso";
+
+  const text = document.createElement("p");
+  text.textContent = message;
+  copy.append(heading, text);
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "toast-close";
+  closeButton.setAttribute("aria-label", "Fechar aviso");
+  closeButton.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>';
+  closeButton.addEventListener("click", () => removeToast(toast));
+
+  toast.append(copy, closeButton);
+  toastViewport.append(toast);
+
+  while (toastViewport.children.length > 4) {
+    removeToast(toastViewport.firstElementChild, true);
+  }
+
+  window.requestAnimationFrame(() => {
+    toast.classList.add("is-visible");
+  });
+
+  const duration = options.duration ?? (tone === "error" ? 6200 : 4200);
+  const timer = window.setTimeout(() => removeToast(toast), duration);
+  toastTimers.set(toastId, timer);
 }
 
 function buildVerificationUiState(verification, context = {}) {
@@ -2582,6 +2732,7 @@ function setAdminStatus(message) {
   if (adminStatus) {
     adminStatus.textContent = message;
   }
+  announceToast(message);
 }
 
 function renderAdminPaneState() {
