@@ -1448,6 +1448,10 @@ body.android-fullscreen-dialogs .billing-close {
   grid-column: 1 / -1;
 }
 
+#account-menu-admin {
+  grid-column: 1 / -1;
+}
+
 .menu-action-icon {
   display: grid;
   place-items: center;
@@ -1478,6 +1482,19 @@ html[data-theme="dark"] .menu-action-icon {
   display: grid;
   grid-template-columns: minmax(240px, 0.82fr) minmax(0, 1.18fr);
   gap: 0.9rem;
+}
+
+.account-subscription-stack {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.account-subscription-card {
+  gap: 0.9rem;
+}
+
+.account-subscription-manage-button {
+  justify-self: stretch;
 }
 
 .account-shell-sidebar,

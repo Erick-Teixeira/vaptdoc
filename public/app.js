@@ -79,6 +79,13 @@ const accountPopoverProgressFill = document.getElementById("account-popover-prog
 const accountPopoverProgressLabel = document.getElementById("account-popover-progress-label");
 const accountPopoverProgressMeta = document.getElementById("account-popover-progress-meta");
 const accountPopoverCloseButton = document.getElementById("account-popover-close");
+const accountSubscriptionPlanBadge = document.getElementById("account-subscription-plan-badge");
+const accountSubscriptionPlanMeta = document.getElementById("account-subscription-plan-meta");
+const accountSubscriptionPlanTitle = document.getElementById("account-subscription-plan-title");
+const accountSubscriptionPlanCopy = document.getElementById("account-subscription-plan-copy");
+const accountSubscriptionProgressFill = document.getElementById("account-subscription-progress-fill");
+const accountSubscriptionProgressLabel = document.getElementById("account-subscription-progress-label");
+const accountSubscriptionProgressMeta = document.getElementById("account-subscription-progress-meta");
 const accountMenuOverview = document.getElementById("account-menu-overview");
 const accountMenuOverviewLabel = document.getElementById("account-menu-overview-label");
 const accountMenuProfile = document.getElementById("account-menu-profile");
@@ -130,12 +137,14 @@ const billingStatus = document.getElementById("billing-status");
 const accountRegisterModal = document.getElementById("account-register-modal");
 const accountLoginModal = document.getElementById("account-login-modal");
 const accountOverviewModal = document.getElementById("account-overview-modal");
+const accountSubscriptionModal = document.getElementById("account-subscription-modal");
 const accountProfileModal = document.getElementById("account-profile-modal");
 const accountSettingsModal = document.getElementById("account-settings-modal");
 const accountVerificationModal = document.getElementById("account-verification-modal");
 const accountRegisterCloseButton = document.getElementById("account-register-close");
 const accountLoginCloseButton = document.getElementById("account-login-close");
 const accountOverviewCloseButton = document.getElementById("account-overview-close");
+const accountSubscriptionCloseButton = document.getElementById("account-subscription-close");
 const accountProfileCloseButton = document.getElementById("account-profile-close");
 const accountSettingsCloseButton = document.getElementById("account-settings-close");
 const accountVerificationCloseButton = document.getElementById("account-verification-close");
@@ -151,6 +160,7 @@ const accountPasswordForm = document.getElementById("account-password-form");
 const accountVerificationForm = document.getElementById("account-verification-form");
 const accountLogoutButton = document.getElementById("account-logout");
 const accountUpgradeButton = document.getElementById("account-upgrade-button");
+const accountSubscriptionManageButton = document.getElementById("account-subscription-manage-button");
 const accountStatusOutputs = Array.from(document.querySelectorAll("[data-account-status]"));
 const accountPlanValue = document.getElementById("account-plan-value");
 const accountPlanCopy = document.getElementById("account-plan-copy");
@@ -246,6 +256,7 @@ const accountPaneModals = [
   accountRegisterModal,
   accountLoginModal,
   accountOverviewModal,
+  accountSubscriptionModal,
   accountProfileModal,
   accountSettingsModal,
   accountVerificationModal,
@@ -2063,6 +2074,10 @@ function getAccountModalByFocus(focus) {
     return accountLoginModal;
   }
 
+  if (focus === "subscription") {
+    return accountSubscriptionModal;
+  }
+
   if (focus === "profile") {
     return accountProfileModal;
   }
@@ -2091,6 +2106,10 @@ function getAccountModalFocusTarget(focus) {
     return document.getElementById("login-email") ?? accountLoginCloseButton;
   }
 
+  if (focus === "subscription") {
+    return accountSubscriptionManageButton ?? accountSubscriptionCloseButton;
+  }
+
   if (focus === "profile") {
     return accountDisplayNameInput ?? accountProfileCloseButton;
   }
@@ -2113,7 +2132,7 @@ function getAccountModalFocusTarget(focus) {
 function showAccountModal(options = {}) {
   const requestedFocus = options.focus ?? (isAccountAuthenticated() ? "overview" : "login");
   const allowedGuestFocus = new Set(["register", "login"]);
-  const allowedAuthenticatedFocus = new Set(["overview", "profile", "verify", "settings", "admin", "close"]);
+  const allowedAuthenticatedFocus = new Set(["overview", "subscription", "profile", "verify", "settings", "admin", "close"]);
   let focus = requestedFocus;
   if (!isAccountAuthenticated() && !allowedGuestFocus.has(requestedFocus)) {
     focus = requestedFocus === "verify" ? "verify" : "login";
@@ -2282,33 +2301,53 @@ function renderAccountUi() {
   if (accountPopoverEmail) {
     accountPopoverEmail.textContent = authenticated ? (accountState.user?.email ?? "") : "Salve seu plano e seus dados";
   }
-  if (accountPopoverPlanBadge) {
-    accountPopoverPlanBadge.textContent = getPopoverPlanBadgeLabel();
-    accountPopoverPlanBadge.dataset.plan = accessSession?.plan ?? "free";
-  }
-  if (accountPopoverPlanMeta) {
-    accountPopoverPlanMeta.textContent = getPopoverPlanMeta();
-  }
-  if (accountPopoverPlanTitle) {
-    accountPopoverPlanTitle.textContent = authenticated
-      ? `Ola, ${accountState.user?.displayName ?? "sua conta"}`
-      : "Seu conversor favorito sempre pronto";
-  }
-  if (accountPopoverPlanCopy) {
-    accountPopoverPlanCopy.textContent = authenticated
-      ? getAccountPlanDescription()
-      : "Entre para guardar seu plano, acompanhar o uso e acessar upgrades em poucos toques.";
-  }
+  const planBadgeLabel = getPopoverPlanBadgeLabel();
+  const planMeta = getPopoverPlanMeta();
+  const planTitle = authenticated
+    ? `Ola, ${accountState.user?.displayName ?? "sua conta"}`
+    : "Seu conversor favorito sempre pronto";
+  const planCopy = authenticated
+    ? getAccountPlanDescription()
+    : "Entre para guardar seu plano, acompanhar o uso e acessar upgrades em poucos toques.";
+
+  [accountPopoverPlanBadge, accountSubscriptionPlanBadge].forEach((element) => {
+    if (!element) {
+      return;
+    }
+    element.textContent = planBadgeLabel;
+    element.dataset.plan = accessSession?.plan ?? "free";
+  });
+  [accountPopoverPlanMeta, accountSubscriptionPlanMeta].forEach((element) => {
+    if (element) {
+      element.textContent = planMeta;
+    }
+  });
+  [accountPopoverPlanTitle, accountSubscriptionPlanTitle].forEach((element) => {
+    if (element) {
+      element.textContent = planTitle;
+    }
+  });
+  [accountPopoverPlanCopy, accountSubscriptionPlanCopy].forEach((element) => {
+    if (element) {
+      element.textContent = planCopy;
+    }
+  });
   const usageProgress = getPopoverUsageProgress();
-  if (accountPopoverProgressFill) {
-    accountPopoverProgressFill.style.width = `${usageProgress.percent}%`;
-  }
-  if (accountPopoverProgressLabel) {
-    accountPopoverProgressLabel.textContent = usageProgress.label;
-  }
-  if (accountPopoverProgressMeta) {
-    accountPopoverProgressMeta.textContent = usageProgress.meta;
-  }
+  [accountPopoverProgressFill, accountSubscriptionProgressFill].forEach((element) => {
+    if (element) {
+      element.style.width = `${usageProgress.percent}%`;
+    }
+  });
+  [accountPopoverProgressLabel, accountSubscriptionProgressLabel].forEach((element) => {
+    if (element) {
+      element.textContent = usageProgress.label;
+    }
+  });
+  [accountPopoverProgressMeta, accountSubscriptionProgressMeta].forEach((element) => {
+    if (element) {
+      element.textContent = usageProgress.meta;
+    }
+  });
   for (const menuButton of [accountMenuProfile, accountMenuSubscription, accountMenuTheme, accountMenuLogout]) {
     if (menuButton) {
       menuButton.hidden = !authenticated;
@@ -6291,6 +6330,7 @@ billingModal?.addEventListener("click", (event) => {
   accountRegisterCloseButton,
   accountLoginCloseButton,
   accountOverviewCloseButton,
+  accountSubscriptionCloseButton,
   accountProfileCloseButton,
   accountSettingsCloseButton,
   accountVerificationCloseButton,
@@ -6352,7 +6392,7 @@ accountMenuProfile?.addEventListener("click", () => {
 });
 accountMenuSubscription?.addEventListener("click", () => {
   hideAccountMenu();
-  showBillingModal({ tool: getToolById() });
+  showAccountModal({ focus: "subscription" });
 });
 accountMenuTheme?.addEventListener("click", () => {
   hideAccountMenu();
@@ -6372,6 +6412,9 @@ accountMenuLogout?.addEventListener("click", async () => {
   }
 });
 accountUpgradeButton?.addEventListener("click", () => {
+  showBillingModal({ tool: getToolById() });
+});
+accountSubscriptionManageButton?.addEventListener("click", () => {
   showBillingModal({ tool: getToolById() });
 });
 accountLogoutButton?.addEventListener("click", async () => {

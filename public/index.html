@@ -107,7 +107,7 @@
             </div>
           </div>
 
-          <section class="account-popover-plan-card" aria-live="polite">
+          <section class="account-popover-plan-card" aria-live="polite" hidden>
             <div class="account-popover-plan-topline">
               <div class="account-popover-plan-topline-copy">
                 <span class="account-popover-plan-badge" id="account-popover-plan-badge">Grátis</span>
@@ -880,6 +880,52 @@
         </div>
 
         <p class="billing-status account-status-output" data-account-status>Sua conta está protegida. Use os atalhos para abrir cada ajuste em seu próprio modal.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="account-subscription-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar assinatura" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="account-subscription-title">
+        <button type="button" class="billing-close" id="account-subscription-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+
+        <div class="billing-header">
+          <span class="selection-kicker">Assinatura</span>
+          <h2 id="account-subscription-title">Seu plano e benefícios</h2>
+          <p>Veja o status da sua assinatura e abra o gerenciamento do plano quando quiser.</p>
+        </div>
+
+        <div class="account-subscription-stack">
+          <section class="account-popover-plan-card account-subscription-card" aria-live="polite">
+            <div class="account-popover-plan-topline">
+              <div class="account-popover-plan-topline-copy">
+                <span class="account-popover-plan-badge" id="account-subscription-plan-badge">Grátis</span>
+                <span class="account-popover-plan-meta" id="account-subscription-plan-meta">Uso rápido no navegador</span>
+              </div>
+            </div>
+            <div class="account-popover-plan-copy">
+              <strong id="account-subscription-plan-title">Seu acesso está pronto para converter</strong>
+              <p id="account-subscription-plan-copy">Veja seu plano, acompanhe seu uso e desbloqueie ferramentas premium quando quiser.</p>
+            </div>
+            <div class="account-popover-progress">
+              <div class="account-popover-progress-track" aria-hidden="true">
+                <span class="account-popover-progress-fill" id="account-subscription-progress-fill"></span>
+              </div>
+              <div class="account-popover-progress-copy">
+                <strong id="account-subscription-progress-label">8 livres hoje</strong>
+                <span id="account-subscription-progress-meta">0 de 8 conversões usadas</span>
+              </div>
+            </div>
+            <button type="button" class="button secondary wide account-subscription-manage-button" id="account-subscription-manage-button">Gerenciar assinatura</button>
+          </section>
+        </div>
+
+        <p class="billing-status account-status-output" data-account-status>Abra o gerenciamento da assinatura para fazer upgrade, ativar código ou revisar seu acesso.</p>
       </section>
     </div>
 
