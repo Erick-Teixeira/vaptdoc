@@ -71,6 +71,18 @@ const passwordSchema = z.object({
   newPassword: z.string().min(8).max(128)
 });
 
+const accountFavoritesSchema = z.object({
+  toolIds: z.array(z.string().trim().min(1).max(80)).max(48)
+});
+
+const accountHistoryQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(24).optional()
+});
+
+const accountHistoryParamsSchema = z.object({
+  historyId: z.string().trim().uuid()
+});
+
 const adminUserParamsSchema = z.object({
   userId: z.string().trim().min(8).max(80)
 });
@@ -160,7 +172,9 @@ function buildAnonymousAccountSession(): PublicAccountSession {
     user: null,
     plan: null,
     wallet: null,
-    isAdmin: false
+    isAdmin: false,
+    favoriteToolIds: [],
+    recentConversions: []
   };
 }
 
@@ -214,7 +228,7 @@ function assertInternalClientRequest(request: FastifyRequest) {
     return;
   }
 
-  throw new AppError("Requisicao rejeitada por seguranca. Recarregue a pagina e tente novamente.", 403, "REQUEST_ORIGIN_FORBIDDEN");
+  throw new AppError("Requisição rejeitada por segurança. Recarregue a página e tente novamente.", 403, "REQUEST_ORIGIN_FORBIDDEN");
 }
 
 function buildPublicOrigin(request: FastifyRequest) {
@@ -321,7 +335,8 @@ function buildPublicClientState(
   return {
     ...accessPayload,
     account: accountSession,
-    billingOffers
+    billingOffers,
+    queue: options.gate?.snapshot() ?? null
   };
 }
 
@@ -375,9 +390,54 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     return buildPublicClientState(request, options);
   });
 
+  app.put("/api/account/favorites", async (request, reply) => {
+    assertInternalClientRequest(request);
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const payload = accountFavoritesSchema.parse(request.body ?? {});
+    const accountSession = options.accountService.replaceFavoriteToolIds(request.headers.cookie, payload);
+    const accessSession = options.accountService.getAccessSession(request.headers.cookie);
+    return buildPublicClientState(request, options, accessSession, accountSession);
+  });
+
+  app.get("/api/account/history", async (request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const query = accountHistoryQuerySchema.parse(request.query ?? {});
+    return {
+      items: options.accountService.listConversionHistory(request.headers.cookie, query.limit ?? 12)
+    };
+  });
+
+  app.get("/api/account/history/:historyId/download", async (request, reply) => {
+    reply.header("Cache-Control", "private, no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const params = accountHistoryParamsSchema.parse(request.params ?? {});
+    const asset = await options.accountService.getConversionDownload(request.headers.cookie, params.historyId);
+    reply
+      .header("Content-Type", asset.contentType)
+      .header("Content-Disposition", buildContentDisposition(asset.filename));
+    return reply.send(asset.buffer);
+  });
+
   app.get("/api/account/avatar", async (request, reply) => {
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const avatar = options.accountService.getAvatar(request.headers.cookie);
@@ -404,7 +464,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O cadastro de conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("O cadastro de conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = registerSchema.parse(request.body ?? {});
@@ -424,7 +484,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O cadastro de conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("O cadastro de conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = verificationConfirmSchema.parse(request.body ?? {});
@@ -452,7 +512,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A verificacao por e-mail ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A verificação por e-mail ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = verificationResendSchema.parse(request.body ?? {});
@@ -472,7 +532,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O login de conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("O login de conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = loginSchema.parse(request.body ?? {});
@@ -500,7 +560,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = profileSchema.parse(request.body ?? {});
@@ -522,7 +582,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = verificationConfirmSchema.parse(request.body ?? {});
@@ -544,7 +604,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = profileEmailChangeSchema.parse(request.body ?? {});
@@ -564,7 +624,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     let uploadBuffer: Buffer | null = null;
@@ -583,7 +643,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     }
 
     if (uploadBuffer.byteLength > maxAvatarBytes) {
-      throw new AppError("A foto de perfil precisa ter no maximo 1,5 MB.", 413, "ACCOUNT_AVATAR_TOO_LARGE");
+      throw new AppError("A foto de perfil precisa ter no máximo 1,5 MB.", 413, "ACCOUNT_AVATAR_TOO_LARGE");
     }
 
     const contentType = detectAvatarContentType(uploadBuffer);
@@ -605,7 +665,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const accountSession = options.accountService.clearAvatar(request.headers.cookie);
@@ -626,7 +686,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = passwordSchema.parse(request.body ?? {});
@@ -646,7 +706,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
     }
 
     const payload = verificationConfirmSchema.parse(request.body ?? {});
@@ -676,7 +736,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     return {
@@ -690,7 +750,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const query = adminUsersQuerySchema.parse(request.query ?? {});
@@ -705,7 +765,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminUserParamsSchema.parse(request.params ?? {});
@@ -727,7 +787,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminUserParamsSchema.parse(request.params ?? {});
@@ -750,7 +810,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminUserParamsSchema.parse(request.params ?? {});
@@ -773,7 +833,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminUserParamsSchema.parse(request.params ?? {});
@@ -796,7 +856,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminUserParamsSchema.parse(request.params ?? {});
@@ -812,7 +872,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminUserParamsSchema.parse(request.params ?? {});
@@ -828,7 +888,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     return {
@@ -849,7 +909,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const payload = adminPromoCreateSchema.parse(request.body ?? {});
@@ -883,7 +943,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminPromoParamsSchema.parse(request.params ?? {});
@@ -899,7 +959,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accountService) {
-      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+      throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
     const params = adminPromoParamsSchema.parse(request.params ?? {});
@@ -926,7 +986,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
 
     if (!options.billingService?.isCheckoutEnabled()) {
       if (!manualUrl) {
-        throw new AppError("O checkout ainda nao esta configurado neste ambiente.", 503, "CHECKOUT_UNAVAILABLE");
+        throw new AppError("O checkout ainda não está configurado neste ambiente.", 503, "CHECKOUT_UNAVAILABLE");
       }
 
       return {
@@ -971,7 +1031,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.billingService || !options.accessService || !options.usageTracker) {
-      throw new AppError("A confirmacao de pagamento ainda nao esta disponivel neste ambiente.", 503, "CHECKOUT_UNAVAILABLE");
+      throw new AppError("A confirmação de pagamento ainda não está disponível neste ambiente.", 503, "CHECKOUT_UNAVAILABLE");
     }
 
     const payload = confirmReturnSchema.parse(request.body ?? {});
@@ -1052,7 +1112,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         offerId: confirmation.offer.id,
         amountBRL: confirmation.amountBRL
       },
-      message: "O pagamento nao foi aprovado. Tente novamente ou escolha outra forma de pagamento."
+      message: "O pagamento não foi aprovado. Tente novamente ou escolha outra forma de pagamento."
     });
   });
 
@@ -1085,7 +1145,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     reply.header("Pragma", "no-cache");
 
     if (!options.accessService || !options.usageTracker) {
-      throw new AppError("A ativacao de planos ainda nao esta disponivel neste ambiente.", 503, "ACCESS_UNAVAILABLE");
+      throw new AppError("A ativação de planos ainda não está disponível neste ambiente.", 503, "ACCESS_UNAVAILABLE");
     }
 
     const payload = redeemSchema.parse(request.body ?? {});
@@ -1100,7 +1160,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
 
     const redeemedSession = options.accessService.redeemCode(payload.code);
     if (!redeemedSession) {
-      throw new AppError("Codigo invalido ou expirado. Confira e tente novamente.", 400, "INVALID_ACCESS_CODE");
+      throw new AppError("Código inválido ou expirado. Confira e tente novamente.", 400, "INVALID_ACCESS_CODE");
     }
 
     let accountSession: PublicAccountSession | undefined;
@@ -1147,6 +1207,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
 
     const startedAt = performance.now();
     let toolId = "";
+    let historyId: string | null = null;
     const uploads: UploadedAsset[] = [];
     const rawOptions: Record<string, string> = {};
 
@@ -1175,7 +1236,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       }
 
       if (uploads.length === 0) {
-        throw new AppError("Envie ao menos um arquivo para iniciar a conversao.", 400, "MISSING_FILE");
+        throw new AppError("Envie ao menos um arquivo para iniciar a conversão.", 400, "MISSING_FILE");
       }
 
       assertUploadLimits(uploads, env.MAX_FILE_SIZE_MB * 1024 * 1024);
@@ -1199,7 +1260,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
 
       if (usageSnapshot?.reachedLimit) {
         throw new AppError(
-          `Voce atingiu o limite gratuito de ${usageSnapshot.limit} conversoes por dia. Ative o Pro para continuar agora.`,
+          `Você atingiu o limite gratuito de ${usageSnapshot.limit} conversões por dia. Ative o Pro para continuar agora.`,
           429,
           "FREE_LIMIT_REACHED"
         );
@@ -1211,6 +1272,12 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         uploads,
         options: safeOptions
       };
+      historyId = options.accountService?.createConversionHistory(request.headers.cookie, {
+        toolId: toolDefinition.id,
+        toolLabel: toolDefinition.label,
+        sourceLabel: uploads.length === 1 ? uploads[0].filename : `${uploads.length} arquivos`,
+        inputCount: uploads.length
+      }) ?? null;
 
       request.log.info({
         event: "conversion.accepted",
@@ -1220,9 +1287,26 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         options: sanitizeOptionsForLogs(rawOptions)
       }, "Conversion request accepted.");
 
+      const executeConversion = async () => {
+        if (historyId && options.accountService) {
+          options.accountService.markConversionProcessing(historyId);
+        }
+        return conversionService.convert(payload);
+      };
+
       const result = options.gate
-        ? await options.gate.run(() => conversionService.convert(payload))
-        : await conversionService.convert(payload);
+        ? await options.gate.run(executeConversion)
+        : await executeConversion();
+
+      if (historyId && options.accountService) {
+        await options.accountService.completeConversionHistory(historyId, {
+          outputFilename: result.filename,
+          outputContentType: result.contentType,
+          outputSizeBytes: result.data.byteLength,
+          provider: result.provider,
+          data: result.data
+        });
+      }
 
       const nextUsageSnapshot =
         accessSession && options.usageTracker
@@ -1266,6 +1350,17 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         durationMs: Math.round(performance.now() - startedAt),
         queue: options.gate?.snapshot()
       }, "Conversion failed.");
+
+      if (historyId && options.accountService) {
+        try {
+          options.accountService.failConversionHistory(
+            historyId,
+            error instanceof Error ? error.message : String(error)
+          );
+        } catch {
+          // Ignore history persistence failures and keep the original error surface.
+        }
+      }
 
       throw error;
     }

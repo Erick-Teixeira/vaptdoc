@@ -44,6 +44,7 @@ const seoToolIdMeta = document.getElementById("seo-tool-id");
 const seoCanonicalLink = document.getElementById("seo-canonical");
 const seoSoftwareSchema = document.getElementById("seo-software-schema");
 const seoHowToSchema = document.getElementById("seo-howto-schema");
+const seoFaqSchema = document.getElementById("seo-faq-schema");
 const pageDataScript = document.getElementById("vaptdoc-page-data");
 const progressFill = document.getElementById("progress-fill");
 const progressLabel = document.getElementById("progress-label");
@@ -97,6 +98,8 @@ const accountMenuLogout = document.getElementById("account-menu-logout");
 const premiumLock = document.getElementById("premium-lock");
 const unlockToolButton = document.getElementById("unlock-tool");
 const convertButton = document.getElementById("convert-button");
+const conversionLifecycle = document.getElementById("conversion-lifecycle");
+const conversionLifecycleChips = Array.from(document.querySelectorAll("[data-conversion-stage]"));
 const convertSidebar = document.getElementById("convert-sidebar");
 const workspaceMainGrid = document.getElementById("workspace-main-grid");
 const workspaceCanvasCard = document.getElementById("workspace-canvas-card");
@@ -153,6 +156,8 @@ const accountSwitchToRegisterButton = document.getElementById("account-switch-to
 const accountShortcutProfileButton = document.getElementById("account-shortcut-profile");
 const accountShortcutSettingsButton = document.getElementById("account-shortcut-settings");
 const accountShortcutAdminButton = document.getElementById("account-shortcut-admin");
+const accountHistoryList = document.getElementById("account-history-list");
+const accountHistoryEmpty = document.getElementById("account-history-empty");
 const accountRegisterForm = document.getElementById("account-register-form");
 const accountLoginForm = document.getElementById("account-login-form");
 const accountProfileForm = document.getElementById("account-profile-form");
@@ -230,6 +235,8 @@ const adminTabButtons = Array.from(document.querySelectorAll("[data-admin-pane-t
 const adminPanes = Array.from(document.querySelectorAll("[data-admin-pane]"));
 const toolToolbarCopy = document.getElementById("tool-toolbar-copy");
 const toolEmpty = document.getElementById("tool-empty");
+const toolFaqSection = document.getElementById("tool-faq-section");
+const toolFaqList = document.getElementById("tool-faq-list");
 const toolTabs = Array.from(document.querySelectorAll(".tool-tab"));
 const workspaceGuideCopy = document.getElementById("workspace-guide-copy");
 const workspaceFromBadge = document.getElementById("workspace-from-badge");
@@ -280,6 +287,9 @@ let draggedFileIndex = null;
 let toolOptionState = {};
 let conversionModalRenderedCards = [];
 const filePreviewUrlCache = new Map();
+const pdfPreviewUrlCache = new Map();
+let pdfJsModulePromise = null;
+let currentConversionLifecycleStage = "";
 let accessSession = {
   plan: "free",
   premium: false,
@@ -303,7 +313,9 @@ let accessSession = {
     user: null,
     plan: null,
     wallet: null,
-    isAdmin: false
+    isAdmin: false,
+    favoriteToolIds: [],
+    recentConversions: []
   }
 };
 let adminState = {
@@ -805,6 +817,60 @@ function getToolMetaDescription(tool) {
   return `${lead}. ${detail}.`;
 }
 
+function buildToolFaqItems(tool) {
+  if (!tool) {
+    return [];
+  }
+
+  const helpContent = toolHelpContent[tool.id];
+  const readableInput = tool.inputKinds.map((kind) => String(kind).toUpperCase()).join(", ");
+  const readableOutput = String(tool.outputExtension ?? "").toUpperCase();
+  const uploadCopy = tool.allowsMultipleFiles
+    ? `Envie ${tool.minFiles && tool.minFiles > 1 ? `pelo menos ${tool.minFiles} arquivos` : "os arquivos necessários"} no formato ${readableInput}.`
+    : `Envie um arquivo no formato ${readableInput}.`;
+
+  const items = [
+    {
+      question: `Como usar ${tool.label}?`,
+      answer: `${uploadCopy} Depois disso, revise apenas os ajustes necessários e baixe o resultado em ${readableOutput}.`
+    },
+    {
+      question: `${tool.label} funciona no celular?`,
+      answer: "Sim. O fluxo foi enxugado para abrir rápido no mobile, com upload direto, ajustes objetivos e download imediato."
+    }
+  ];
+
+  if (helpContent?.items?.[0]) {
+    items.push({
+      question: helpContent.items[0].title,
+      answer: helpContent.items[0].copy
+    });
+  } else {
+    items.push({
+      question: `O que muda no resultado de ${tool.label}?`,
+      answer: `A ferramenta entrega a conversão em ${readableOutput} e só mostra opções extras quando elas realmente ajudam nesse tipo de arquivo.`
+    });
+  }
+
+  return items;
+}
+
+function buildFaqSchemaPayload(tool) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    url: buildAbsoluteSiteUrl(tool ? getToolPagePath(tool) : "/"),
+    mainEntity: buildToolFaqItems(tool).map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer
+      }
+    }))
+  };
+}
+
 function getToolPagePath(tool) {
   return String(tool?.routePath ?? `/ferramenta/${encodeURIComponent(tool?.id ?? "")}`);
 }
@@ -853,6 +919,9 @@ function updatePageModeUi(tool) {
   toolDirectory.hidden = isToolPage;
   routeHero.hidden = !isToolPage;
   form.hidden = !isToolPage;
+  if (toolFaqSection && !isToolPage) {
+    toolFaqSection.hidden = true;
+  }
 
   if (toolHelpButton && !isToolPage) {
     toolHelpButton.hidden = true;
@@ -976,9 +1045,10 @@ function syncSeoForTool(tool) {
       "@type": "HowToStep",
       position: index + 1,
       name: text,
-      text
-    }))
+        text
+      }))
   });
+  setSeoScriptContent(seoFaqSchema, buildFaqSchemaPayload(tool));
 
   updatePageData(tool);
 }
@@ -1092,6 +1162,39 @@ function renderToolHelp(tool) {
   });
 }
 
+function renderToolFaq(tool) {
+  if (!toolFaqSection || !toolFaqList) {
+    return;
+  }
+
+  const items = buildToolFaqItems(tool);
+  const shouldShow = Boolean(tool && document.body.dataset.pageMode === "tool" && items.length > 0);
+  toolFaqSection.hidden = !shouldShow;
+
+  if (!shouldShow) {
+    toolFaqList.innerHTML = "";
+    return;
+  }
+
+  toolFaqList.innerHTML = "";
+  items.forEach((item, index) => {
+    const entry = document.createElement("details");
+    entry.className = "tool-faq-item";
+    if (index === 0) {
+      entry.open = true;
+    }
+
+    const summary = document.createElement("summary");
+    summary.textContent = item.question;
+
+    const copy = document.createElement("p");
+    copy.textContent = item.answer;
+
+    entry.append(summary, copy);
+    toolFaqList.append(entry);
+  });
+}
+
 function setStatus(message, options = {}) {
   if (!statusText) {
     announceToast(message, options);
@@ -1101,6 +1204,32 @@ function setStatus(message, options = {}) {
   statusText.textContent = message;
   statusText.hidden = !message || quietStatusMessages.has(message);
   announceToast(message, options);
+}
+
+function setConversionLifecycle(stage = "") {
+  currentConversionLifecycleStage = stage;
+
+  if (!conversionLifecycle) {
+    return;
+  }
+
+  const visible = Boolean(stage);
+  conversionLifecycle.hidden = !visible;
+  conversionLifecycleChips.forEach((chip) => {
+    const chipStage = chip.dataset.conversionStage ?? "";
+    const isActive = visible && chipStage === stage;
+    const isDone =
+      visible &&
+      ((stage === "processing" && chipStage === "queued") ||
+        (stage === "ready" && (chipStage === "queued" || chipStage === "processing")));
+
+    chip.classList.toggle("is-active", isActive);
+    chip.classList.toggle("is-done", isDone);
+  });
+}
+
+function clearConversionLifecycle() {
+  setConversionLifecycle("");
 }
 
 function setProgress(value, label) {
@@ -1339,7 +1468,9 @@ function getAccountState() {
     user: null,
     plan: null,
     wallet: null,
-    isAdmin: false
+    isAdmin: false,
+    favoriteToolIds: [],
+    recentConversions: []
   };
 }
 
@@ -1452,6 +1583,16 @@ function applySessionPayload(payload = {}) {
       : getAccountState()
   };
 
+  if (accessSession.account?.authenticated && Array.isArray(accessSession.account?.favoriteToolIds)) {
+    favoriteToolIds.clear();
+    accessSession.account.favoriteToolIds.forEach((toolId) => {
+      if (typeof toolId === "string" && toolId.trim()) {
+        favoriteToolIds.add(toolId);
+      }
+    });
+    saveFavoriteToolIds();
+  }
+
   if (!accessSession.account?.authenticated || !accessSession.account?.isAdmin) {
     adminState = {
       dashboard: null,
@@ -1464,6 +1605,7 @@ function applySessionPayload(payload = {}) {
   }
 
   updateAccessUi();
+  renderAccountHistory();
   return accessSession;
 }
 
@@ -2174,6 +2316,9 @@ function showAccountModal(options = {}) {
   }
   updateBodyScrollLock();
   renderAccountUi();
+  if (focus === "overview" && isAccountAuthenticated()) {
+    void fetchAccountHistory().catch(() => undefined);
+  }
   if (focus === "admin") {
     void loadAdminPanel();
   }
@@ -2291,6 +2436,91 @@ function getPopoverPlanMeta() {
   }
 
   return "Uso rápido no navegador";
+}
+
+function getConversionStatusLabel(status) {
+  if (status === "queued") {
+    return "Na fila";
+  }
+  if (status === "processing") {
+    return "Processando";
+  }
+  if (status === "ready") {
+    return "Pronto";
+  }
+  if (status === "failed") {
+    return "Falhou";
+  }
+  return "Atualizando";
+}
+
+function renderAccountHistory() {
+  if (!accountHistoryList || !accountHistoryEmpty) {
+    return;
+  }
+
+  const accountState = getAccountState();
+  const items = Array.isArray(accountState.recentConversions) ? accountState.recentConversions.slice(0, 8) : [];
+  accountHistoryList.innerHTML = "";
+
+  if (!accountState.authenticated) {
+    accountHistoryEmpty.hidden = false;
+    accountHistoryEmpty.textContent = "Entre na sua conta para acompanhar seus arquivos convertidos.";
+    return;
+  }
+
+  if (items.length === 0) {
+    accountHistoryEmpty.hidden = false;
+    accountHistoryEmpty.textContent = "Nenhuma conversão recente apareceu por aqui ainda.";
+    return;
+  }
+
+  accountHistoryEmpty.hidden = true;
+
+  items.forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "account-history-item";
+
+    const copy = document.createElement("div");
+    copy.className = "account-history-copy";
+
+    const topline = document.createElement("div");
+    topline.className = "account-history-topline";
+
+    const title = document.createElement("strong");
+    title.textContent = item.outputFilename || item.toolLabel;
+
+    const status = document.createElement("span");
+    status.className = `account-history-status is-${item.status}`;
+    status.textContent = getConversionStatusLabel(item.status);
+
+    topline.append(title, status);
+
+    const meta = document.createElement("p");
+    meta.className = "account-copy";
+    meta.textContent = `${item.toolLabel} • ${item.sourceLabel} • ${formatDateTime(item.completedAt || item.updatedAt || item.createdAt)}`;
+
+    copy.append(topline, meta);
+    row.append(copy);
+
+    if (item.downloadUrl) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "ghost-action";
+      button.textContent = "Baixar novamente";
+      button.addEventListener("click", async () => {
+        try {
+          await redownloadHistoryItem(item.id);
+          setAccountStatus("Download iniciado.");
+        } catch (error) {
+          setAccountStatus(error instanceof Error ? error.message : "Não foi possível baixar novamente este arquivo.");
+        }
+      });
+      row.append(button);
+    }
+
+    accountHistoryList.append(row);
+  });
 }
 
 function renderAccountUi() {
@@ -2427,6 +2657,7 @@ function renderAccountUi() {
         ? `Digite o código enviado para ${pendingAccountVerification.verification.destination}.`
         : "Entre ou crie sua conta para continuar."
     );
+    renderAccountHistory();
     return;
   }
 
@@ -2489,6 +2720,7 @@ function renderAccountUi() {
   setAccountStatus(isAdmin
       ? "Sua conta do dono está protegida. Abra o Painel Administrativo para gerenciar usuários, créditos e promoções."
       : "Sua conta está protegida. Atualize dados ou siga para um upgrade quando quiser.");
+  renderAccountHistory();
 }
 
 function updateAccessUi() {
@@ -2546,6 +2778,63 @@ async function refreshAccessSession() {
   });
   const payload = await response.json();
   return applySessionPayload(payload);
+}
+
+async function updateAccountFavorites(toolIds) {
+  const response = await fetch("/api/account/favorites", {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      ...internalClientHeader
+    },
+    body: JSON.stringify({ toolIds })
+  });
+  const payload = await response.json().catch(() => ({ message: "Não foi possível salvar os favoritos." }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível salvar os favoritos.");
+  }
+
+  applySessionPayload(payload);
+  return payload;
+}
+
+async function fetchAccountHistory(limit = 12) {
+  const response = await fetch(`/api/account/history?limit=${encodeURIComponent(String(limit))}`, {
+    credentials: "same-origin"
+  });
+  const payload = await response.json().catch(() => ({ items: [] }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível carregar o histórico.");
+  }
+
+  accessSession.account = {
+    ...getAccountState(),
+    recentConversions: Array.isArray(payload.items) ? payload.items : []
+  };
+  renderAccountHistory();
+  return payload.items ?? [];
+}
+
+async function redownloadHistoryItem(historyId) {
+  const response = await fetch(`/api/account/history/${encodeURIComponent(historyId)}/download`, {
+    credentials: "same-origin"
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ message: "Não foi possível baixar novamente este arquivo." }));
+    throw new Error(payload.message ?? "Não foi possível baixar novamente este arquivo.");
+  }
+
+  const blob = await response.blob();
+  const filename = extractDownloadFilename(response.headers.get("Content-Disposition") ?? "");
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 async function redeemAccessCode(code) {
@@ -4132,6 +4421,7 @@ function updateWorkspacePanels(tool = getToolById()) {
       workspaceOptionsCard.hidden = true;
     }
     renderToolHelp(null);
+    renderToolFaq(null);
     hideConversionModal();
     updateWorkspaceGuide(null);
     return;
@@ -4227,6 +4517,7 @@ function updateToolFlowLayout(tool = getToolById()) {
 
   if (!showConvertAction && !form.classList.contains("is-processing")) {
     hideUploadProgress();
+    clearConversionLifecycle();
   }
 }
 
@@ -4369,6 +4660,69 @@ function syncPreviewUrlCache(files) {
     URL.revokeObjectURL(previewUrl);
     filePreviewUrlCache.delete(file);
   }
+
+  for (const [file, previewUrl] of pdfPreviewUrlCache.entries()) {
+    if (activeFiles.has(file)) {
+      continue;
+    }
+
+    URL.revokeObjectURL(previewUrl);
+    pdfPreviewUrlCache.delete(file);
+  }
+}
+
+async function loadPdfJsModule() {
+  if (!pdfJsModulePromise) {
+    pdfJsModulePromise = import("/assets/vendor/pdf.mjs").then((module) => {
+      const pdfjs = module;
+      if (pdfjs?.GlobalWorkerOptions) {
+        pdfjs.GlobalWorkerOptions.workerSrc = "/assets/vendor/pdf.worker.mjs";
+      }
+      return pdfjs;
+    });
+  }
+
+  return pdfJsModulePromise;
+}
+
+async function getPdfPreviewUrl(file) {
+  if (pdfPreviewUrlCache.has(file)) {
+    return pdfPreviewUrlCache.get(file) ?? "";
+  }
+
+  const pdfjs = await loadPdfJsModule();
+  const documentTask = pdfjs.getDocument({
+    data: await file.arrayBuffer(),
+    isEvalSupported: false
+  });
+  const pdfDocument = await documentTask.promise;
+  const page = await pdfDocument.getPage(1);
+  const viewport = page.getViewport({ scale: 1 });
+  const targetWidth = 440;
+  const scale = targetWidth / Math.max(1, viewport.width);
+  const scaledViewport = page.getViewport({ scale: Math.min(1.8, Math.max(0.9, scale)) });
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { alpha: false });
+
+  if (!context) {
+    throw new Error("Canvas indisponível para gerar miniatura.");
+  }
+
+  canvas.width = Math.ceil(scaledViewport.width);
+  canvas.height = Math.ceil(scaledViewport.height);
+  await page.render({
+    canvasContext: context,
+    viewport: scaledViewport
+  }).promise;
+
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", 0.86));
+  if (!(blob instanceof Blob)) {
+    throw new Error("Falha ao gerar miniatura do PDF.");
+  }
+
+  const previewUrl = URL.createObjectURL(blob);
+  pdfPreviewUrlCache.set(file, previewUrl);
+  return previewUrl;
 }
 
 function createFileStageIcon(kind) {
@@ -4444,11 +4798,24 @@ function createFilePreviewSurface(file, kind, tool, index, total) {
     mediaElement.playsInline = true;
     mediaElement.preload = "metadata";
   } else if (kind === "pdf") {
-    const previewUrl = getFilePreviewUrl(file);
-    mediaElement = document.createElement("embed");
-    mediaElement.src = `${previewUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
-    mediaElement.type = "application/pdf";
+    mediaElement = document.createElement("img");
+    mediaElement.alt = "";
+    mediaElement.loading = "lazy";
+    mediaElement.decoding = "async";
     mediaElement.className = "file-preview-media file-preview-document";
+
+    getPdfPreviewUrl(file)
+      .then((previewUrl) => {
+        if (mediaElement?.isConnected) {
+          mediaElement.src = previewUrl;
+        }
+      })
+      .catch(() => {
+        const fallbackUrl = getFilePreviewUrl(file);
+        if (mediaElement?.isConnected) {
+          mediaElement.src = fallbackUrl;
+        }
+      });
   }
 
   if (mediaElement) {
@@ -6007,6 +6374,7 @@ function applyActiveTool(toolId, options = {}) {
   updateFileLabel();
   updateDropzonePrompt(tool);
   renderToolHelp(tool);
+  renderToolFaq(tool);
   if (syncSeo) {
     syncSeoForTool(tool);
   }
@@ -6179,6 +6547,7 @@ async function handleBillingOfferClick(button) {
     setBillingStatus(error instanceof Error ? error.message : "Não foi possível abrir o checkout.");
   } finally {
     button.textContent = previousLabel;
+    setConversionLifecycle("ready");
     updateAccessUi();
   }
 }
@@ -6850,11 +7219,12 @@ redeemForm?.addEventListener("submit", async (event) => {
   }
 });
 
-favoriteToggle?.addEventListener("click", () => {
+favoriteToggle?.addEventListener("click", async () => {
   if (!activeToolId) {
     return;
   }
 
+  const alreadyFavorite = isFavorite(activeToolId);
   if (isFavorite(activeToolId)) {
     favoriteToolIds.delete(activeToolId);
   } else {
@@ -6865,6 +7235,25 @@ favoriteToggle?.addEventListener("click", () => {
   updateFavoriteButton(activeToolId);
   renderTools();
   renderSearchResults();
+
+  if (!isAccountAuthenticated()) {
+    return;
+  }
+
+  try {
+    await updateAccountFavorites(Array.from(favoriteToolIds));
+  } catch (error) {
+    if (alreadyFavorite) {
+      favoriteToolIds.add(activeToolId);
+    } else {
+      favoriteToolIds.delete(activeToolId);
+    }
+    saveFavoriteToolIds();
+    updateFavoriteButton(activeToolId);
+    renderTools();
+    renderSearchResults();
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível salvar os favoritos.");
+  }
 });
 
 toolTabs.forEach((tab) => {
@@ -7013,6 +7402,7 @@ async function performConversion() {
   const { toolId, tool, files } = request;
   hideConversionModal();
   const formData = buildConversionFormData(toolId, files);
+  setConversionLifecycle("queued");
   setStatus("Enviando seu arquivo...");
   setProgress(4, "Preparando conversão...");
   showUploadProgress();
@@ -7040,6 +7430,8 @@ async function performConversion() {
 
       xhr.upload.addEventListener("load", () => {
         hideUploadProgress();
+        setConversionLifecycle("processing");
+        setProgress(74, "Processando conversão...");
       });
 
       xhr.addEventListener("load", () => {
@@ -7097,11 +7489,15 @@ async function performConversion() {
     if (typeof accessSession.remainingToday === "number" && typeof accessSession.dailyLimit === "number") {
       accessSession.usedToday = Math.max(0, accessSession.dailyLimit - accessSession.remainingToday);
     }
+    setConversionLifecycle("ready");
     updateAccessUi();
     setStatus("Conversao concluida. Download iniciado.");
+    await refreshAccessSession().catch(() => undefined);
+    window.setTimeout(clearConversionLifecycle, 2600);
   } catch (error) {
     stopProgressAnimation();
     hideUploadProgress();
+    clearConversionLifecycle();
     const message = error instanceof Error ? error.message : "Não foi possível concluir a conversão.";
     if (/plano pro|premium|limite gratuito/iu.test(message)) {
       promptAccountPlanAccess(tool);

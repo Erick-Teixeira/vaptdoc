@@ -1,8 +1,10 @@
 import path from "node:path";
-import { access, mkdir } from "node:fs/promises";
+import { access, copyFile, mkdir } from "node:fs/promises";
 import sharp from "sharp";
 
 const assetRoot = path.resolve(import.meta.dirname, "../public/assets");
+const vendorAssetRoot = path.resolve(assetRoot, "vendor");
+const pdfJsBuildRoot = path.resolve(import.meta.dirname, "../node_modules/pdfjs-dist/build");
 
 const imageJobs = [
   {
@@ -51,4 +53,23 @@ async function generateAssetVariants() {
   }
 }
 
+async function copyVendorAssets() {
+  await mkdir(vendorAssetRoot, { recursive: true });
+
+  const vendorFiles = [
+    ["pdf.mjs", "pdf.mjs"],
+    ["pdf.worker.mjs", "pdf.worker.mjs"]
+  ];
+
+  for (const [sourceFile, targetFile] of vendorFiles) {
+    const sourcePath = path.join(pdfJsBuildRoot, sourceFile);
+    if (!(await fileExists(sourcePath))) {
+      continue;
+    }
+
+    await copyFile(sourcePath, path.join(vendorAssetRoot, targetFile));
+  }
+}
+
 await generateAssetVariants();
+await copyVendorAssets();

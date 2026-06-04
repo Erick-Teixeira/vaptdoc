@@ -3,9 +3,9 @@ import { toolCatalog, toolList, type ToolDefinition, type ToolId } from "./catal
 import { getToolPath } from "./tool-paths.js";
 
 const siteName = "vaptdoc";
-const defaultTitle = "vaptdoc | Converta arquivos sem complicacao";
+const defaultTitle = "vaptdoc | Converta arquivos sem complicação";
 const defaultDescription =
-  "Converta PDF, DOCX, imagens, audio, video e modelos 3D com rapidez, seguranca e uma experiencia limpa em qualquer dispositivo.";
+  "Converta PDF, DOCX, imagens, áudio, vídeo e modelos 3D com rapidez, segurança e uma experiência limpa em qualquer dispositivo.";
 const defaultOgImagePath = "/assets/vaptdoc-logo-transparent.png";
 
 export interface SeoViewModel {
@@ -19,6 +19,7 @@ export interface SeoViewModel {
   pagePath: string;
   softwareApplicationJson: string;
   howToJson: string;
+  faqJson: string;
 }
 
 function normalizeBaseUrl(input?: string) {
@@ -66,9 +67,9 @@ function getReadableFormats(tool: ToolDefinition) {
 function buildHowToSteps(tool?: ToolDefinition) {
   if (!tool) {
     return [
-      "Escolha a conversao ideal na grade principal.",
-      "Envie seu arquivo e organize a ordem quando necessario.",
-      "Revise os ajustes visiveis e inicie a conversao.",
+      "Escolha a conversão ideal na grade principal.",
+      "Envie seu arquivo e organize a ordem quando necessário.",
+      "Revise os ajustes visíveis e inicie a conversão.",
       "Baixe o resultado assim que o processamento terminar."
     ];
   }
@@ -80,14 +81,52 @@ function buildHowToSteps(tool?: ToolDefinition) {
       } no formato ${formats.input} e ajuste a ordem visualmente.`
     : `Envie um arquivo no formato ${formats.input} para iniciar ${tool.label.toLowerCase()}.`;
   const optionsStep = Array.isArray(tool.optionFields) && tool.optionFields.length > 0
-    ? "Ajuste apenas as opcoes que aparecem no painel lateral para refinar o resultado."
-    : "Revise o painel e avance sem preencher campos desnecessarios.";
+    ? "Ajuste apenas as opções que aparecem no painel lateral para refinar o resultado."
+    : "Revise o painel e avance sem preencher campos desnecessários.";
 
   return [
     `Abra a ferramenta ${tool.label} no vaptdoc.`,
     uploadStep,
     optionsStep,
     `Converta e baixe o arquivo final em ${formats.output}.`
+  ];
+}
+
+function buildFaqItems(tool?: ToolDefinition) {
+  if (!tool) {
+    return [
+      {
+        question: "Quais arquivos posso converter no vaptdoc?",
+        answer: "O vaptdoc suporta fluxos para PDF, Office, imagens, áudio, vídeo e alguns modelos 3D, com cada ferramenta exibindo exatamente os formatos aceitos."
+      },
+      {
+        question: "Preciso instalar algum programa?",
+        answer: "Não. O processamento acontece na web, então basta escolher a ferramenta, enviar o arquivo e baixar o resultado."
+      },
+      {
+        question: "Meus arquivos ficam salvos para sempre?",
+        answer: "Não. Os arquivos são tratados com limpeza automática e o histórico recente serve apenas para facilitar seus downloads mais recentes."
+      }
+    ];
+  }
+
+  const readableInput = tool.inputKinds.map((kind) => String(kind).toUpperCase()).join(", ");
+  const readableOutput = String(tool.outputExtension ?? "").toUpperCase();
+  const minFiles = tool.minFiles && tool.minFiles > 1 ? `pelo menos ${tool.minFiles} arquivos` : "um arquivo";
+
+  return [
+    {
+      question: `O que eu preciso para usar ${tool.label}?`,
+      answer: `Basta enviar ${minFiles} no formato ${readableInput} e seguir para a conversão no próprio navegador.`
+    },
+    {
+      question: `${tool.label} gera saída em qual formato?`,
+      answer: `Essa ferramenta entrega o resultado final em ${readableOutput}, com os ajustes da operação mostrados somente quando forem necessários.`
+    },
+    {
+      question: `${tool.label} funciona bem no celular?`,
+      answer: "Sim. O fluxo foi simplificado para telas móveis, com upload direto, ajustes enxutos e download do resultado sem telas longas."
+    }
   ];
 }
 
@@ -125,6 +164,22 @@ function buildHowToSchema(seo: Pick<SeoViewModel, "title" | "description" | "can
   };
 }
 
+function buildFaqSchema(seo: Pick<SeoViewModel, "canonicalUrl">, tool?: ToolDefinition) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    url: seo.canonicalUrl,
+    mainEntity: buildFaqItems(tool).map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer
+      }
+    }))
+  };
+}
+
 export function getSeoViewModel(baseUrlInput?: string, toolId?: string): SeoViewModel {
   const baseUrl = normalizeBaseUrl(baseUrlInput);
   const tool = toolId && toolId in toolCatalog ? toolCatalog[toolId as ToolId] : undefined;
@@ -148,7 +203,8 @@ export function getSeoViewModel(baseUrlInput?: string, toolId?: string): SeoView
     pageToolId: tool?.id ?? "",
     pagePath,
     softwareApplicationJson: JSON.stringify(buildSoftwareApplicationSchema(baseUrl, seo)),
-    howToJson: JSON.stringify(buildHowToSchema(seo, tool))
+    howToJson: JSON.stringify(buildHowToSchema(seo, tool)),
+    faqJson: JSON.stringify(buildFaqSchema(seo, tool))
   };
 }
 
@@ -196,6 +252,7 @@ export function renderSeoHtml(template: string, seo: SeoViewModel) {
   output = replaceLinkHref(output, "seo-canonical", seo.canonicalUrl);
   output = replaceTagValue(output, "seo-software-schema", seo.softwareApplicationJson);
   output = replaceTagValue(output, "seo-howto-schema", seo.howToJson);
+  output = replaceTagValue(output, "seo-faq-schema", seo.faqJson);
   output = replaceTagValue(
     output,
     "vaptdoc-page-data",

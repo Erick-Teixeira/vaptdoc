@@ -30,6 +30,7 @@
     "file-type": "^22.0.1",
     "nodemailer": "^7.0.10",
     "pdf-parse": "^2.4.5",
+    "pdfjs-dist": "^6.0.227",
     "sanitize-filename": "^1.6.4",
     "sharp": "^0.34.5",
     "zod": "^4.4.3"

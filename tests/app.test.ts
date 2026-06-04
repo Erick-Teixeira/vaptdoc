@@ -94,6 +94,8 @@ describe("app routes", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json().plan).toBe("free");
     expect(response.json().remainingToday).toBeGreaterThan(0);
+    expect(response.json().account.favoriteToolIds).toEqual([]);
+    expect(response.json().account.recentConversions).toEqual([]);
   });
 
   it("ignores malformed cookie encoding instead of crashing the session route", async () => {
@@ -160,6 +162,7 @@ describe("app routes", () => {
     expect(toolPage.statusCode).toBe(200);
     expect(toolPage.body).toContain("Converter PDF para DOCX online | vaptdoc");
     expect(toolPage.body).toContain("application/ld+json");
+    expect(toolPage.body).toContain("seo-faq-schema");
     expect(toolPage.body).toContain("/pdf-para-docx");
     expect(legacyToolRoute.statusCode).toBe(301);
     expect(legacyToolRoute.headers.location).toBe("/pdf-para-docx");

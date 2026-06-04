@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { mkdirSync } from "node:fs";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { AppError } from "../utils/errors.js";
@@ -115,6 +116,33 @@ interface PromoRedemptionRow {
   access_plan: PersistedPlan | null;
 }
 
+interface AccountFavoriteRow {
+  user_id: string;
+  tool_id: string;
+  created_at: string;
+}
+
+type ConversionHistoryStatus = "queued" | "processing" | "ready" | "failed";
+
+interface AccountConversionHistoryRow {
+  id: string;
+  user_id: string;
+  tool_id: string;
+  tool_label: string;
+  source_label: string;
+  input_count: number;
+  output_filename: string | null;
+  output_content_type: string | null;
+  output_size_bytes: number | null;
+  provider: string | null;
+  status: ConversionHistoryStatus;
+  error_message: string | null;
+  stored_file_name: string | null;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}
+
 export interface AccountUserPublic {
   id: string;
   email: string;
@@ -130,6 +158,24 @@ export interface AccountWalletPublic {
   creditBalance: number;
   discountPercent: number;
   discountExpiresAt: string | null;
+}
+
+export interface AccountConversionHistoryPublic {
+  id: string;
+  toolId: string;
+  toolLabel: string;
+  sourceLabel: string;
+  inputCount: number;
+  outputFilename: string | null;
+  outputContentType: string | null;
+  outputSizeBytes: number;
+  provider: string | null;
+  status: ConversionHistoryStatus;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  downloadUrl: string | null;
 }
 
 export interface AccountPlanPublic {
@@ -149,6 +195,8 @@ export interface PublicAccountSession {
   plan: AccountPlanPublic | null;
   wallet: AccountWalletPublic | null;
   isAdmin: boolean;
+  favoriteToolIds: string[];
+  recentConversions: AccountConversionHistoryPublic[];
 }
 
 interface AuthenticatedAccountState {
@@ -169,6 +217,31 @@ export interface AccountServiceConfig {
   verificationCodeMinutes?: number;
   verificationCooldownSeconds?: number;
   verificationMaxAttempts?: number;
+}
+
+export interface AccountFavoriteUpdateInput {
+  toolIds: string[];
+}
+
+export interface AccountConversionHistoryCreateInput {
+  toolId: string;
+  toolLabel: string;
+  sourceLabel: string;
+  inputCount: number;
+}
+
+export interface AccountConversionHistoryCompleteInput {
+  outputFilename: string;
+  outputContentType: string;
+  outputSizeBytes: number;
+  provider: string;
+  data: Buffer;
+}
+
+export interface AccountConversionDownloadAsset {
+  filename: string;
+  contentType: string;
+  buffer: Buffer;
 }
 
 export interface AccountRegisterInput {
@@ -495,6 +568,26 @@ function mapPromoCode(row: PromoCodeRow): AdminPromoCodePublic {
   };
 }
 
+function mapConversionHistory(row: AccountConversionHistoryRow): AccountConversionHistoryPublic {
+  return {
+    id: row.id,
+    toolId: row.tool_id,
+    toolLabel: row.tool_label,
+    sourceLabel: row.source_label,
+    inputCount: Math.max(1, Math.round(Number(row.input_count ?? 1))),
+    outputFilename: row.output_filename ?? null,
+    outputContentType: row.output_content_type ?? null,
+    outputSizeBytes: Math.max(0, Math.round(Number(row.output_size_bytes ?? 0))),
+    provider: row.provider ?? null,
+    status: row.status,
+    errorMessage: row.error_message ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    completedAt: row.completed_at ?? null,
+    downloadUrl: row.status === "ready" && row.stored_file_name ? `/api/account/history/${encodeURIComponent(row.id)}/download` : null
+  };
+}
+
 function resolveDbPath(config: AccountServiceConfig) {
   if (config.dbPath) {
     return config.dbPath === ":memory:" ? ":memory:" : path.resolve(config.dbPath);
@@ -509,13 +602,36 @@ function resolveDbPath(config: AccountServiceConfig) {
   return path.join(dataDir, "vaptdoc.sqlite");
 }
 
+function resolveDataDir(config: AccountServiceConfig) {
+  if (config.dataDir) {
+    return path.resolve(config.dataDir);
+  }
+
+  if (config.dbPath && config.dbPath !== ":memory:") {
+    return path.dirname(path.resolve(config.dbPath));
+  }
+
+  return path.resolve(process.cwd(), "data");
+}
+
 function buildGeneratedPromoCode() {
   return `VAPT-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+}
+
+function sanitizeStoredFilename(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[^\w.\-]+/gu, "-")
+    .replace(/-+/gu, "-")
+    .replace(/^-|-$/gu, "")
+    .slice(0, 120) || "arquivo";
 }
 
 export class AccountService {
   private readonly db: DatabaseSyncInstance;
   private readonly dbPath: string;
+  private readonly dataDir: string;
+  private readonly conversionHistoryDir: string;
   private readonly sessionCookieName: string;
   private readonly sessionDays: number;
   private readonly proDailyLimit: number;
@@ -527,9 +643,12 @@ export class AccountService {
 
   constructor(config: AccountServiceConfig = {}) {
     this.dbPath = resolveDbPath(config);
+    this.dataDir = resolveDataDir(config);
+    this.conversionHistoryDir = path.join(this.dataDir, "conversion-history");
     const useInMemoryDatabase = this.dbPath === ":memory:";
     if (!useInMemoryDatabase) {
       mkdirSync(path.dirname(this.dbPath), { recursive: true });
+      mkdirSync(this.conversionHistoryDir, { recursive: true });
     }
     this.db = new DatabaseSync(this.dbPath);
     this.db.exec("PRAGMA foreign_keys = ON;");
@@ -552,6 +671,7 @@ export class AccountService {
     this.verificationCooldownSeconds = Math.max(30, Math.min(300, Math.round(config.verificationCooldownSeconds ?? 60)));
     this.verificationMaxAttempts = Math.max(3, Math.min(10, Math.round(config.verificationMaxAttempts ?? 5)));
     this.ensureSchema();
+    void this.purgeExpiredConversionHistory();
   }
 
   getDbPath() {
@@ -655,7 +775,9 @@ export class AccountService {
         user: null,
         plan: null,
         wallet: null,
-        isAdmin: false
+        isAdmin: false,
+        favoriteToolIds: [],
+        recentConversions: []
       };
     }
 
@@ -664,7 +786,9 @@ export class AccountService {
       user: authenticated.user,
       plan: authenticated.plan,
       wallet: authenticated.wallet,
-      isAdmin: authenticated.isAdmin
+      isAdmin: authenticated.isAdmin,
+      favoriteToolIds: this.getFavoriteToolIdsForUser(authenticated.user.id),
+      recentConversions: this.getRecentConversionsForUser(authenticated.user.id)
     };
   }
 
@@ -725,6 +849,152 @@ export class AccountService {
       activatedAt: authenticated.plan.accessStartsAt,
       expiresAt: authenticated.plan.accessExpiresAt,
       dailyLimit: authenticated.plan.plan === "pro" ? this.proDailyLimit : null
+    };
+  }
+
+  replaceFavoriteToolIds(cookieHeader: string | undefined, input: AccountFavoriteUpdateInput) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const now = new Date().toISOString();
+    const nextToolIds = Array.from(new Set(input.toolIds.map((value) => String(value).trim()).filter(Boolean))).slice(0, 48);
+
+    this.db.prepare("DELETE FROM account_favorites WHERE user_id = ?").run(authenticated.user.id);
+    const statement = this.db.prepare(`
+      INSERT INTO account_favorites (user_id, tool_id, created_at)
+      VALUES (?, ?, ?)
+    `);
+
+    for (const toolId of nextToolIds) {
+      statement.run(authenticated.user.id, toolId, now);
+    }
+
+    return this.getPublicSessionForUser(authenticated.user.id);
+  }
+
+  createConversionHistory(cookieHeader: string | undefined, input: AccountConversionHistoryCreateInput) {
+    const authenticated = this.getAuthenticatedAccount(cookieHeader);
+    if (!authenticated) {
+      return null;
+    }
+
+    return this.createConversionHistoryForUser(authenticated.user.id, input);
+  }
+
+  createConversionHistoryForUser(userId: string, input: AccountConversionHistoryCreateInput) {
+    const now = new Date().toISOString();
+    const historyId = crypto.randomUUID();
+    this.db.prepare(`
+      INSERT INTO account_conversion_history (
+        id,
+        user_id,
+        tool_id,
+        tool_label,
+        source_label,
+        input_count,
+        status,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      historyId,
+      userId,
+      input.toolId,
+      input.toolLabel,
+      input.sourceLabel,
+      Math.max(1, Math.round(input.inputCount)),
+      "queued",
+      now,
+      now
+    );
+
+    return historyId;
+  }
+
+  markConversionProcessing(historyId: string) {
+    this.db.prepare(`
+      UPDATE account_conversion_history
+      SET status = 'processing', updated_at = ?
+      WHERE id = ? AND status = 'queued'
+    `).run(new Date().toISOString(), historyId);
+  }
+
+  async completeConversionHistory(historyId: string, input: AccountConversionHistoryCompleteInput) {
+    const row = this.db.prepare(`
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, output_filename, output_content_type, output_size_bytes,
+             provider, status, error_message, stored_file_name, created_at, updated_at, completed_at
+      FROM account_conversion_history
+      WHERE id = ?
+    `).get(historyId) as AccountConversionHistoryRow | undefined;
+
+    if (!row) {
+      return;
+    }
+
+    await mkdir(this.conversionHistoryDir, { recursive: true });
+    const extension = path.extname(input.outputFilename) || "";
+    const storedFileName = `${historyId}-${sanitizeStoredFilename(path.basename(input.outputFilename, extension))}${extension}`;
+    await writeFile(path.join(this.conversionHistoryDir, storedFileName), input.data);
+
+    const now = new Date().toISOString();
+    this.db.prepare(`
+      UPDATE account_conversion_history
+      SET output_filename = ?,
+          output_content_type = ?,
+          output_size_bytes = ?,
+          provider = ?,
+          status = 'ready',
+          error_message = NULL,
+          stored_file_name = ?,
+          updated_at = ?,
+          completed_at = ?
+      WHERE id = ?
+    `).run(
+      input.outputFilename,
+      input.outputContentType,
+      Math.max(0, Math.round(input.outputSizeBytes)),
+      input.provider,
+      storedFileName,
+      now,
+      now,
+      historyId
+    );
+
+    await this.purgeExpiredConversionHistory();
+  }
+
+  failConversionHistory(historyId: string, errorMessage: string) {
+    this.db.prepare(`
+      UPDATE account_conversion_history
+      SET status = 'failed',
+          error_message = ?,
+          updated_at = ?,
+          completed_at = ?
+      WHERE id = ?
+    `).run(errorMessage.slice(0, 240), new Date().toISOString(), new Date().toISOString(), historyId);
+  }
+
+  listConversionHistory(cookieHeader: string | undefined, limit = 12) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    return this.getRecentConversionsForUser(authenticated.user.id, limit);
+  }
+
+  async getConversionDownload(cookieHeader: string | undefined, historyId: string): Promise<AccountConversionDownloadAsset> {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const row = this.db.prepare(`
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, output_filename, output_content_type, output_size_bytes,
+             provider, status, error_message, stored_file_name, created_at, updated_at, completed_at
+      FROM account_conversion_history
+      WHERE id = ? AND user_id = ?
+    `).get(historyId, authenticated.user.id) as AccountConversionHistoryRow | undefined;
+
+    if (!row || row.status !== "ready" || !row.stored_file_name || !row.output_filename || !row.output_content_type) {
+      throw new AppError("Esse arquivo convertido nao esta disponivel para download.", 404, "ACCOUNT_CONVERSION_NOT_FOUND");
+    }
+
+    const buffer = await readFile(path.join(this.conversionHistoryDir, row.stored_file_name));
+    return {
+      filename: row.output_filename,
+      contentType: row.output_content_type,
+      buffer
     };
   }
 
@@ -1812,6 +2082,34 @@ export class AccountService {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS account_favorites (
+        user_id TEXT NOT NULL,
+        tool_id TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, tool_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS account_conversion_history (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        tool_id TEXT NOT NULL,
+        tool_label TEXT NOT NULL,
+        source_label TEXT NOT NULL,
+        input_count INTEGER NOT NULL DEFAULT 1,
+        output_filename TEXT,
+        output_content_type TEXT,
+        output_size_bytes INTEGER,
+        provider TEXT,
+        status TEXT NOT NULL,
+        error_message TEXT,
+        stored_file_name TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        completed_at TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
       CREATE TABLE IF NOT EXISTS admin_audit_log (
         id TEXT PRIMARY KEY,
         actor_user_id TEXT NOT NULL,
@@ -1826,6 +2124,9 @@ export class AccountService {
       CREATE INDEX IF NOT EXISTS idx_account_sessions_expires_at ON account_sessions(expires_at);
       CREATE INDEX IF NOT EXISTS idx_account_verifications_expires_at ON account_verifications(expires_at);
       CREATE INDEX IF NOT EXISTS idx_account_verifications_target_email ON account_verifications(target_email);
+      CREATE INDEX IF NOT EXISTS idx_account_favorites_user_id ON account_favorites(user_id);
+      CREATE INDEX IF NOT EXISTS idx_account_conversion_history_user_id_created_at ON account_conversion_history(user_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_account_conversion_history_status ON account_conversion_history(status);
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_promo_redemptions_user_id ON promo_redemptions(user_id);
       CREATE INDEX IF NOT EXISTS idx_billing_payments_user_id ON billing_payments(user_id);
@@ -1909,8 +2210,34 @@ export class AccountService {
       user: mapUser(row),
       plan: this.getPlanForUser(userId),
       wallet: this.buildWalletForRow(row),
-      isAdmin: this.isAdminEmail(row.email)
+      isAdmin: this.isAdminEmail(row.email),
+      favoriteToolIds: this.getFavoriteToolIdsForUser(userId),
+      recentConversions: this.getRecentConversionsForUser(userId)
     };
+  }
+
+  private getFavoriteToolIdsForUser(userId: string) {
+    const rows = this.db.prepare(`
+      SELECT user_id, tool_id, created_at
+      FROM account_favorites
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `).all(userId) as unknown as AccountFavoriteRow[];
+
+    return rows.map((row) => row.tool_id);
+  }
+
+  private getRecentConversionsForUser(userId: string, limit = 8) {
+    const rows = this.db.prepare(`
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, output_filename, output_content_type, output_size_bytes,
+             provider, status, error_message, stored_file_name, created_at, updated_at, completed_at
+      FROM account_conversion_history
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+      LIMIT ?
+    `).all(userId, Math.max(1, Math.min(50, Math.round(limit)))) as unknown as AccountConversionHistoryRow[];
+
+    return rows.map((row) => mapConversionHistory(row));
   }
 
   private buildWalletForRow(row: AccountUserRow): AccountWalletPublic {
@@ -1975,6 +2302,39 @@ export class AccountService {
       FROM account_plans
       WHERE user_id = ?
     `).get(userId) as AccountPlanRow | undefined;
+  }
+
+  private async purgeExpiredConversionHistory() {
+    const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const rows = this.db.prepare(`
+      SELECT id, stored_file_name
+      FROM account_conversion_history
+      WHERE created_at <= ?
+    `).all(cutoff) as Array<{ id: string; stored_file_name: string | null }>;
+
+    for (const row of rows) {
+      if (row.stored_file_name) {
+        await rm(path.join(this.conversionHistoryDir, row.stored_file_name), { force: true }).catch(() => undefined);
+      }
+    }
+
+    this.db.prepare("DELETE FROM account_conversion_history WHERE created_at <= ?").run(cutoff);
+
+    try {
+      const fileNames = new Set(
+        (
+          this.db.prepare("SELECT stored_file_name FROM account_conversion_history WHERE stored_file_name IS NOT NULL").all() as Array<{ stored_file_name: string }>
+        ).map((row) => row.stored_file_name)
+      );
+      const files = await readdir(this.conversionHistoryDir).catch(() => []);
+      await Promise.all(
+        files
+          .filter((fileName) => !fileNames.has(fileName))
+          .map((fileName) => rm(path.join(this.conversionHistoryDir, fileName), { force: true }).catch(() => undefined))
+      );
+    } catch {
+      // Ignore cleanup failures to keep account operations available.
+    }
   }
 
   private isAdminEmail(email: string) {

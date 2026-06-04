@@ -40,6 +40,23 @@ function buildAvatarMultipartBody() {
   };
 }
 
+function buildConversionMultipartBody() {
+  const boundary = "----vaptdoc-conversion-boundary";
+  const parts = [
+    `--${boundary}\r\nContent-Disposition: form-data; name="toolId"\r\n\r\npdf-to-text\r\n`,
+    `--${boundary}\r\nContent-Disposition: form-data; name="textLayout"\r\n\r\nblocks\r\n`,
+    `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="sample.pdf"\r\nContent-Type: application/pdf\r\n\r\n`,
+    Buffer.from("%PDF-1.7\n1 0 obj\n"),
+    "\r\n",
+    `--${boundary}--\r\n`
+  ];
+
+  return {
+    boundary,
+    body: Buffer.concat(parts.map((part) => (typeof part === "string" ? Buffer.from(part) : part)))
+  };
+}
+
 describe("account routes", () => {
   const apps: Array<Awaited<ReturnType<typeof createApp>>> = [];
 
@@ -182,6 +199,116 @@ describe("account routes", () => {
     expect(session.statusCode).toBe(200);
     expect(session.json().plan).toBe("pro");
     expect(session.json().account.plan.plan).toBe("pro");
+  });
+
+  it("persists favorite tools in the authenticated account session", async () => {
+    const accountService = createTempAccountService();
+    const app = await createApp({
+      accessService: createAccessService({ secret: "account-secret" }),
+      accountService: accountService.service
+    });
+    apps.push(app);
+
+    const register = await registerAndVerifyAccount(app, accountService, {
+      displayName: "Conta Favoritos",
+      email: "favoritos@vaptdoc.test",
+      password: "SenhaSegura123"
+    });
+
+    const cookieHeader = createCookieHeader(register.headers["set-cookie"]);
+    const updateFavorites = await app.inject({
+      method: "PUT",
+      url: "/api/account/favorites",
+      headers: {
+        cookie: cookieHeader,
+        "content-type": "application/json",
+        ...internalClientHeaders
+      },
+      payload: {
+        toolIds: ["pdf-to-docx", "pdf-merge", "pdf-to-docx"]
+      }
+    });
+
+    expect(updateFavorites.statusCode).toBe(200);
+    expect(updateFavorites.json().account.favoriteToolIds).toEqual(["pdf-to-docx", "pdf-merge"]);
+
+    const session = await app.inject({
+      method: "GET",
+      url: "/api/access/session",
+      headers: {
+        cookie: cookieHeader
+      }
+    });
+
+    expect(session.statusCode).toBe(200);
+    expect(session.json().account.favoriteToolIds).toEqual(["pdf-to-docx", "pdf-merge"]);
+  });
+
+  it("stores conversion history and allows downloading the generated file again", async () => {
+    const accountService = createTempAccountService();
+    const app = await createApp({
+      accessService: createAccessService({ secret: "account-secret" }),
+      accountService: accountService.service,
+      conversionService: {
+        async convert() {
+          return {
+            data: Buffer.from("resultado-final"),
+            filename: "resultado.txt",
+            contentType: "text/plain; charset=utf-8",
+            provider: "mock",
+            summary: "mock"
+          };
+        }
+      } as never
+    });
+    apps.push(app);
+
+    const register = await registerAndVerifyAccount(app, accountService, {
+      displayName: "Conta Historico",
+      email: "historico@vaptdoc.test",
+      password: "SenhaSegura123"
+    });
+
+    const cookieHeader = createCookieHeader(register.headers["set-cookie"]);
+    const multipart = buildConversionMultipartBody();
+    const convert = await app.inject({
+      method: "POST",
+      url: "/api/convert",
+      headers: {
+        cookie: cookieHeader,
+        "content-type": `multipart/form-data; boundary=${multipart.boundary}`,
+        ...internalClientHeaders
+      },
+      payload: multipart.body
+    });
+
+    expect(convert.statusCode).toBe(200);
+
+    const history = await app.inject({
+      method: "GET",
+      url: "/api/account/history",
+      headers: {
+        cookie: cookieHeader
+      }
+    });
+
+    expect(history.statusCode).toBe(200);
+    expect(history.json().items).toHaveLength(1);
+    expect(history.json().items[0].status).toBe("ready");
+    expect(history.json().items[0].outputFilename).toBe("resultado.txt");
+
+    const historyId = history.json().items[0].id as string;
+    const download = await app.inject({
+      method: "GET",
+      url: `/api/account/history/${historyId}/download`,
+      headers: {
+        cookie: cookieHeader
+      }
+    });
+
+    expect(download.statusCode).toBe(200);
+    expect(download.headers["content-type"]).toContain("text/plain");
+    expect(download.body).toBe("resultado-final");
   });
 
   it("updates profile and password, then allows login with the new credentials", async () => {
