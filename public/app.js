@@ -6189,16 +6189,29 @@ async function resumeCheckoutIfNeeded() {
   const paymentId = query.get("payment_id") || query.get("collection_id") || "";
   const path = window.location.pathname;
   const isCheckoutPath = /^\/checkout\/(success|pending|failure)$/u.test(path);
+  const shouldResumeCheckout = isCheckoutPath || Boolean(paymentId);
 
-  if (!pendingCheckout && !isCheckoutPath) {
+  if (!shouldResumeCheckout) {
+    if (pendingCheckout) {
+      clearPendingCheckout();
+    }
     return;
   }
 
   if (path === "/checkout/failure" && !paymentId) {
     clearPendingCheckout();
-    showBillingModal({ tool: getToolById() });
-    setBillingStatus("O pagamento foi interrompido. Você pode tentar novamente quando quiser.", { toast: false });
-    setStatus("Pagamento não concluído.");
+    hideBillingModal();
+    setBillingStatus("", { toast: false });
+    setStatus("", { toast: false });
+    window.history.replaceState({}, "", "/");
+    return;
+  }
+
+  if (path === "/checkout/pending" && !paymentId) {
+    clearPendingCheckout();
+    hideBillingModal();
+    setBillingStatus("", { toast: false });
+    setStatus("", { toast: false });
     window.history.replaceState({}, "", "/");
     return;
   }
@@ -6224,19 +6237,18 @@ async function resumeCheckoutIfNeeded() {
     }
 
     if (payload.status === "pending") {
-      showBillingModal({ tool: getToolById() });
-      setBillingStatus(payload.message ?? "Pagamento em analise. Assim que aprovar, o acesso sera liberado aqui.", { toast: false });
-      setStatus("Pagamento aguardando confirmação.");
-      if (isCheckoutPath && path !== "/checkout/pending") {
-        window.history.replaceState({}, "", "/checkout/pending");
-      }
+      clearPendingCheckout();
+      hideBillingModal();
+      setBillingStatus("", { toast: false });
+      setStatus("", { toast: false });
+      window.history.replaceState({}, "", "/");
+      return;
     }
   } catch (error) {
     clearPendingCheckout();
-    showBillingModal({ tool: getToolById() });
-    const message = error instanceof Error ? error.message : "Não foi possível validar o pagamento.";
-    setBillingStatus(message, { toast: false });
-    setStatus(message);
+    hideBillingModal();
+    setBillingStatus("", { toast: false });
+    setStatus("", { toast: false });
     if (isCheckoutPath) {
       window.history.replaceState({}, "", "/");
     }
