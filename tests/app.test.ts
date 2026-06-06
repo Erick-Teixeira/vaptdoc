@@ -144,7 +144,10 @@ describe("app routes", () => {
 
     const toolPage = await app.inject({
       method: "GET",
-      url: "/pdf-para-docx"
+      url: "/pdf-para-docx",
+      headers: {
+        host: "example.test"
+      }
     });
     const legacyToolRoute = await app.inject({
       method: "GET",
@@ -164,6 +167,8 @@ describe("app routes", () => {
     expect(toolPage.body).toContain("application/ld+json");
     expect(toolPage.body).toContain("seo-faq-schema");
     expect(toolPage.body).toContain("/pdf-para-docx");
+    expect(toolPage.body).toContain("http://example.test/pdf-para-docx");
+    expect(toolPage.body).not.toContain("transmutalab.up.railway.app");
     expect(legacyToolRoute.statusCode).toBe(301);
     expect(legacyToolRoute.headers.location).toBe("/pdf-para-docx");
     expect(sitemap.statusCode).toBe(200);

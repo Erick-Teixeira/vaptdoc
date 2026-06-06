@@ -1,4 +1,12 @@
-const baseUrl = (process.env.SMOKE_BASE_URL || "https://transmutalab.up.railway.app").replace(/\/+$/u, "");
+import "dotenv/config";
+
+const configuredBaseUrl = String(process.env.SMOKE_BASE_URL || process.env.PUBLIC_APP_URL || "").trim();
+
+if (!configuredBaseUrl) {
+  throw new Error("Defina SMOKE_BASE_URL ou PUBLIC_APP_URL antes de rodar o smoke test público.");
+}
+
+const baseUrl = configuredBaseUrl.replace(/\/+$/u, "");
 
 async function assertOk(pathname, check) {
   const response = await fetch(`${baseUrl}${pathname}`);

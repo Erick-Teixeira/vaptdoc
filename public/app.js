@@ -437,7 +437,7 @@ const quietStatusMessages = new Set([
 ]);
 const toastTimers = new Map();
 let toastSequence = 0;
-const defaultSiteUrl = window.location.origin || "https://transmutalab.up.railway.app";
+const defaultSiteUrl = window.location.origin || "";
 const initialPageData = (() => {
   try {
     return JSON.parse(pageDataScript?.textContent ?? "{}");

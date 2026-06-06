@@ -5,7 +5,7 @@
 - conversoes rapidas com fallback local e provedores externos
 - OCR e fluxos PDF avancados
 - autenticacao de conta, verificacao por codigo e monetizacao
-- seguranca, observabilidade e operacao pronta para Railway
+- seguranca, observabilidade e operacao pronta para ambientes modernos de hospedagem
 
 O projeto foi estruturado para que outros desenvolvedores consigam:
 
@@ -104,8 +104,8 @@ transmuta-lab/
     types.ts               # Tipos compartilhados
   scripts/                 # Automacoes locais e smoke tests
   tests/                   # Suite Vitest
-  Dockerfile               # Build/deploy em Railway
-  railway.toml             # Configuracao do servico Railway
+  Dockerfile               # Imagem de producao conteinerizada
+  railway.toml             # Exemplo de configuracao para Railway
 ```
 
 ## Documentacao Tecnica
@@ -118,39 +118,53 @@ transmuta-lab/
 - [Contribuindo](CONTRIBUTING.md)
 - [Seguranca operacional](SECURITY.md)
 
-## Setup Local Rapido
+## Como rodar este projeto em qualquer ambiente
 
 ### 1. Requisitos
 
 - Node.js `24+`
 - npm
-- Opcional para mais fidelidade local:
+- Docker `24+` com Docker Compose opcional
+- Opcional para desenvolvimento sem container:
   - LibreOffice
   - Tesseract OCR
   - pdftoppm
   - FFmpeg
 
-### 2. Instale dependencias
+### 2. Variaveis de ambiente
 
-```bash
-npm install
-```
+O projeto nao depende de secrets, portas ou URLs fixas no codigo. Tudo entra por variaveis de ambiente validadas em [src/env.ts](src/env.ts).
 
-### 3. Configure ambiente
-
-Copie `.env.example` para `.env` e preencha as variaveis necessarias:
+Comece copiando o modelo:
 
 ```bash
 cp .env.example .env
 ```
 
-### 4. Rode em modo dev
+Preencha somente o que for necessario para o ambiente em questao:
+
+- `PORT`: porta dinamica fornecida pela hospedagem
+- `PUBLIC_APP_URL`: URL publica final do ambiente
+- `DATA_DIR`: caminho persistente do SQLite e arquivos de apoio
+- credenciais das integracoes que voce realmente vai usar
+
+> O `.env.example` lista todas as variaveis suportadas com valores vazios, para que cada ambiente possa definir seus proprios valores sem depender de defaults locais.
+
+### 3. Rodando sem Docker
+
+Instale as dependencias:
+
+```bash
+npm install
+```
+
+Suba em desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-### 5. Validacao local
+Valide antes de publicar:
 
 ```bash
 npm run lint
@@ -158,37 +172,66 @@ npm test
 npm run build
 ```
 
+### 4. Rodando com Docker
+
+Crie a imagem de producao:
+
+```bash
+docker build -t vaptdoc .
+```
+
+Suba o container apontando um `.env` e um volume persistente:
+
+```bash
+docker run --rm ^
+  --env-file .env ^
+  -e PORT=8080 ^
+  -p 8080:8080 ^
+  -v "%cd%/data:/data" ^
+  vaptdoc
+```
+
+Notas importantes:
+
+- o servidor sempre escuta a porta informada por `PORT`
+- o `Dockerfile` usa build multi-stage para manter a imagem final mais enxuta
+- o volume em `/data` evita perder o banco SQLite entre reinicios
+
 ## Variaveis de Ambiente Principais
+
+Estas sao as categorias mais importantes. A lista completa e oficial fica em [.env.example](.env.example).
 
 ### Nucleo
 
 ```env
-NODE_ENV=development
-HOST=0.0.0.0
-PORT=3000
-DATA_DIR=./data
-PUBLIC_APP_URL=http://localhost:3000
+NODE_ENV=
+HOST=
+PORT=
+DATA_DIR=
+PUBLIC_APP_URL=
 ```
 
 ### Limites operacionais
 
 ```env
-MAX_FILE_SIZE_MB=25
-MAX_OCR_PAGES=8
-MAX_CONCURRENT_CONVERSIONS=3
-MAX_PENDING_CONVERSIONS=12
+MAX_FILE_SIZE_MB=
+MAX_OCR_PAGES=
+MAX_CONCURRENT_CONVERSIONS=
+MAX_PENDING_CONVERSIONS=
 ```
 
 ### Conta, planos e admin
 
 ```env
 ACCESS_TOKEN_SECRET=
-ACCOUNT_SESSION_DAYS=30
-FREE_DAILY_LIMIT=8
-PRO_DAILY_LIMIT=80
-PRO_ACCESS_DAYS=30
-TEAM_ACCESS_DAYS=365
-ADMIN_OWNER_EMAILS=voce@seudominio.com
+ACCOUNT_SESSION_DAYS=
+FREE_DAILY_LIMIT=
+PRO_DAILY_LIMIT=
+PRO_ACCESS_DAYS=
+TEAM_ACCESS_DAYS=
+PRO_ACCESS_CODES=
+TEAM_ACCESS_CODES=
+ADMIN_OWNER_EMAILS=
 ```
 
 ### Billing
@@ -197,18 +240,23 @@ ADMIN_OWNER_EMAILS=voce@seudominio.com
 BILLING_STATE_SECRET=
 MERCADOPAGO_ACCESS_TOKEN=
 MERCADOPAGO_WEBHOOK_SECRET=
-PRO_MONTHLY_PRICE_BRL=19.9
-PRO_YEARLY_PRICE_BRL=149.9
-STARTER_PACK_PRICE_BRL=9.9
-STARTER_ACCESS_DAYS=7
+PRO_MONTHLY_PRICE_BRL=
+PRO_YEARLY_PRICE_BRL=
+STARTER_PACK_PRICE_BRL=
+STARTER_ACCESS_DAYS=
 ```
 
 ### E-mail
 
 ```env
 BREVO_API_KEY=
-EMAIL_FROM_ADDRESS=noreply@seudominio.com
-EMAIL_FROM_NAME=vaptdoc
+SMTP_HOST=
+SMTP_PORT=
+SMTP_SECURE=
+SMTP_USER=
+SMTP_PASS=
+EMAIL_FROM_ADDRESS=
+EMAIL_FROM_NAME=
 ```
 
 ### Integracoes de conversao
@@ -216,12 +264,16 @@ EMAIL_FROM_NAME=vaptdoc
 ```env
 ILOVEPDF_PUBLIC_KEY=
 ILOVEPDF_SECRET_KEY=
-ILOVEPDF_OCR_LANGUAGES=por,eng
+ILOVEPDF_OCR_LANGUAGES=
 ASPOSE3D_CLIENT_ID=
 ASPOSE3D_CLIENT_SECRET=
 CONVERTAPI_TOKEN=
 OCR_SPACE_API_KEY=
-OCR_SPACE_LANGUAGE=por
+OCR_SPACE_LANGUAGE=
+LIBREOFFICE_BIN=
+PDFTOPPM_BIN=
+TESSERACT_BIN=
+FFMPEG_BIN=
 ```
 
 ## Fluxos importantes

@@ -23,7 +23,9 @@ export interface SeoViewModel {
 }
 
 function normalizeBaseUrl(input?: string) {
-  const fallback = "https://transmutalab.up.railway.app";
+  const fallbackHost =
+    env.HOST === "0.0.0.0" || env.HOST === "::" || env.HOST === "::0" ? "localhost" : env.HOST;
+  const fallback = `http://${fallbackHost}:${env.PORT}`;
   const candidate = String(input ?? env.PUBLIC_APP_URL ?? "").trim() || fallback;
 
   try {

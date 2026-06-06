@@ -162,7 +162,13 @@ export async function createApp(options: AppOptions = {}) {
       return explicit;
     }
 
-    return requestHostOrigin || "https://transmutalab.up.railway.app";
+    if (requestHostOrigin) {
+      return requestHostOrigin;
+    }
+
+    const fallbackHost =
+      env.HOST === "0.0.0.0" || env.HOST === "::" || env.HOST === "::0" ? "localhost" : env.HOST;
+    return `http://${fallbackHost}:${env.PORT}`;
   }
 
   function renderIndexPage(baseUrl: string, toolId?: string) {
@@ -313,7 +319,10 @@ export async function createApp(options: AppOptions = {}) {
       return reply.code(404).send({ message: "Recurso não encontrado." });
     }
 
-    return reply.sendFile("index.html");
+    reply
+      .header("Cache-Control", "public, max-age=0, must-revalidate")
+      .type("text/html; charset=utf-8");
+    return reply.send(renderIndexPage(resolveRequestOrigin(request)));
   });
 
   app.setErrorHandler((error, _request, reply) => {
