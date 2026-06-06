@@ -2591,6 +2591,28 @@ export class AccountService {
         FOREIGN KEY (actor_user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
+    `);
+
+    this.ensureUserColumn("email_verified_at", "TEXT");
+    this.ensureUserColumn("avatar_blob", "BLOB");
+    this.ensureUserColumn("avatar_content_type", "TEXT");
+    this.ensureUserColumn("avatar_updated_at", "TEXT");
+    this.ensureUserColumn("credit_balance", "REAL NOT NULL DEFAULT 0");
+    this.ensureUserColumn("discount_percent", "REAL NOT NULL DEFAULT 0");
+    this.ensureUserColumn("discount_expires_at", "TEXT");
+    this.ensureConversionHistoryColumn("mode", "TEXT NOT NULL DEFAULT 'sync'");
+    this.ensureConversionHistoryColumn("options_json", "TEXT");
+    this.ensureConversionHistoryColumn("input_files_json", "TEXT");
+    this.ensureConversionHistoryColumn("output_filename", "TEXT");
+    this.ensureConversionHistoryColumn("output_content_type", "TEXT");
+    this.ensureConversionHistoryColumn("output_size_bytes", "INTEGER");
+    this.ensureConversionHistoryColumn("provider", "TEXT");
+    this.ensureIndexes();
+    this.db.prepare("UPDATE users SET email_verified_at = created_at WHERE email_verified_at IS NULL").run();
+  }
+
+  private ensureIndexes() {
+    this.db.exec(`
       CREATE INDEX IF NOT EXISTS idx_account_sessions_expires_at ON account_sessions(expires_at);
       CREATE INDEX IF NOT EXISTS idx_account_verifications_expires_at ON account_verifications(expires_at);
       CREATE INDEX IF NOT EXISTS idx_account_verifications_target_email ON account_verifications(target_email);
@@ -2604,18 +2626,6 @@ export class AccountService {
       CREATE INDEX IF NOT EXISTS idx_promo_redemptions_user_id ON promo_redemptions(user_id);
       CREATE INDEX IF NOT EXISTS idx_billing_payments_user_id ON billing_payments(user_id);
     `);
-
-    this.ensureUserColumn("email_verified_at", "TEXT");
-    this.ensureUserColumn("avatar_blob", "BLOB");
-    this.ensureUserColumn("avatar_content_type", "TEXT");
-    this.ensureUserColumn("avatar_updated_at", "TEXT");
-    this.ensureUserColumn("credit_balance", "REAL NOT NULL DEFAULT 0");
-    this.ensureUserColumn("discount_percent", "REAL NOT NULL DEFAULT 0");
-    this.ensureUserColumn("discount_expires_at", "TEXT");
-    this.ensureConversionHistoryColumn("mode", "TEXT NOT NULL DEFAULT 'sync'");
-    this.ensureConversionHistoryColumn("options_json", "TEXT");
-    this.ensureConversionHistoryColumn("input_files_json", "TEXT");
-    this.db.prepare("UPDATE users SET email_verified_at = created_at WHERE email_verified_at IS NULL").run();
   }
 
   private ensureUserColumn(columnName: string, definition: string) {

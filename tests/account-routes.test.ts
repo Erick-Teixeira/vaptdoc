@@ -1,11 +1,17 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { afterEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import { createAccessService } from "../src/services/access-service.js";
 import { createAccountService } from "../src/services/account-service.js";
 import { MemoryEmailService } from "../src/services/email-service.js";
+
+const require = createRequire(import.meta.url);
+const { DatabaseSync } = require("node:sqlite") as {
+  DatabaseSync: typeof import("node:sqlite").DatabaseSync;
+};
 
 const internalClientHeaders = {
   "x-vaptdoc-client": "web"
@@ -86,6 +92,57 @@ describe("account routes", () => {
       emailService,
       service: createAccountService({
         dbPath: ":memory:",
+        dataDir,
+        sessionDays: 30,
+        proDailyLimit: 80,
+        emailService
+      })
+    };
+  }
+
+  function createLegacyHistoryAccountService() {
+    const emailService = new MemoryEmailService();
+    const dataDir = mkdtempSync(path.join(tmpdir(), "vaptdoc-legacy-account-"));
+    const dbPath = path.join(dataDir, "legacy.sqlite");
+    tempDirs.push(dataDir);
+
+    const db = new DatabaseSync(dbPath);
+    db.exec(`
+      CREATE TABLE users (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        display_name TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        password_salt TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+
+      CREATE TABLE account_conversion_history (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        tool_id TEXT NOT NULL,
+        tool_label TEXT NOT NULL,
+        source_label TEXT NOT NULL,
+        input_count INTEGER NOT NULL DEFAULT 1,
+        status TEXT NOT NULL,
+        error_message TEXT,
+        stored_file_name TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        completed_at TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX idx_account_conversion_history_user_id_created_at ON account_conversion_history(user_id, created_at DESC);
+      CREATE INDEX idx_account_conversion_history_status ON account_conversion_history(status);
+    `);
+    db.close();
+
+    return {
+      dbPath,
+      service: createAccountService({
+        dbPath,
         dataDir,
         sessionDays: 30,
         proDailyLimit: 80,
@@ -206,6 +263,22 @@ describe("account routes", () => {
     expect(session.statusCode).toBe(200);
     expect(session.json().account.authenticated).toBe(true);
     expect(session.json().account.user.displayName).toBe("Erick Teste");
+  });
+
+  it("migrates legacy conversion history tables before creating mode-based indexes", () => {
+    const { dbPath, service } = createLegacyHistoryAccountService();
+    service.close();
+    const db = new DatabaseSync(dbPath);
+    const columns = db.prepare("PRAGMA table_info(account_conversion_history)").all() as Array<{ name: string }>;
+    db.close();
+
+    expect(columns.some((column) => column.name === "mode")).toBe(true);
+    expect(columns.some((column) => column.name === "options_json")).toBe(true);
+    expect(columns.some((column) => column.name === "input_files_json")).toBe(true);
+    expect(columns.some((column) => column.name === "output_filename")).toBe(true);
+    expect(columns.some((column) => column.name === "output_content_type")).toBe(true);
+    expect(columns.some((column) => column.name === "output_size_bytes")).toBe(true);
+    expect(columns.some((column) => column.name === "provider")).toBe(true);
   });
 
   it("persists a redeemed premium code in the authenticated account", async () => {
