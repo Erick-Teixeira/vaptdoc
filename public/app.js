@@ -156,8 +156,17 @@ const accountSwitchToRegisterButton = document.getElementById("account-switch-to
 const accountShortcutProfileButton = document.getElementById("account-shortcut-profile");
 const accountShortcutSettingsButton = document.getElementById("account-shortcut-settings");
 const accountShortcutAdminButton = document.getElementById("account-shortcut-admin");
+const accountFileFilterButtons = Array.from(document.querySelectorAll("[data-account-file-filter]"));
+const accountFileCountTotal = document.getElementById("account-file-count-total");
+const accountFileCountTemporary = document.getElementById("account-file-count-temporary");
+const accountFileCountReady = document.getElementById("account-file-count-ready");
+const accountFileCountFailed = document.getElementById("account-file-count-failed");
 const accountHistoryList = document.getElementById("account-history-list");
 const accountHistoryEmpty = document.getElementById("account-history-empty");
+const accountUsageList = document.getElementById("account-usage-list");
+const accountUsageEmpty = document.getElementById("account-usage-empty");
+const accountNotificationsList = document.getElementById("account-notifications-list");
+const accountNotificationsEmpty = document.getElementById("account-notifications-empty");
 const accountRegisterForm = document.getElementById("account-register-form");
 const accountLoginForm = document.getElementById("account-login-form");
 const accountProfileForm = document.getElementById("account-profile-form");
@@ -203,6 +212,8 @@ const adminStatPremium = document.getElementById("admin-stat-premium");
 const adminStatCredits = document.getElementById("admin-stat-credits");
 const adminStatRevenue = document.getElementById("admin-stat-revenue");
 const adminStatPayments = document.getElementById("admin-stat-payments");
+const adminStatQueued = document.getElementById("admin-stat-queued");
+const adminStatProcessing = document.getElementById("admin-stat-processing");
 const adminRefreshUsersButton = document.getElementById("admin-refresh-users");
 const adminUserSearchInput = document.getElementById("admin-user-search");
 const adminUserList = document.getElementById("admin-user-list");
@@ -227,10 +238,13 @@ const adminUserDiscountDaysInput = document.getElementById("admin-user-discount-
 const adminUserDeleteButton = document.getElementById("admin-user-delete");
 const adminUserPayments = document.getElementById("admin-user-payments");
 const adminUserPromos = document.getElementById("admin-user-promos");
+const adminUserUsage = document.getElementById("admin-user-usage");
+const adminUserConversions = document.getElementById("admin-user-conversions");
 const adminPromoForm = document.getElementById("admin-promo-form");
 const adminPromoList = document.getElementById("admin-promo-list");
 const adminPromoEmpty = document.getElementById("admin-promo-empty");
 const adminRefreshPromosButton = document.getElementById("admin-refresh-promos");
+const adminDashboardUsage = document.getElementById("admin-dashboard-usage");
 const adminTabButtons = Array.from(document.querySelectorAll("[data-admin-pane-target]"));
 const adminPanes = Array.from(document.querySelectorAll("[data-admin-pane]"));
 const toolToolbarCopy = document.getElementById("tool-toolbar-copy");
@@ -330,6 +344,24 @@ let adminState = {
 let pendingAccountVerification = null;
 let avatarActionReveal = false;
 let hasLoadedTools = false;
+let accountPollingTimer = null;
+let hasHydratedNotifications = false;
+const seenNotificationIds = new Set();
+const asyncQueueToolIds = new Set(["pdf-ocr", "3d-convert", "mp4-to-mp3"]);
+let accountWorkspaceState = {
+  fileFilter: "all",
+  files: {
+    counts: {
+      total: 0,
+      temporary: 0,
+      ready: 0,
+      failed: 0
+    },
+    items: []
+  },
+  usage: [],
+  notifications: []
+};
 const themeCookieName = "vaptdoc-theme";
 const legacyThemeCookieName = "transmuta-theme";
 const favoritesStorageKey = "vaptdoc-favorites";
@@ -1474,6 +1506,35 @@ function getAccountState() {
   };
 }
 
+function createEmptyAccountWorkspaceState() {
+  return {
+    fileFilter: "all",
+    files: {
+      counts: {
+        total: 0,
+        temporary: 0,
+        ready: 0,
+        failed: 0
+      },
+      items: []
+    },
+    usage: [],
+    notifications: []
+  };
+}
+
+function normalizeAccountFileFilter(value) {
+  return ["all", "temporary", "ready", "failed"].includes(String(value)) ? value : "all";
+}
+
+function shouldQueueAsyncConversion(tool, files) {
+  if (!tool || !isAccountAuthenticated() || !Array.isArray(files) || files.length === 0) {
+    return false;
+  }
+
+  return asyncQueueToolIds.has(tool.id);
+}
+
 function isAccountAuthenticated() {
   return Boolean(getAccountState().authenticated && getAccountState().user);
 }
@@ -1600,12 +1661,22 @@ function applySessionPayload(payload = {}) {
       promos: [],
       selectedUserId: "",
       selectedUser: null,
-      search: ""
+      search: "",
+      activePane: "account"
     };
+  }
+
+  if (!accessSession.account?.authenticated) {
+    accountWorkspaceState = createEmptyAccountWorkspaceState();
+    hasHydratedNotifications = false;
+    seenNotificationIds.clear();
   }
 
   updateAccessUi();
   renderAccountHistory();
+  renderAccountUsage();
+  renderAccountNotifications();
+  syncAccountPolling();
   return accessSession;
 }
 
@@ -2317,7 +2388,7 @@ function showAccountModal(options = {}) {
   updateBodyScrollLock();
   renderAccountUi();
   if (focus === "overview" && isAccountAuthenticated()) {
-    void fetchAccountHistory().catch(() => undefined);
+    void refreshAccountWorkspaceData({ silent: true }).catch(() => undefined);
   }
   if (focus === "admin") {
     void loadAdminPanel();
@@ -2454,24 +2525,102 @@ function getConversionStatusLabel(status) {
   return "Atualizando";
 }
 
+function renderAccountHistoryFilters() {
+  const counts = accountWorkspaceState.files?.counts ?? {
+    total: 0,
+    temporary: 0,
+    ready: 0,
+    failed: 0
+  };
+
+  if (accountFileCountTotal) {
+    accountFileCountTotal.textContent = String(counts.total ?? 0);
+  }
+  if (accountFileCountTemporary) {
+    accountFileCountTemporary.textContent = String(counts.temporary ?? 0);
+  }
+  if (accountFileCountReady) {
+    accountFileCountReady.textContent = String(counts.ready ?? 0);
+  }
+  if (accountFileCountFailed) {
+    accountFileCountFailed.textContent = String(counts.failed ?? 0);
+  }
+
+  accountFileFilterButtons.forEach((button) => {
+    const isActive = button.dataset.accountFileFilter === accountWorkspaceState.fileFilter;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+}
+
+function buildAccountFileMeta(item) {
+  const parts = [item.toolLabel];
+  if (item.sourceLabel) {
+    parts.push(item.sourceLabel);
+  }
+  if (item.completedAt || item.updatedAt || item.createdAt) {
+    parts.push(formatDateTime(item.completedAt || item.updatedAt || item.createdAt));
+  }
+  return parts.filter(Boolean).join(" • ");
+}
+
+async function deleteAccountFile(historyId) {
+  const response = await fetch(`/api/account/files/${encodeURIComponent(historyId)}`, {
+    method: "DELETE",
+    credentials: "same-origin",
+    headers: {
+      ...internalClientHeader
+    }
+  });
+  const payload = await response.json().catch(() => ({ message: "Não foi possível remover este arquivo." }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível remover este arquivo.");
+  }
+}
+
+async function markAccountNotificationsRead(ids) {
+  const filteredIds = Array.from(new Set((Array.isArray(ids) ? ids : []).map((value) => String(value || "").trim()).filter(Boolean)));
+  if (filteredIds.length === 0) {
+    return [];
+  }
+
+  const response = await fetch("/api/account/notifications/read", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      ...internalClientHeader
+    },
+    body: JSON.stringify({ ids: filteredIds })
+  });
+  const payload = await response.json().catch(() => ({ message: "Não foi possível atualizar as notificações." }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível atualizar as notificações.");
+  }
+
+  accountWorkspaceState.notifications = Array.isArray(payload.items) ? payload.items : [];
+  renderAccountNotifications();
+  return accountWorkspaceState.notifications;
+}
+
 function renderAccountHistory() {
   if (!accountHistoryList || !accountHistoryEmpty) {
     return;
   }
 
-  const accountState = getAccountState();
-  const items = Array.isArray(accountState.recentConversions) ? accountState.recentConversions.slice(0, 8) : [];
+  renderAccountHistoryFilters();
   accountHistoryList.innerHTML = "";
 
-  if (!accountState.authenticated) {
+  if (!isAccountAuthenticated()) {
     accountHistoryEmpty.hidden = false;
-    accountHistoryEmpty.textContent = "Entre na sua conta para acompanhar seus arquivos convertidos.";
+    accountHistoryEmpty.textContent = "Entre na sua conta para acompanhar seus arquivos e resultados.";
     return;
   }
 
+  const items = Array.isArray(accountWorkspaceState.files?.items) ? accountWorkspaceState.files.items : [];
   if (items.length === 0) {
     accountHistoryEmpty.hidden = false;
-    accountHistoryEmpty.textContent = "Nenhuma conversão recente apareceu por aqui ainda.";
+    accountHistoryEmpty.textContent = "Nenhum arquivo apareceu nesta seleção ainda.";
     return;
   }
 
@@ -2498,10 +2647,27 @@ function renderAccountHistory() {
 
     const meta = document.createElement("p");
     meta.className = "account-copy";
-    meta.textContent = `${item.toolLabel} • ${item.sourceLabel} • ${formatDateTime(item.completedAt || item.updatedAt || item.createdAt)}`;
+    meta.textContent = buildAccountFileMeta(item);
 
-    copy.append(topline, meta);
+    const detail = document.createElement("p");
+    detail.className = "account-copy";
+    const inputLabel = item.inputCount === 1 ? "1 arquivo de origem" : `${item.inputCount} arquivos de origem`;
+    const outputLabel = item.outputFilename || "Aguardando saída";
+    detail.textContent = `${item.mode === "async" ? "Fila assíncrona" : "Conversão imediata"} • ${inputLabel} • ${outputLabel}`;
+
+    copy.append(topline, meta, detail);
+
+    if (item.errorMessage) {
+      const errorCopy = document.createElement("p");
+      errorCopy.className = "account-copy danger";
+      errorCopy.textContent = item.errorMessage;
+      copy.append(errorCopy);
+    }
+
     row.append(copy);
+
+    const actions = document.createElement("div");
+    actions.className = "account-history-actions";
 
     if (item.downloadUrl) {
       const button = document.createElement("button");
@@ -2516,10 +2682,144 @@ function renderAccountHistory() {
           setAccountStatus(error instanceof Error ? error.message : "Não foi possível baixar novamente este arquivo.");
         }
       });
-      row.append(button);
+      actions.append(button);
     }
 
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "ghost-action";
+    deleteButton.textContent = "Excluir";
+    deleteButton.addEventListener("click", async () => {
+      try {
+        await deleteAccountFile(item.id);
+        setAccountStatus("Arquivo removido.");
+        await refreshAccountWorkspaceData({ silent: true });
+      } catch (error) {
+        setAccountStatus(error instanceof Error ? error.message : "Não foi possível excluir este arquivo.");
+      }
+    });
+    actions.append(deleteButton);
+
+    row.append(actions);
+
     accountHistoryList.append(row);
+  });
+}
+
+function renderAccountUsage() {
+  if (!accountUsageList || !accountUsageEmpty) {
+    return;
+  }
+
+  accountUsageList.innerHTML = "";
+  if (!isAccountAuthenticated()) {
+    accountUsageEmpty.hidden = false;
+    accountUsageEmpty.textContent = "Entre na sua conta para ver o consumo por ferramenta.";
+    return;
+  }
+
+  const items = Array.isArray(accountWorkspaceState.usage) ? accountWorkspaceState.usage : [];
+  if (items.length === 0) {
+    accountUsageEmpty.hidden = false;
+    accountUsageEmpty.textContent = "Seu consumo por conversão aparece aqui conforme você usa a plataforma.";
+    return;
+  }
+
+  accountUsageEmpty.hidden = true;
+  items.forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "account-history-item";
+    row.innerHTML = `
+      <div class="account-history-copy">
+        <div class="account-history-topline">
+          <strong>${escapeHtml(item.toolLabel)}</strong>
+          <span class="account-history-status is-ready">${escapeHtml(String(item.totalConversions))} usos</span>
+        </div>
+        <p class="account-copy">${escapeHtml(`${item.completedConversions} concluídas • ${item.failedConversions} falhas • ${item.pendingConversions} pendentes`)}</p>
+        <p class="account-copy">${escapeHtml(`${Number(item.estimatedCreditsUsed ?? 0).toFixed(2).replace(".", ",")} créditos estimados • Último uso em ${formatDateTime(item.lastUsedAt)}`)}</p>
+      </div>
+    `;
+    accountUsageList.append(row);
+  });
+}
+
+function renderAccountNotifications() {
+  if (!accountNotificationsList || !accountNotificationsEmpty) {
+    return;
+  }
+
+  accountNotificationsList.innerHTML = "";
+  if (!isAccountAuthenticated()) {
+    accountNotificationsEmpty.hidden = false;
+    accountNotificationsEmpty.textContent = "Entre na sua conta para receber avisos internos.";
+    return;
+  }
+
+  const items = Array.isArray(accountWorkspaceState.notifications) ? accountWorkspaceState.notifications : [];
+  if (items.length === 0) {
+    accountNotificationsEmpty.hidden = false;
+    accountNotificationsEmpty.textContent = "Quando um OCR, vídeo ou 3D terminar, o aviso aparece aqui.";
+    return;
+  }
+
+  accountNotificationsEmpty.hidden = true;
+  items.forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "account-history-item";
+
+    const copy = document.createElement("div");
+    copy.className = "account-history-copy";
+    copy.innerHTML = `
+      <div class="account-history-topline">
+        <strong>${escapeHtml(item.title)}</strong>
+        <span class="account-history-status ${item.type === "job-failed" ? "is-failed" : "is-ready"}">${escapeHtml(item.readAt ? "Lido" : "Novo")}</span>
+      </div>
+      <p class="account-copy">${escapeHtml(item.message)}</p>
+      <p class="account-copy">${escapeHtml(formatDateTime(item.createdAt))}</p>
+    `;
+    row.append(copy);
+
+    const actions = document.createElement("div");
+    actions.className = "account-history-actions";
+
+    if (item.actionUrl) {
+      const actionButton = document.createElement("button");
+      actionButton.type = "button";
+      actionButton.className = "ghost-action";
+      actionButton.textContent = "Baixar";
+      actionButton.addEventListener("click", async () => {
+        try {
+          if (item.historyId) {
+            await redownloadHistoryItem(item.historyId);
+          } else {
+            window.open(item.actionUrl, "_self");
+          }
+          await markAccountNotificationsRead([item.id]).catch(() => undefined);
+          setAccountStatus("Download iniciado.");
+        } catch (error) {
+          setAccountStatus(error instanceof Error ? error.message : "Não foi possível abrir este arquivo.");
+        }
+      });
+      actions.append(actionButton);
+    }
+
+    if (!item.readAt) {
+      const readButton = document.createElement("button");
+      readButton.type = "button";
+      readButton.className = "ghost-action";
+      readButton.textContent = "Marcar como lido";
+      readButton.addEventListener("click", async () => {
+        try {
+          await markAccountNotificationsRead([item.id]);
+        } catch (error) {
+          setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar este aviso.");
+        }
+      });
+      actions.append(readButton);
+    }
+
+    row.append(actions);
+    accountNotificationsList.append(row);
   });
 }
 
@@ -2658,6 +2958,8 @@ function renderAccountUi() {
         : "Entre ou crie sua conta para continuar."
     );
     renderAccountHistory();
+    renderAccountUsage();
+    renderAccountNotifications();
     return;
   }
 
@@ -2721,6 +3023,8 @@ function renderAccountUi() {
       ? "Sua conta do dono está protegida. Abra o Painel Administrativo para gerenciar usuários, créditos e promoções."
       : "Sua conta está protegida. Atualize dados ou siga para um upgrade quando quiser.");
   renderAccountHistory();
+  renderAccountUsage();
+  renderAccountNotifications();
 }
 
 function updateAccessUi() {
@@ -2799,21 +3103,153 @@ async function updateAccountFavorites(toolIds) {
   return payload;
 }
 
-async function fetchAccountHistory(limit = 12) {
-  const response = await fetch(`/api/account/history?limit=${encodeURIComponent(String(limit))}`, {
+async function fetchAccountFiles(filter = accountWorkspaceState.fileFilter, limit = 30) {
+  const normalizedFilter = normalizeAccountFileFilter(filter);
+  const target = new URL("/api/account/files", window.location.origin);
+  target.searchParams.set("filter", normalizedFilter);
+  target.searchParams.set("limit", String(limit));
+
+  const response = await fetch(target, {
+    credentials: "same-origin"
+  });
+  const payload = await response.json().catch(() => ({ counts: null, items: [] }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível carregar seus arquivos.");
+  }
+
+  accountWorkspaceState.fileFilter = normalizedFilter;
+  accountWorkspaceState.files = {
+    counts: payload.counts ?? {
+      total: 0,
+      temporary: 0,
+      ready: 0,
+      failed: 0
+    },
+    items: Array.isArray(payload.items) ? payload.items : []
+  };
+  renderAccountHistory();
+  return accountWorkspaceState.files.items;
+}
+
+async function fetchAccountUsage() {
+  const response = await fetch("/api/account/usage", {
     credentials: "same-origin"
   });
   const payload = await response.json().catch(() => ({ items: [] }));
   if (!response.ok) {
-    throw new Error(payload.message ?? "Não foi possível carregar o histórico.");
+    throw new Error(payload.message ?? "Não foi possível carregar o consumo da conta.");
   }
 
-  accessSession.account = {
-    ...getAccountState(),
-    recentConversions: Array.isArray(payload.items) ? payload.items : []
-  };
-  renderAccountHistory();
-  return payload.items ?? [];
+  accountWorkspaceState.usage = Array.isArray(payload.items) ? payload.items : [];
+  renderAccountUsage();
+  return accountWorkspaceState.usage;
+}
+
+function toastNewNotifications(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return;
+  }
+
+  const newUnreadItems = items.filter((item) => item && !item.readAt && !seenNotificationIds.has(item.id));
+  items.forEach((item) => {
+    if (item?.id) {
+      seenNotificationIds.add(item.id);
+    }
+  });
+
+  if (!hasHydratedNotifications) {
+    hasHydratedNotifications = true;
+    return;
+  }
+
+  newUnreadItems.slice(0, 3).forEach((item) => {
+    setAccountStatus(item.message, {
+      toast: true,
+      toastTitle: item.title,
+      tone: item.type === "job-failed" ? "error" : "success"
+    });
+  });
+}
+
+async function fetchAccountNotifications(options = {}) {
+  const { limit = 20, toastNew = false } = options;
+  const target = new URL("/api/account/notifications", window.location.origin);
+  target.searchParams.set("limit", String(limit));
+
+  const response = await fetch(target, {
+    credentials: "same-origin"
+  });
+  const payload = await response.json().catch(() => ({ items: [] }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível carregar as notificações da conta.");
+  }
+
+  accountWorkspaceState.notifications = Array.isArray(payload.items) ? payload.items : [];
+  renderAccountNotifications();
+
+  if (toastNew) {
+    toastNewNotifications(accountWorkspaceState.notifications);
+  } else {
+    accountWorkspaceState.notifications.forEach((item) => {
+      if (item?.id) {
+        seenNotificationIds.add(item.id);
+      }
+    });
+    hasHydratedNotifications = true;
+  }
+
+  return accountWorkspaceState.notifications;
+}
+
+async function refreshAccountWorkspaceData(options = {}) {
+  const { silent = false, toastNotifications = false } = options;
+  if (!isAccountAuthenticated()) {
+    accountWorkspaceState = createEmptyAccountWorkspaceState();
+    renderAccountHistory();
+    renderAccountUsage();
+    renderAccountNotifications();
+    return null;
+  }
+
+  try {
+    await Promise.all([
+      fetchAccountFiles(accountWorkspaceState.fileFilter, 30),
+      fetchAccountUsage(),
+      fetchAccountNotifications({ limit: 20, toastNew: toastNotifications })
+    ]);
+    return accountWorkspaceState;
+  } catch (error) {
+    if (!silent) {
+      setAccountStatus(error instanceof Error ? error.message : "Não foi possível atualizar os dados da sua conta.");
+    }
+    throw error;
+  }
+}
+
+function clearAccountPolling() {
+  if (accountPollingTimer) {
+    window.clearInterval(accountPollingTimer);
+    accountPollingTimer = null;
+  }
+}
+
+function syncAccountPolling() {
+  clearAccountPolling();
+  if (!isAccountAuthenticated()) {
+    return;
+  }
+
+  accountPollingTimer = window.setInterval(() => {
+    if (document.hidden || !isAccountAuthenticated()) {
+      return;
+    }
+
+    void refreshAccountWorkspaceData({ silent: true, toastNotifications: true }).catch(() => undefined);
+  }, 25000);
+}
+
+async function fetchAccountHistory(limit = 12) {
+  return fetchAccountFiles(accountWorkspaceState.fileFilter, Math.max(limit, 30));
 }
 
 async function redownloadHistoryItem(historyId) {
@@ -3161,7 +3597,10 @@ function renderAdminDashboard() {
     activePromos: 0,
     totalCredits: 0,
     approvedPayments: 0,
-    approvedRevenueBRL: 0
+    approvedRevenueBRL: 0,
+    queuedJobs: 0,
+    processingJobs: 0,
+    topToolUsage: []
   };
 
   if (adminStatUsers) {
@@ -3180,6 +3619,22 @@ function renderAdminDashboard() {
     const payments = Number(dashboard.approvedPayments ?? 0);
     adminStatPayments.textContent = `${payments} pagamento${payments === 1 ? "" : "s"} aprovado${payments === 1 ? "" : "s"}.`;
   }
+  if (adminStatQueued) {
+    adminStatQueued.textContent = String(Number(dashboard.queuedJobs ?? 0));
+  }
+  if (adminStatProcessing) {
+    adminStatProcessing.textContent = String(Number(dashboard.processingJobs ?? 0));
+  }
+
+  renderAdminMiniList(
+    adminDashboardUsage,
+    dashboard.topToolUsage ?? [],
+    "O consumo por ferramenta aparece aqui conforme a plataforma é usada.",
+    (item) => `
+      <strong>${escapeHtml(item.toolLabel)}</strong>
+      <span>${escapeHtml(`${item.totalConversions} usos • ${Number(item.estimatedCreditsUsed ?? 0).toFixed(2).replace(".", ",")} créditos • ${formatDateTime(item.lastUsedAt)}`)}</span>
+    `
+  );
 }
 
 function renderAdminUserList() {
@@ -3336,6 +3791,26 @@ function applyAdminSelectionToForms() {
           item.accessDays > 0 ? `${item.accessDays} dias ${item.accessPlan ?? "pro"}` : ""
         ].filter(Boolean).join(" • ") || "Sem beneficios registrados"
       )}</span>
+    `
+  );
+
+  renderAdminMiniList(
+    adminUserUsage,
+    user?.usageBreakdown ?? [],
+    "O consumo por ferramenta desta conta aparece aqui.",
+    (item) => `
+      <strong>${escapeHtml(item.toolLabel)}</strong>
+      <span>${escapeHtml(`${item.totalConversions} usos • ${item.completedConversions} concluídas • ${item.failedConversions} falhas • ${Number(item.estimatedCreditsUsed ?? 0).toFixed(2).replace(".", ",")} créditos`)}</span>
+    `
+  );
+
+  renderAdminMiniList(
+    adminUserConversions,
+    user?.recentConversions ?? [],
+    "Nenhum arquivo recente para esta conta.",
+    (item) => `
+      <strong>${escapeHtml(item.outputFilename || item.toolLabel)}</strong>
+      <span>${escapeHtml(`${item.toolLabel} • ${getConversionStatusLabel(item.status)} • ${formatDateTime(item.completedAt || item.updatedAt || item.createdAt)}`)}</span>
     `
   );
 }
@@ -6632,6 +7107,11 @@ reducedMotionQuery.addEventListener("change", () => {
 
 compactViewportQuery.addEventListener("change", syncResponsiveUi);
 touchViewportQuery.addEventListener("change", syncResponsiveUi);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && isAccountAuthenticated()) {
+    void refreshAccountWorkspaceData({ silent: true, toastNotifications: true }).catch(() => undefined);
+  }
+});
 
 window.addEventListener("popstate", () => {
   if (!hasLoadedTools) {
@@ -6774,6 +7254,15 @@ accountSwitchToRegisterButton?.addEventListener("click", () => showAccountModal(
 accountShortcutProfileButton?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
 accountShortcutSettingsButton?.addEventListener("click", () => showAccountModal({ focus: "settings" }));
 accountShortcutAdminButton?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
+accountFileFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const nextFilter = normalizeAccountFileFilter(button.dataset.accountFileFilter);
+    accountWorkspaceState.fileFilter = nextFilter;
+    void fetchAccountFiles(nextFilter, 30).catch((error) => {
+      setAccountStatus(error instanceof Error ? error.message : "Não foi possível filtrar seus arquivos.");
+    });
+  });
+});
 accountPopoverCloseButton?.addEventListener("click", hideAccountMenu);
 accountMenuOverview?.addEventListener("click", () => {
   hideAccountMenu();
@@ -7400,6 +7889,7 @@ async function performConversion() {
   }
 
   const { toolId, tool, files } = request;
+  const shouldUseAsyncQueue = shouldQueueAsyncConversion(tool, files);
   hideConversionModal();
   const formData = buildConversionFormData(toolId, files);
   setConversionLifecycle("queued");
@@ -7412,6 +7902,32 @@ async function performConversion() {
   }
 
   try {
+    if (shouldUseAsyncQueue) {
+      const response = await fetch("/api/convert/async", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          ...internalClientHeader
+        },
+        body: formData
+      });
+      const payload = await response.json().catch(() => ({ message: "Falha inesperada." }));
+
+      hideUploadProgress();
+      if (!response.ok) {
+        setProgress(0, "Falha na fila");
+        throw new Error(payload.message ?? "Falha inesperada.");
+      }
+
+      setConversionLifecycle("processing");
+      setProgress(86, "Arquivo enviado para a fila");
+      await refreshAccessSession().catch(() => undefined);
+      await refreshAccountWorkspaceData({ silent: true, toastNotifications: false }).catch(() => undefined);
+      setStatus(payload.message ?? "Arquivo enviado. Você pode sair da página e voltar depois para baixar o resultado.");
+      window.setTimeout(clearConversionLifecycle, 2600);
+      return;
+    }
+
     const response = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/api/convert");
@@ -7493,6 +8009,7 @@ async function performConversion() {
     updateAccessUi();
     setStatus("Conversao concluida. Download iniciado.");
     await refreshAccessSession().catch(() => undefined);
+    await refreshAccountWorkspaceData({ silent: true, toastNotifications: false }).catch(() => undefined);
     window.setTimeout(clearConversionLifecycle, 2600);
   } catch (error) {
     stopProgressAnimation();
@@ -7536,6 +8053,8 @@ Promise.allSettled([loadTools(), refreshAccessSession()]).then((results) => {
 
   if (accessResult.status === "rejected") {
     updateAccessUi();
+  } else if (isAccountAuthenticated()) {
+    void refreshAccountWorkspaceData({ silent: true, toastNotifications: false }).catch(() => undefined);
   }
 
   void resumeCheckoutIfNeeded();

@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import { createAccessService } from "../src/services/access-service.js";
@@ -59,25 +62,79 @@ function buildConversionMultipartBody() {
 
 describe("account routes", () => {
   const apps: Array<Awaited<ReturnType<typeof createApp>>> = [];
+  const tempDirs: string[] = [];
 
   afterEach(async () => {
     while (apps.length) {
       const app = apps.pop();
       await app?.close();
     }
+
+    while (tempDirs.length) {
+      const dir = tempDirs.pop();
+      if (dir) {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
   });
 
   function createTempAccountService() {
     const emailService = new MemoryEmailService();
+    const dataDir = mkdtempSync(path.join(tmpdir(), "vaptdoc-account-"));
+    tempDirs.push(dataDir);
     return {
       emailService,
       service: createAccountService({
         dbPath: ":memory:",
+        dataDir,
         sessionDays: 30,
         proDailyLimit: 80,
         emailService
       })
     };
+  }
+
+  function buildAsyncConversionMultipartBody() {
+    const boundary = "----vaptdoc-async-boundary";
+    const parts = [
+      `--${boundary}\r\nContent-Disposition: form-data; name="toolId"\r\n\r\nmp4-to-mp3\r\n`,
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="sample.mp4"\r\nContent-Type: video/mp4\r\n\r\n`,
+      Buffer.from([0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x6d, 0x70, 0x34]),
+      "\r\n",
+      `--${boundary}--\r\n`
+    ];
+
+    return {
+      boundary,
+      body: Buffer.concat(parts.map((part) => (typeof part === "string" ? Buffer.from(part) : part)))
+    };
+  }
+
+  async function waitForConversionFile(
+    app: Awaited<ReturnType<typeof createApp>>,
+    cookieHeader: string,
+    historyId: string,
+    attempts = 80
+  ) {
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/account/files?filter=all&limit=30",
+        headers: {
+          cookie: cookieHeader
+        }
+      });
+
+      expect(response.statusCode).toBe(200);
+      const item = response.json().items.find((entry: { id: string }) => entry.id === historyId);
+      if (item && item.status === "ready") {
+        return item;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    throw new Error(`Timed out while waiting for conversion file ${historyId}`);
   }
 
   async function registerAndVerifyAccount(
@@ -480,5 +537,177 @@ describe("account routes", () => {
 
     expect(remove.statusCode).toBe(200);
     expect(remove.json().account.user.hasAvatar).toBe(false);
+  });
+
+  it("stores async jobs in Meus arquivos, emits notifications and exposes usage breakdown", async () => {
+    const accountService = createTempAccountService();
+    const app = await createApp({
+      accessService: createAccessService({ secret: "account-secret" }),
+      accountService: accountService.service,
+      conversionService: {
+        async convert() {
+          return {
+            data: Buffer.from("async-mp3"),
+            filename: "sample.mp3",
+            contentType: "audio/mpeg",
+            provider: "mock",
+            summary: "mock"
+          };
+        }
+      } as never
+    });
+    apps.push(app);
+
+    const register = await registerAndVerifyAccount(app, accountService, {
+      displayName: "Conta Async",
+      email: "async@vaptdoc.test",
+      password: "SenhaAsync123"
+    });
+
+    const cookieHeader = createCookieHeader(register.headers["set-cookie"]);
+    const multipart = buildAsyncConversionMultipartBody();
+    const queued = await app.inject({
+      method: "POST",
+      url: "/api/convert/async",
+      headers: {
+        cookie: cookieHeader,
+        "content-type": `multipart/form-data; boundary=${multipart.boundary}`,
+        ...internalClientHeaders
+      },
+      payload: multipart.body
+    });
+
+    expect(queued.statusCode).toBe(202);
+    expect(queued.json().historyId).toBeTruthy();
+
+    const historyId = queued.json().historyId as string;
+    const readyItem = await waitForConversionFile(app, cookieHeader, historyId);
+    expect(readyItem.mode).toBe("async");
+    expect(readyItem.status).toBe("ready");
+    expect(readyItem.downloadUrl).toContain(historyId);
+
+    const usage = await app.inject({
+      method: "GET",
+      url: "/api/account/usage",
+      headers: {
+        cookie: cookieHeader
+      }
+    });
+    expect(usage.statusCode).toBe(200);
+    expect(usage.json().items.find((item: { toolId: string }) => item.toolId === "mp4-to-mp3")).toBeTruthy();
+
+    const notifications = await app.inject({
+      method: "GET",
+      url: "/api/account/notifications",
+      headers: {
+        cookie: cookieHeader
+      }
+    });
+    expect(notifications.statusCode).toBe(200);
+    expect(notifications.json().items.some((item: { historyId: string | null; type: string }) => item.historyId === historyId && item.type === "job-ready")).toBe(true);
+
+    const download = await app.inject({
+      method: "GET",
+      url: `/api/account/history/${historyId}/download`,
+      headers: {
+        cookie: cookieHeader
+      }
+    });
+    expect(download.statusCode).toBe(200);
+    expect(download.body).toBe("async-mp3");
+
+    const remove = await app.inject({
+      method: "DELETE",
+      url: `/api/account/files/${historyId}`,
+      headers: {
+        cookie: cookieHeader,
+        ...internalClientHeaders
+      }
+    });
+    expect(remove.statusCode).toBe(200);
+
+    const filesAfterDelete = await app.inject({
+      method: "GET",
+      url: "/api/account/files?filter=all&limit=30",
+      headers: {
+        cookie: cookieHeader
+      }
+    });
+    expect(filesAfterDelete.statusCode).toBe(200);
+    expect(filesAfterDelete.json().items).toHaveLength(0);
+  });
+
+  it("exposes queue counts and per-tool usage inside the admin panel data", async () => {
+    const accountService = createTempAccountService();
+    const ownerEmail = "owner@vaptdoc.test";
+    accountService.service = createAccountService({
+      dbPath: ":memory:",
+      dataDir: tempDirs[tempDirs.length - 1],
+      sessionDays: 30,
+      proDailyLimit: 80,
+      emailService: accountService.emailService,
+      adminOwnerEmails: [ownerEmail]
+    });
+    const app = await createApp({
+      accessService: createAccessService({ secret: "account-secret" }),
+      accountService: accountService.service,
+      conversionService: {
+        async convert() {
+          return {
+            data: Buffer.from("admin-mp3"),
+            filename: "owner.mp3",
+            contentType: "audio/mpeg",
+            provider: "mock",
+            summary: "mock"
+          };
+        }
+      } as never
+    });
+    apps.push(app);
+
+    const register = await registerAndVerifyAccount(app, accountService, {
+      displayName: "Owner",
+      email: ownerEmail,
+      password: "SenhaOwner123"
+    });
+    const cookieHeader = createCookieHeader(register.headers["set-cookie"]);
+    const multipart = buildAsyncConversionMultipartBody();
+
+    const queued = await app.inject({
+      method: "POST",
+      url: "/api/convert/async",
+      headers: {
+        cookie: cookieHeader,
+        "content-type": `multipart/form-data; boundary=${multipart.boundary}`,
+        ...internalClientHeaders
+      },
+      payload: multipart.body
+    });
+    expect(queued.statusCode).toBe(202);
+    const historyId = queued.json().historyId as string;
+    await waitForConversionFile(app, cookieHeader, historyId);
+
+    const dashboard = await app.inject({
+      method: "GET",
+      url: "/api/admin/dashboard",
+      headers: {
+        cookie: cookieHeader,
+        ...internalClientHeaders
+      }
+    });
+    expect(dashboard.statusCode).toBe(200);
+    expect(dashboard.json().dashboard.topToolUsage.some((item: { toolId: string }) => item.toolId === "mp4-to-mp3")).toBe(true);
+
+    const detail = await app.inject({
+      method: "GET",
+      url: `/api/admin/users/${register.json().account.user.id}`,
+      headers: {
+        cookie: cookieHeader,
+        ...internalClientHeaders
+      }
+    });
+    expect(detail.statusCode).toBe(200);
+    expect(detail.json().user.usageBreakdown.some((item: { toolId: string }) => item.toolId === "mp4-to-mp3")).toBe(true);
+    expect(detail.json().user.recentConversions.some((item: { id: string }) => item.id === historyId)).toBe(true);
   });
 });

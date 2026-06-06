@@ -123,6 +123,14 @@ interface AccountFavoriteRow {
 }
 
 type ConversionHistoryStatus = "queued" | "processing" | "ready" | "failed";
+type ConversionHistoryMode = "sync" | "async";
+
+interface StoredConversionInputFile {
+  storedFileName: string;
+  originalFilename: string;
+  declaredMime: string | null;
+  size: number;
+}
 
 interface AccountConversionHistoryRow {
   id: string;
@@ -131,6 +139,9 @@ interface AccountConversionHistoryRow {
   tool_label: string;
   source_label: string;
   input_count: number;
+  mode: ConversionHistoryMode;
+  options_json: string | null;
+  input_files_json: string | null;
   output_filename: string | null;
   output_content_type: string | null;
   output_size_bytes: number | null;
@@ -141,6 +152,18 @@ interface AccountConversionHistoryRow {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+}
+
+interface AccountNotificationRow {
+  id: string;
+  user_id: string;
+  history_id: string | null;
+  type: "job-ready" | "job-failed";
+  title: string;
+  message: string;
+  action_url: string | null;
+  read_at: string | null;
+  created_at: string;
 }
 
 export interface AccountUserPublic {
@@ -166,6 +189,12 @@ export interface AccountConversionHistoryPublic {
   toolLabel: string;
   sourceLabel: string;
   inputCount: number;
+  mode: ConversionHistoryMode;
+  inputFiles: Array<{
+    name: string;
+    contentType: string | null;
+    size: number;
+  }>;
   outputFilename: string | null;
   outputContentType: string | null;
   outputSizeBytes: number;
@@ -176,6 +205,38 @@ export interface AccountConversionHistoryPublic {
   updatedAt: string;
   completedAt: string | null;
   downloadUrl: string | null;
+}
+
+export interface AccountFileListPublic {
+  counts: {
+    total: number;
+    temporary: number;
+    ready: number;
+    failed: number;
+  };
+  items: AccountConversionHistoryPublic[];
+}
+
+export interface AccountUsageBreakdownPublic {
+  toolId: string;
+  toolLabel: string;
+  totalConversions: number;
+  completedConversions: number;
+  failedConversions: number;
+  pendingConversions: number;
+  estimatedCreditsUsed: number;
+  lastUsedAt: string;
+}
+
+export interface AccountNotificationPublic {
+  id: string;
+  historyId: string | null;
+  type: "job-ready" | "job-failed";
+  title: string;
+  message: string;
+  actionUrl: string | null;
+  readAt: string | null;
+  createdAt: string;
 }
 
 export interface AccountPlanPublic {
@@ -228,6 +289,9 @@ export interface AccountConversionHistoryCreateInput {
   toolLabel: string;
   sourceLabel: string;
   inputCount: number;
+  mode?: ConversionHistoryMode;
+  optionsJson?: string | null;
+  inputFiles?: StoredConversionInputFile[] | null;
 }
 
 export interface AccountConversionHistoryCompleteInput {
@@ -242,6 +306,22 @@ export interface AccountConversionDownloadAsset {
   filename: string;
   contentType: string;
   buffer: Buffer;
+}
+
+export interface AccountQueuedConversionJob {
+  id: string;
+  userId: string;
+  toolId: string;
+  toolLabel: string;
+  sourceLabel: string;
+  inputCount: number;
+  options: Record<string, string>;
+  uploads: Array<{
+    filename: string;
+    declaredMime?: string;
+    size: number;
+    buffer: Buffer;
+  }>;
 }
 
 export interface AccountRegisterInput {
@@ -315,6 +395,9 @@ export interface AdminDashboardSnapshot {
   totalCredits: number;
   approvedPayments: number;
   approvedRevenueBRL: number;
+  queuedJobs: number;
+  processingJobs: number;
+  topToolUsage: AccountUsageBreakdownPublic[];
 }
 
 export interface AdminUserSummary {
@@ -350,6 +433,8 @@ export interface AdminUserPromoRedemption {
 export interface AdminUserDetail extends AdminUserSummary {
   recentPayments: AdminUserPaymentRecord[];
   promoRedemptions: AdminUserPromoRedemption[];
+  usageBreakdown: AccountUsageBreakdownPublic[];
+  recentConversions: AccountConversionHistoryPublic[];
 }
 
 export interface AdminUserProfileUpdateInput {
@@ -568,13 +653,93 @@ function mapPromoCode(row: PromoCodeRow): AdminPromoCodePublic {
   };
 }
 
+function parseStoredInputFiles(rawValue: string | null): StoredConversionInputFile[] {
+  if (!rawValue) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map((item) => {
+        if (!item || typeof item !== "object") {
+          return null;
+        }
+
+        const record = item as Record<string, unknown>;
+        const storedFileName = String(record.storedFileName ?? "").trim();
+        const originalFilename = String(record.originalFilename ?? "").trim();
+        if (!storedFileName || !originalFilename) {
+          return null;
+        }
+
+        return {
+          storedFileName,
+          originalFilename,
+          declaredMime: record.declaredMime ? String(record.declaredMime) : null,
+          size: Math.max(0, Math.round(Number(record.size ?? 0)))
+        } satisfies StoredConversionInputFile;
+      })
+      .filter((item): item is StoredConversionInputFile => Boolean(item));
+  } catch {
+    return [];
+  }
+}
+
+function parseStoredOptions(rawValue: string | null) {
+  if (!rawValue) {
+    return {} as Record<string, string>;
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (!parsed || typeof parsed !== "object") {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>).map(([key, value]) => [key, String(value ?? "")])
+    );
+  } catch {
+    return {};
+  }
+}
+
+function estimateToolCredits(toolId: string, inputCount: number) {
+  const baseCostByToolId: Record<string, number> = {
+    "pdf-merge": 5,
+    "pdf-split": 5,
+    "pdf-compress": 10,
+    "docx-to-pdf": 10,
+    "office-to-pdf": 10,
+    "pdf-ocr": 5,
+    "pdf-to-docx": 10,
+    "3d-convert": 8,
+    "mp4-to-mp3": 3
+  };
+
+  const baseCost = baseCostByToolId[toolId] ?? 0;
+  return clampPositiveCurrency(baseCost * Math.max(1, inputCount));
+}
+
 function mapConversionHistory(row: AccountConversionHistoryRow): AccountConversionHistoryPublic {
+  const inputFiles = parseStoredInputFiles(row.input_files_json);
   return {
     id: row.id,
     toolId: row.tool_id,
     toolLabel: row.tool_label,
     sourceLabel: row.source_label,
     inputCount: Math.max(1, Math.round(Number(row.input_count ?? 1))),
+    mode: row.mode ?? "sync",
+    inputFiles: inputFiles.map((item) => ({
+      name: item.originalFilename,
+      contentType: item.declaredMime,
+      size: item.size
+    })),
     outputFilename: row.output_filename ?? null,
     outputContentType: row.output_content_type ?? null,
     outputSizeBytes: Math.max(0, Math.round(Number(row.output_size_bytes ?? 0))),
@@ -585,6 +750,19 @@ function mapConversionHistory(row: AccountConversionHistoryRow): AccountConversi
     updatedAt: row.updated_at,
     completedAt: row.completed_at ?? null,
     downloadUrl: row.status === "ready" && row.stored_file_name ? `/api/account/history/${encodeURIComponent(row.id)}/download` : null
+  };
+}
+
+function mapNotification(row: AccountNotificationRow): AccountNotificationPublic {
+  return {
+    id: row.id,
+    historyId: row.history_id ?? null,
+    type: row.type,
+    title: row.title,
+    message: row.message,
+    actionUrl: row.action_url ?? null,
+    readAt: row.read_at ?? null,
+    createdAt: row.created_at
   };
 }
 
@@ -632,6 +810,7 @@ export class AccountService {
   private readonly dbPath: string;
   private readonly dataDir: string;
   private readonly conversionHistoryDir: string;
+  private readonly conversionInputDir: string;
   private readonly sessionCookieName: string;
   private readonly sessionDays: number;
   private readonly proDailyLimit: number;
@@ -645,10 +824,12 @@ export class AccountService {
     this.dbPath = resolveDbPath(config);
     this.dataDir = resolveDataDir(config);
     this.conversionHistoryDir = path.join(this.dataDir, "conversion-history");
+    this.conversionInputDir = path.join(this.dataDir, "conversion-inputs");
     const useInMemoryDatabase = this.dbPath === ":memory:";
     if (!useInMemoryDatabase) {
       mkdirSync(path.dirname(this.dbPath), { recursive: true });
       mkdirSync(this.conversionHistoryDir, { recursive: true });
+      mkdirSync(this.conversionInputDir, { recursive: true });
     }
     this.db = new DatabaseSync(this.dbPath);
     this.db.exec("PRAGMA foreign_keys = ON;");
@@ -890,10 +1071,13 @@ export class AccountService {
         tool_label,
         source_label,
         input_count,
+        mode,
+        options_json,
+        input_files_json,
         status,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       historyId,
       userId,
@@ -901,6 +1085,9 @@ export class AccountService {
       input.toolLabel,
       input.sourceLabel,
       Math.max(1, Math.round(input.inputCount)),
+      input.mode ?? "sync",
+      input.optionsJson ?? null,
+      input.inputFiles ? JSON.stringify(input.inputFiles) : null,
       "queued",
       now,
       now
@@ -919,8 +1106,9 @@ export class AccountService {
 
   async completeConversionHistory(historyId: string, input: AccountConversionHistoryCompleteInput) {
     const row = this.db.prepare(`
-      SELECT id, user_id, tool_id, tool_label, source_label, input_count, output_filename, output_content_type, output_size_bytes,
-             provider, status, error_message, stored_file_name, created_at, updated_at, completed_at
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, mode, options_json, input_files_json,
+             output_filename, output_content_type, output_size_bytes, provider, status, error_message, stored_file_name,
+             created_at, updated_at, completed_at
       FROM account_conversion_history
       WHERE id = ?
     `).get(historyId) as AccountConversionHistoryRow | undefined;
@@ -958,10 +1146,29 @@ export class AccountService {
       historyId
     );
 
+    await this.deleteStoredInputFiles(row);
+    if (row.mode === "async" && this.shouldNotifyAsyncTool(row.tool_id)) {
+      this.createNotification(row.user_id, {
+        historyId: row.id,
+        type: "job-ready",
+        title: `${row.tool_label} pronto`,
+        message: `Seu arquivo ${input.outputFilename} ja esta disponivel para baixar.`,
+        actionUrl: `/api/account/history/${encodeURIComponent(row.id)}/download`
+      });
+    }
+
     await this.purgeExpiredConversionHistory();
   }
 
-  failConversionHistory(historyId: string, errorMessage: string) {
+  async failConversionHistory(historyId: string, errorMessage: string) {
+    const row = this.db.prepare(`
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, mode, options_json, input_files_json,
+             output_filename, output_content_type, output_size_bytes, provider, status, error_message, stored_file_name,
+             created_at, updated_at, completed_at
+      FROM account_conversion_history
+      WHERE id = ?
+    `).get(historyId) as AccountConversionHistoryRow | undefined;
+
     this.db.prepare(`
       UPDATE account_conversion_history
       SET status = 'failed',
@@ -970,6 +1177,19 @@ export class AccountService {
           completed_at = ?
       WHERE id = ?
     `).run(errorMessage.slice(0, 240), new Date().toISOString(), new Date().toISOString(), historyId);
+
+    if (row) {
+      await this.deleteStoredInputFiles(row);
+      if (row.mode === "async" && this.shouldNotifyAsyncTool(row.tool_id)) {
+        this.createNotification(row.user_id, {
+          historyId: row.id,
+          type: "job-failed",
+          title: `${row.tool_label} nao terminou`,
+          message: "A conversao falhou. Revise o arquivo e tente novamente.",
+          actionUrl: null
+        });
+      }
+    }
   }
 
   listConversionHistory(cookieHeader: string | undefined, limit = 12) {
@@ -980,8 +1200,9 @@ export class AccountService {
   async getConversionDownload(cookieHeader: string | undefined, historyId: string): Promise<AccountConversionDownloadAsset> {
     const authenticated = this.requireAuthenticated(cookieHeader);
     const row = this.db.prepare(`
-      SELECT id, user_id, tool_id, tool_label, source_label, input_count, output_filename, output_content_type, output_size_bytes,
-             provider, status, error_message, stored_file_name, created_at, updated_at, completed_at
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, mode, options_json, input_files_json,
+             output_filename, output_content_type, output_size_bytes, provider, status, error_message, stored_file_name,
+             created_at, updated_at, completed_at
       FROM account_conversion_history
       WHERE id = ? AND user_id = ?
     `).get(historyId, authenticated.user.id) as AccountConversionHistoryRow | undefined;
@@ -996,6 +1217,227 @@ export class AccountService {
       contentType: row.output_content_type,
       buffer
     };
+  }
+
+  async queueAsyncConversion(
+    cookieHeader: string | undefined,
+    input: AccountConversionHistoryCreateInput & {
+      uploads: Array<{
+        filename: string;
+        declaredMime?: string;
+        size: number;
+        buffer: Buffer;
+      }>;
+      options: Record<string, unknown>;
+    }
+  ) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    await mkdir(this.conversionInputDir, { recursive: true });
+
+    const historyId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const storedInputFiles: StoredConversionInputFile[] = [];
+
+    for (const [index, upload] of input.uploads.entries()) {
+      const extension = path.extname(upload.filename) || "";
+      const baseName = sanitizeStoredFilename(path.basename(upload.filename, extension)) || `arquivo-${index + 1}`;
+      const storedFileName = `${historyId}-${index + 1}-${baseName}${extension}`;
+      await writeFile(path.join(this.conversionInputDir, storedFileName), upload.buffer);
+      storedInputFiles.push({
+        storedFileName,
+        originalFilename: upload.filename,
+        declaredMime: upload.declaredMime ?? null,
+        size: Math.max(0, Math.round(upload.size))
+      });
+    }
+
+    this.db.prepare(`
+      INSERT INTO account_conversion_history (
+        id,
+        user_id,
+        tool_id,
+        tool_label,
+        source_label,
+        input_count,
+        mode,
+        options_json,
+        input_files_json,
+        status,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 'async', ?, ?, 'queued', ?, ?)
+    `).run(
+      historyId,
+      authenticated.user.id,
+      input.toolId,
+      input.toolLabel,
+      input.sourceLabel,
+      Math.max(1, Math.round(input.inputCount)),
+      JSON.stringify(input.options ?? {}),
+      JSON.stringify(storedInputFiles),
+      now,
+      now
+    );
+
+    return historyId;
+  }
+
+  reclaimStaleAsyncJobs(maxAgeMinutes = 20) {
+    const cutoff = new Date(Date.now() - maxAgeMinutes * 60 * 1000).toISOString();
+    this.db.prepare(`
+      UPDATE account_conversion_history
+      SET status = 'queued', updated_at = ?
+      WHERE mode = 'async' AND status = 'processing' AND updated_at <= ?
+    `).run(new Date().toISOString(), cutoff);
+  }
+
+  async claimNextAsyncConversionJob(): Promise<AccountQueuedConversionJob | null> {
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      const row = this.db.prepare(`
+        SELECT id, user_id, tool_id, tool_label, source_label, input_count, mode, options_json, input_files_json,
+               output_filename, output_content_type, output_size_bytes, provider, status, error_message, stored_file_name,
+               created_at, updated_at, completed_at
+        FROM account_conversion_history
+        WHERE mode = 'async' AND status = 'queued'
+        ORDER BY created_at ASC
+        LIMIT 1
+      `).get() as AccountConversionHistoryRow | undefined;
+
+      if (!row) {
+        this.db.exec("COMMIT");
+        return null;
+      }
+
+      this.db.prepare(`
+        UPDATE account_conversion_history
+        SET status = 'processing', updated_at = ?
+        WHERE id = ? AND status = 'queued'
+      `).run(new Date().toISOString(), row.id);
+
+      this.db.exec("COMMIT");
+
+      const storedInputs = parseStoredInputFiles(row.input_files_json);
+      const uploads = await Promise.all(
+        storedInputs.map(async (item) => ({
+          filename: item.originalFilename,
+          declaredMime: item.declaredMime ?? undefined,
+          size: item.size,
+          buffer: await readFile(path.join(this.conversionInputDir, item.storedFileName))
+        }))
+      );
+
+      return {
+        id: row.id,
+        userId: row.user_id,
+        toolId: row.tool_id,
+        toolLabel: row.tool_label,
+        sourceLabel: row.source_label,
+        inputCount: Math.max(1, Math.round(Number(row.input_count ?? 1))),
+        options: parseStoredOptions(row.options_json),
+        uploads
+      };
+    } catch (error) {
+      try {
+        this.db.exec("ROLLBACK");
+      } catch {
+        // Ignore rollback errors after failed claim attempts.
+      }
+      throw error;
+    }
+  }
+
+  listConversionFiles(
+    cookieHeader: string | undefined,
+    filter: "all" | "temporary" | "ready" | "failed" = "all",
+    limit = 30
+  ): AccountFileListPublic {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const rows = this.getConversionHistoryRowsForUser(authenticated.user.id, Math.max(1, Math.min(100, Math.round(limit))));
+    const allItems = rows.map((row) => mapConversionHistory(row));
+    const filteredItems = allItems.filter((item) => {
+      if (filter === "temporary") {
+        return item.status === "queued" || item.status === "processing";
+      }
+      if (filter === "ready") {
+        return item.status === "ready";
+      }
+      if (filter === "failed") {
+        return item.status === "failed";
+      }
+      return true;
+    });
+
+    return {
+      counts: {
+        total: allItems.length,
+        temporary: allItems.filter((item) => item.status === "queued" || item.status === "processing").length,
+        ready: allItems.filter((item) => item.status === "ready").length,
+        failed: allItems.filter((item) => item.status === "failed").length
+      },
+      items: filteredItems
+    };
+  }
+
+  async deleteConversionFile(cookieHeader: string | undefined, historyId: string) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const row = this.db.prepare(`
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, mode, options_json, input_files_json,
+             output_filename, output_content_type, output_size_bytes, provider, status, error_message, stored_file_name,
+             created_at, updated_at, completed_at
+      FROM account_conversion_history
+      WHERE id = ? AND user_id = ?
+    `).get(historyId, authenticated.user.id) as AccountConversionHistoryRow | undefined;
+
+    if (!row) {
+      throw new AppError("Esse arquivo nao foi encontrado na sua conta.", 404, "ACCOUNT_FILE_NOT_FOUND");
+    }
+
+    await this.deleteStoredInputFiles(row);
+    if (row.stored_file_name) {
+      await rm(path.join(this.conversionHistoryDir, row.stored_file_name), { force: true }).catch(() => undefined);
+    }
+
+    this.db.prepare("DELETE FROM account_notifications WHERE history_id = ? AND user_id = ?").run(row.id, authenticated.user.id);
+    this.db.prepare("DELETE FROM account_conversion_history WHERE id = ? AND user_id = ?").run(row.id, authenticated.user.id);
+  }
+
+  listUsageBreakdown(cookieHeader: string | undefined, limit = 12) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    return this.getUsageBreakdownForUser(authenticated.user.id, limit);
+  }
+
+  listNotifications(cookieHeader: string | undefined, limit = 20) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const rows = this.db.prepare(`
+      SELECT id, user_id, history_id, type, title, message, action_url, read_at, created_at
+      FROM account_notifications
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+      LIMIT ?
+    `).all(authenticated.user.id, Math.max(1, Math.min(50, Math.round(limit)))) as unknown as AccountNotificationRow[];
+
+    return rows.map((row) => mapNotification(row));
+  }
+
+  markNotificationsRead(cookieHeader: string | undefined, ids: string[]) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const notificationIds = Array.from(new Set(ids.map((value) => String(value).trim()).filter(Boolean))).slice(0, 50);
+    if (notificationIds.length === 0) {
+      return this.listNotifications(cookieHeader);
+    }
+
+    const statement = this.db.prepare(`
+      UPDATE account_notifications
+      SET read_at = COALESCE(read_at, ?)
+      WHERE id = ? AND user_id = ?
+    `);
+    const now = new Date().toISOString();
+    for (const id of notificationIds) {
+      statement.run(now, id, authenticated.user.id);
+    }
+
+    return this.listNotifications(cookieHeader);
   }
 
   getAdjustedBillingOffers(cookieHeader: string | undefined, offers: PublicBillingOffer[]) {
@@ -1404,6 +1846,12 @@ export class AccountService {
       FROM billing_payments
       WHERE status = 'approved'
     `).get() as { total?: number; revenue?: number };
+    const queueRow = this.db.prepare(`
+      SELECT
+        SUM(CASE WHEN mode = 'async' AND status = 'queued' THEN 1 ELSE 0 END) as queued_jobs,
+        SUM(CASE WHEN mode = 'async' AND status = 'processing' THEN 1 ELSE 0 END) as processing_jobs
+      FROM account_conversion_history
+    `).get() as { queued_jobs?: number; processing_jobs?: number };
 
     return {
       totalUsers: Math.max(0, Math.round(Number(usersRow.total ?? 0))),
@@ -1411,7 +1859,10 @@ export class AccountService {
       activePromos: Math.max(0, Math.round(Number(promoRow.total ?? 0))),
       totalCredits: clampPositiveCurrency(Number(creditRow.total ?? 0)),
       approvedPayments: Math.max(0, Math.round(Number(paymentRow.total ?? 0))),
-      approvedRevenueBRL: clampPositiveCurrency(Number(paymentRow.revenue ?? 0))
+      approvedRevenueBRL: clampPositiveCurrency(Number(paymentRow.revenue ?? 0)),
+      queuedJobs: Math.max(0, Math.round(Number(queueRow.queued_jobs ?? 0))),
+      processingJobs: Math.max(0, Math.round(Number(queueRow.processing_jobs ?? 0))),
+      topToolUsage: this.getGlobalUsageBreakdown(8)
     };
   }
 
@@ -1509,7 +1960,9 @@ export class AccountService {
         discountDays: Math.max(0, Math.round(Number(redemption.discount_days ?? 0))),
         accessDays: Math.max(0, Math.round(Number(redemption.access_days ?? 0))),
         accessPlan: redemption.access_plan
-      }))
+      })),
+      usageBreakdown: this.getUsageBreakdownForUser(userId, 12),
+      recentConversions: this.getRecentConversionsForUser(userId, 12)
     };
   }
 
@@ -2097,6 +2550,9 @@ export class AccountService {
         tool_label TEXT NOT NULL,
         source_label TEXT NOT NULL,
         input_count INTEGER NOT NULL DEFAULT 1,
+        mode TEXT NOT NULL DEFAULT 'sync',
+        options_json TEXT,
+        input_files_json TEXT,
         output_filename TEXT,
         output_content_type TEXT,
         output_size_bytes INTEGER,
@@ -2108,6 +2564,20 @@ export class AccountService {
         updated_at TEXT NOT NULL,
         completed_at TEXT,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS account_notifications (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        history_id TEXT,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        action_url TEXT,
+        read_at TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (history_id) REFERENCES account_conversion_history(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS admin_audit_log (
@@ -2127,6 +2597,9 @@ export class AccountService {
       CREATE INDEX IF NOT EXISTS idx_account_favorites_user_id ON account_favorites(user_id);
       CREATE INDEX IF NOT EXISTS idx_account_conversion_history_user_id_created_at ON account_conversion_history(user_id, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_account_conversion_history_status ON account_conversion_history(status);
+      CREATE INDEX IF NOT EXISTS idx_account_conversion_history_mode_status ON account_conversion_history(mode, status, created_at ASC);
+      CREATE INDEX IF NOT EXISTS idx_account_notifications_user_id_created_at ON account_notifications(user_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_account_notifications_user_id_read_at ON account_notifications(user_id, read_at, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_promo_redemptions_user_id ON promo_redemptions(user_id);
       CREATE INDEX IF NOT EXISTS idx_billing_payments_user_id ON billing_payments(user_id);
@@ -2139,6 +2612,9 @@ export class AccountService {
     this.ensureUserColumn("credit_balance", "REAL NOT NULL DEFAULT 0");
     this.ensureUserColumn("discount_percent", "REAL NOT NULL DEFAULT 0");
     this.ensureUserColumn("discount_expires_at", "TEXT");
+    this.ensureConversionHistoryColumn("mode", "TEXT NOT NULL DEFAULT 'sync'");
+    this.ensureConversionHistoryColumn("options_json", "TEXT");
+    this.ensureConversionHistoryColumn("input_files_json", "TEXT");
     this.db.prepare("UPDATE users SET email_verified_at = created_at WHERE email_verified_at IS NULL").run();
   }
 
@@ -2149,6 +2625,15 @@ export class AccountService {
     }
 
     this.db.exec(`ALTER TABLE users ADD COLUMN ${columnName} ${definition}`);
+  }
+
+  private ensureConversionHistoryColumn(columnName: string, definition: string) {
+    const columns = this.db.prepare("PRAGMA table_info(account_conversion_history)").all() as Array<{ name: string }>;
+    if (columns.some((column) => column.name === columnName)) {
+      return;
+    }
+
+    this.db.exec(`ALTER TABLE account_conversion_history ADD COLUMN ${columnName} ${definition}`);
   }
 
   private issueAccountSession(userId: string, metadata: AccountRequestMetadata): AccountAuthResult {
@@ -2227,17 +2712,93 @@ export class AccountService {
     return rows.map((row) => row.tool_id);
   }
 
-  private getRecentConversionsForUser(userId: string, limit = 8) {
-    const rows = this.db.prepare(`
-      SELECT id, user_id, tool_id, tool_label, source_label, input_count, output_filename, output_content_type, output_size_bytes,
-             provider, status, error_message, stored_file_name, created_at, updated_at, completed_at
+  private getConversionHistoryRowsForUser(userId: string, limit = 8) {
+    return this.db.prepare(`
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, mode, options_json, input_files_json,
+             output_filename, output_content_type, output_size_bytes, provider, status, error_message, stored_file_name,
+             created_at, updated_at, completed_at
       FROM account_conversion_history
       WHERE user_id = ?
       ORDER BY created_at DESC
       LIMIT ?
-    `).all(userId, Math.max(1, Math.min(50, Math.round(limit)))) as unknown as AccountConversionHistoryRow[];
+    `).all(userId, Math.max(1, Math.min(100, Math.round(limit)))) as unknown as AccountConversionHistoryRow[];
+  }
 
-    return rows.map((row) => mapConversionHistory(row));
+  private getRecentConversionsForUser(userId: string, limit = 8) {
+    return this.getConversionHistoryRowsForUser(userId, Math.max(1, Math.min(50, Math.round(limit)))).map((row) => mapConversionHistory(row));
+  }
+
+  private getUsageBreakdownForUser(userId: string, limit = 12): AccountUsageBreakdownPublic[] {
+    const rows = this.db.prepare(`
+      SELECT tool_id, tool_label,
+             COUNT(*) as total_conversions,
+             SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) as completed_conversions,
+             SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_conversions,
+             SUM(CASE WHEN status IN ('queued', 'processing') THEN 1 ELSE 0 END) as pending_conversions,
+             MAX(updated_at) as last_used_at,
+             SUM(input_count) as total_inputs
+      FROM account_conversion_history
+      WHERE user_id = ?
+      GROUP BY tool_id, tool_label
+      ORDER BY last_used_at DESC
+      LIMIT ?
+    `).all(userId, Math.max(1, Math.min(24, Math.round(limit)))) as Array<{
+      tool_id: string;
+      tool_label: string;
+      total_conversions?: number;
+      completed_conversions?: number;
+      failed_conversions?: number;
+      pending_conversions?: number;
+      last_used_at?: string;
+      total_inputs?: number;
+    }>;
+
+    return rows.map((row) => ({
+      toolId: row.tool_id,
+      toolLabel: row.tool_label,
+      totalConversions: Math.max(0, Math.round(Number(row.total_conversions ?? 0))),
+      completedConversions: Math.max(0, Math.round(Number(row.completed_conversions ?? 0))),
+      failedConversions: Math.max(0, Math.round(Number(row.failed_conversions ?? 0))),
+      pendingConversions: Math.max(0, Math.round(Number(row.pending_conversions ?? 0))),
+      estimatedCreditsUsed: estimateToolCredits(row.tool_id, Math.max(1, Math.round(Number(row.total_inputs ?? row.total_conversions ?? 0)))),
+      lastUsedAt: String(row.last_used_at ?? "")
+    }));
+  }
+
+  private getGlobalUsageBreakdown(limit = 8): AccountUsageBreakdownPublic[] {
+    const rows = this.db.prepare(`
+      SELECT tool_id, tool_label,
+             COUNT(*) as total_conversions,
+             SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) as completed_conversions,
+             SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_conversions,
+             SUM(CASE WHEN status IN ('queued', 'processing') THEN 1 ELSE 0 END) as pending_conversions,
+             MAX(updated_at) as last_used_at,
+             SUM(input_count) as total_inputs
+      FROM account_conversion_history
+      GROUP BY tool_id, tool_label
+      ORDER BY total_conversions DESC, last_used_at DESC
+      LIMIT ?
+    `).all(Math.max(1, Math.min(20, Math.round(limit)))) as Array<{
+      tool_id: string;
+      tool_label: string;
+      total_conversions?: number;
+      completed_conversions?: number;
+      failed_conversions?: number;
+      pending_conversions?: number;
+      last_used_at?: string;
+      total_inputs?: number;
+    }>;
+
+    return rows.map((row) => ({
+      toolId: row.tool_id,
+      toolLabel: row.tool_label,
+      totalConversions: Math.max(0, Math.round(Number(row.total_conversions ?? 0))),
+      completedConversions: Math.max(0, Math.round(Number(row.completed_conversions ?? 0))),
+      failedConversions: Math.max(0, Math.round(Number(row.failed_conversions ?? 0))),
+      pendingConversions: Math.max(0, Math.round(Number(row.pending_conversions ?? 0))),
+      estimatedCreditsUsed: estimateToolCredits(row.tool_id, Math.max(1, Math.round(Number(row.total_inputs ?? row.total_conversions ?? 0)))),
+      lastUsedAt: String(row.last_used_at ?? "")
+    }));
   }
 
   private buildWalletForRow(row: AccountUserRow): AccountWalletPublic {
@@ -2307,17 +2868,21 @@ export class AccountService {
   private async purgeExpiredConversionHistory() {
     const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
     const rows = this.db.prepare(`
-      SELECT id, stored_file_name
+      SELECT id, user_id, tool_id, tool_label, source_label, input_count, mode, options_json, input_files_json,
+             output_filename, output_content_type, output_size_bytes, provider, status, error_message, stored_file_name,
+             created_at, updated_at, completed_at
       FROM account_conversion_history
       WHERE created_at <= ?
-    `).all(cutoff) as Array<{ id: string; stored_file_name: string | null }>;
+    `).all(cutoff) as unknown as AccountConversionHistoryRow[];
 
     for (const row of rows) {
+      await this.deleteStoredInputFiles(row);
       if (row.stored_file_name) {
         await rm(path.join(this.conversionHistoryDir, row.stored_file_name), { force: true }).catch(() => undefined);
       }
     }
 
+    this.db.prepare("DELETE FROM account_notifications WHERE created_at <= ?").run(cutoff);
     this.db.prepare("DELETE FROM account_conversion_history WHERE created_at <= ?").run(cutoff);
 
     try {
@@ -2335,6 +2900,51 @@ export class AccountService {
     } catch {
       // Ignore cleanup failures to keep account operations available.
     }
+  }
+
+  private shouldNotifyAsyncTool(toolId: string) {
+    return new Set(["pdf-ocr", "3d-convert", "mp4-to-mp3"]).has(toolId);
+  }
+
+  private createNotification(
+    userId: string,
+    input: {
+      historyId?: string | null;
+      type: "job-ready" | "job-failed";
+      title: string;
+      message: string;
+      actionUrl?: string | null;
+    }
+  ) {
+    this.db.prepare(`
+      INSERT INTO account_notifications (
+        id,
+        user_id,
+        history_id,
+        type,
+        title,
+        message,
+        action_url,
+        read_at,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?)
+    `).run(
+      crypto.randomUUID(),
+      userId,
+      input.historyId ?? null,
+      input.type,
+      input.title.slice(0, 120),
+      input.message.slice(0, 240),
+      input.actionUrl ?? null,
+      new Date().toISOString()
+    );
+  }
+
+  private async deleteStoredInputFiles(row: AccountConversionHistoryRow) {
+    const inputFiles = parseStoredInputFiles(row.input_files_json);
+    await Promise.all(
+      inputFiles.map((item) => rm(path.join(this.conversionInputDir, item.storedFileName), { force: true }).catch(() => undefined))
+    );
   }
 
   private isAdminEmail(email: string) {

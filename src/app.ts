@@ -13,6 +13,7 @@ import { createConversionService } from "./services/conversion-service.js";
 import { createAccessService, type AccessService } from "./services/access-service.js";
 import { createBillingService, type BillingService } from "./services/billing-service.js";
 import { createAccountService, type AccountService } from "./services/account-service.js";
+import { ConversionJobService } from "./services/conversion-job-service.js";
 import { createEmailService } from "./services/email-service.js";
 import { UsageTracker } from "./services/usage-tracker.js";
 import { ConversionGate } from "./utils/conversion-gate.js";
@@ -139,6 +140,13 @@ export async function createApp(options: AppOptions = {}) {
   });
   const usageTracker = options.usageTracker ?? new UsageTracker();
   const conversionGate = new ConversionGate(env.MAX_CONCURRENT_CONVERSIONS, env.MAX_PENDING_CONVERSIONS);
+  const conversionJobService = new ConversionJobService({
+    accountService,
+    conversionService,
+    gate: conversionGate,
+    logger: app.log
+  });
+  conversionJobService.start();
 
   if (accessSecretConfig.usedFallback) {
     app.log.warn("ACCESS_TOKEN_SECRET ausente ou fraco. O vaptdoc gerou um segredo mais seguro automaticamente.");
@@ -296,6 +304,7 @@ export async function createApp(options: AppOptions = {}) {
   });
 
   app.addHook("onClose", async () => {
+    conversionJobService.stop();
     accountService.close();
   });
 

@@ -872,13 +872,55 @@
             <section class="account-card account-history-card" aria-labelledby="account-history-title">
               <div class="admin-section-head">
                 <div>
-                  <span class="selection-kicker">Histórico recente</span>
-                  <strong id="account-history-title">Últimas conversões</strong>
+                  <span class="selection-kicker">Meus arquivos</span>
+                  <strong id="account-history-title">Arquivos e resultados</strong>
                 </div>
               </div>
+              <div class="account-history-filters" role="tablist" aria-label="Filtrar meus arquivos">
+                <button type="button" class="ghost-action is-active" data-account-file-filter="all" aria-selected="true">
+                  Todos
+                  <span class="account-filter-count" id="account-file-count-total">0</span>
+                </button>
+                <button type="button" class="ghost-action" data-account-file-filter="temporary" aria-selected="false">
+                  Temporários
+                  <span class="account-filter-count" id="account-file-count-temporary">0</span>
+                </button>
+                <button type="button" class="ghost-action" data-account-file-filter="ready" aria-selected="false">
+                  Concluídos
+                  <span class="account-filter-count" id="account-file-count-ready">0</span>
+                </button>
+                <button type="button" class="ghost-action" data-account-file-filter="failed" aria-selected="false">
+                  Falhas
+                  <span class="account-filter-count" id="account-file-count-failed">0</span>
+                </button>
+              </div>
               <div class="account-history-list" id="account-history-list" aria-live="polite"></div>
-              <p class="account-copy" id="account-history-empty" hidden>Nenhuma conversão recente apareceu por aqui ainda.</p>
+              <p class="account-copy" id="account-history-empty" hidden>Nenhum arquivo apareceu por aqui ainda.</p>
             </section>
+
+            <div class="account-history-grid">
+              <section class="account-card account-history-card" aria-labelledby="account-usage-title">
+                <div class="admin-section-head">
+                  <div>
+                    <span class="selection-kicker">Consumo</span>
+                    <strong id="account-usage-title">Uso por conversão</strong>
+                  </div>
+                </div>
+                <div class="account-history-list" id="account-usage-list" aria-live="polite"></div>
+                <p class="account-copy" id="account-usage-empty" hidden>Seu consumo por ferramenta aparece aqui conforme você usa a conta.</p>
+              </section>
+
+              <section class="account-card account-history-card" aria-labelledby="account-notifications-title">
+                <div class="admin-section-head">
+                  <div>
+                    <span class="selection-kicker">Notificações</span>
+                    <strong id="account-notifications-title">Atualizações internas</strong>
+                  </div>
+                </div>
+                <div class="account-history-list" id="account-notifications-list" aria-live="polite"></div>
+                <p class="account-copy" id="account-notifications-empty" hidden>Quando um processamento terminar, o aviso aparece aqui.</p>
+              </section>
+            </div>
           </div>
         </div>
 
@@ -1156,6 +1198,16 @@
             <strong id="admin-stat-revenue">R$ 0,00</strong>
             <p class="account-copy" id="admin-stat-payments">0 pagamentos aprovados.</p>
           </article>
+          <article class="account-card admin-stat-card">
+            <span class="selection-kicker">Na fila</span>
+            <strong id="admin-stat-queued">0</strong>
+            <p class="account-copy">Jobs aguardando processamento.</p>
+          </article>
+          <article class="account-card admin-stat-card">
+            <span class="selection-kicker">Processando</span>
+            <strong id="admin-stat-processing">0</strong>
+            <p class="account-copy">Conversões assíncronas em andamento.</p>
+          </article>
         </section>
 
         <section class="admin-workspace">
@@ -1291,6 +1343,38 @@
                   </div>
                   <div class="admin-mini-list" id="admin-user-promos"></div>
                 </article>
+                <article class="account-card admin-feed-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 15.5V8.5"></path>
+                        <path d="M12 15.5V5.5"></path>
+                        <path d="M17.5 15.5v-4"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Uso por ferramenta</strong>
+                      <span>Volume, falhas e créditos estimados.</span>
+                    </div>
+                  </div>
+                  <div class="admin-mini-list" id="admin-user-usage"></div>
+                </article>
+                <article class="account-card admin-feed-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 7.5h11"></path>
+                        <path d="M6.5 12h11"></path>
+                        <path d="M6.5 16.5h7"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Arquivos recentes</strong>
+                      <span>Fila, concluídos e falhas desta conta.</span>
+                    </div>
+                  </div>
+                  <div class="admin-mini-list" id="admin-user-conversions"></div>
+                </article>
               </div>
             </section>
 
@@ -1396,6 +1480,23 @@
                   </div>
                 </article>
               </div>
+
+              <article class="account-card admin-feed-card">
+                <div class="account-card-heading">
+                  <span class="account-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6.5 15.5V8.5"></path>
+                      <path d="M12 15.5V5.5"></path>
+                      <path d="M17.5 15.5v-4"></path>
+                    </svg>
+                  </span>
+                  <div class="account-card-copy">
+                    <strong>Consumo da plataforma</strong>
+                    <span>Ferramentas mais usadas e créditos estimados.</span>
+                  </div>
+                </div>
+                <div class="admin-mini-list" id="admin-dashboard-usage"></div>
+              </article>
             </section>
 
             <section class="admin-pane-grid" data-admin-pane="promos" hidden>

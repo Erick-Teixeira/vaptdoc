@@ -83,6 +83,19 @@ const accountHistoryParamsSchema = z.object({
   historyId: z.string().trim().uuid()
 });
 
+const accountFilesQuerySchema = z.object({
+  filter: z.enum(["all", "temporary", "ready", "failed"]).optional(),
+  limit: z.coerce.number().int().min(1).max(60).optional()
+});
+
+const accountNotificationsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(40).optional()
+});
+
+const accountNotificationsReadSchema = z.object({
+  ids: z.array(z.string().trim().uuid()).min(1).max(50)
+});
+
 const adminUserParamsSchema = z.object({
   userId: z.string().trim().min(8).max(80)
 });
@@ -136,6 +149,7 @@ const adminPromoUpdateSchema = z.object({
 const internalClientHeaderName = "x-vaptdoc-client";
 const internalClientHeaderValue = "web";
 const maxAvatarBytes = 1.5 * 1024 * 1024;
+const asyncToolIds = new Set<ToolId>(["pdf-ocr", "3d-convert", "mp4-to-mp3"]);
 const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const jpegSignature = Buffer.from([0xff, 0xd8, 0xff]);
 const webpRiffSignature = Buffer.from("RIFF", "ascii");
@@ -367,7 +381,104 @@ function sanitizeOptionsForLogs(rawOptions: Record<string, string>) {
   );
 }
 
+function shouldUseAsyncConversion(toolDefinition: ToolDefinition, accountSession: PublicAccountSession, uploads: UploadedAsset[]) {
+  if (!accountSession.authenticated) {
+    return false;
+  }
+
+  if (asyncToolIds.has(toolDefinition.id as ToolId)) {
+    return true;
+  }
+
+  return uploads.length >= 4 && Boolean(toolDefinition.allowsMultipleFiles);
+}
+
 export async function registerApiRoutes(app: FastifyInstance, conversionService: ConversionHandler, options: RegisterApiOptions = {}) {
+  async function parseMultipartConversionRequest(request: FastifyRequest) {
+    let toolId = "";
+    const uploads: UploadedAsset[] = [];
+    const rawOptions: Record<string, string> = {};
+
+    for await (const part of request.parts()) {
+      if (part.type === "file") {
+        const buffer = await part.toBuffer();
+        uploads.push({
+          filename: part.filename ?? "arquivo",
+          declaredMime: part.mimetype,
+          buffer,
+          size: buffer.byteLength
+        });
+        continue;
+      }
+
+      if (part.fieldname === "toolId") {
+        toolId = String(part.value ?? "");
+        continue;
+      }
+
+      rawOptions[part.fieldname] = String(part.value ?? "");
+    }
+
+    return { toolId, uploads, rawOptions };
+  }
+
+  function prepareConversionPayload(
+    request: FastifyRequest,
+    toolId: string,
+    uploads: UploadedAsset[],
+    rawOptions: Record<string, string>
+  ) {
+    if (!toolId || !(toolId in toolCatalog)) {
+      throw new AppError("Selecione uma ferramenta valida antes de converter.", 400, "INVALID_TOOL");
+    }
+
+    if (uploads.length === 0) {
+      throw new AppError("Envie ao menos um arquivo para iniciar a conversao.", 400, "MISSING_FILE");
+    }
+
+    assertUploadLimits(uploads, env.MAX_FILE_SIZE_MB * 1024 * 1024);
+    const toolDefinition = toolCatalog[toolId as ToolId] as ToolDefinition;
+    const effectiveSessions = getEffectiveSessions(request, options);
+    const usageBucket = buildUsageBucket(request, effectiveSessions.accountSession.user?.id);
+    const accessSession = effectiveSessions.accessSession;
+    const usageSnapshot =
+      accessSession && options.usageTracker
+        ? options.usageTracker.peek(usageBucket, accessSession.dailyLimit)
+        : null;
+
+    if (toolDefinition.access === "pro" && !accessSession?.premium) {
+      throw new AppError(
+        `${toolDefinition.label} faz parte do plano Pro do vaptdoc. Ative um acesso premium para continuar.`,
+        402,
+        "PREMIUM_REQUIRED"
+      );
+    }
+
+    if (usageSnapshot?.reachedLimit) {
+      throw new AppError(
+        `Voce atingiu o limite gratuito de ${usageSnapshot.limit} conversoes por dia. Ative o Pro para continuar agora.`,
+        429,
+        "FREE_LIMIT_REACHED"
+      );
+    }
+
+    const safeOptions = sanitizeSubmittedOptions(toolDefinition, rawOptions);
+    const payload: ConversionRequest = {
+      toolId: toolId as ToolId,
+      uploads,
+      options: safeOptions
+    };
+
+    return {
+      toolDefinition,
+      accessSession,
+      usageBucket,
+      usageSnapshot,
+      payload,
+      accountSession: effectiveSessions.accountSession
+    };
+  }
+
   app.get("/api/tools", async () => ({
     tools: toolList.map((tool) => ({
       ...tool,
@@ -433,6 +544,76 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       .header("Content-Type", asset.contentType)
       .header("Content-Disposition", buildContentDisposition(asset.filename));
     return reply.send(asset.buffer);
+  });
+
+  app.get("/api/account/files", async (request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const query = accountFilesQuerySchema.parse(request.query ?? {});
+    return options.accountService.listConversionFiles(request.headers.cookie, query.filter ?? "all", query.limit ?? 30);
+  });
+
+  app.delete("/api/account/files/:historyId", async (request, reply) => {
+    assertInternalClientRequest(request);
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const params = accountHistoryParamsSchema.parse(request.params ?? {});
+    await options.accountService.deleteConversionFile(request.headers.cookie, params.historyId);
+    return {
+      ok: true
+    };
+  });
+
+  app.get("/api/account/usage", async (request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    return {
+      items: options.accountService.listUsageBreakdown(request.headers.cookie, 12)
+    };
+  });
+
+  app.get("/api/account/notifications", async (request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const query = accountNotificationsQuerySchema.parse(request.query ?? {});
+    return {
+      items: options.accountService.listNotifications(request.headers.cookie, query.limit ?? 20)
+    };
+  });
+
+  app.post("/api/account/notifications/read", async (request, reply) => {
+    assertInternalClientRequest(request);
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("A conta ainda nao esta disponivel neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const payload = accountNotificationsReadSchema.parse(request.body ?? {});
+    return {
+      items: options.accountService.markNotificationsRead(request.headers.cookie, payload.ids)
+    };
   });
 
   app.get("/api/account/avatar", async (request, reply) => {
@@ -1195,6 +1376,80 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     );
   });
 
+  app.post("/api/convert/async", {
+    config: {
+      rateLimit: {
+        max: 12,
+        timeWindow: "1 minute"
+      }
+    }
+  }, async (request, reply) => {
+    assertInternalClientRequest(request);
+
+    if (!options.accountService) {
+      throw new AppError("Entre na sua conta para usar a fila de processamento.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+
+    const startedAt = performance.now();
+    const { toolId, uploads, rawOptions } = await parseMultipartConversionRequest(request);
+    let historyId: string | null = null;
+
+    try {
+      const prepared = prepareConversionPayload(request, toolId, uploads, rawOptions);
+      if (!shouldUseAsyncConversion(prepared.toolDefinition, prepared.accountSession, uploads)) {
+        throw new AppError("Essa conversao nao precisa da fila assincrona.", 409, "ASYNC_CONVERSION_NOT_REQUIRED");
+      }
+
+      historyId = await options.accountService.queueAsyncConversion(request.headers.cookie, {
+        toolId: prepared.toolDefinition.id,
+        toolLabel: prepared.toolDefinition.label,
+        sourceLabel: uploads.length === 1 ? uploads[0].filename : `${uploads.length} arquivos`,
+        inputCount: uploads.length,
+        uploads,
+        options: Object.fromEntries(
+          Object.entries((prepared.payload.options ?? {}) as Record<string, unknown>).map(([key, value]) => [key, String(value ?? "")])
+        )
+      });
+
+      request.log.info({
+        event: "conversion.queued",
+        toolId,
+        historyId,
+        uploadCount: uploads.length,
+        uploadBytes: uploads.reduce((total, upload) => total + upload.size, 0),
+        options: sanitizeOptionsForLogs(rawOptions)
+      }, "Async conversion queued.");
+
+      reply.code(202).header("Cache-Control", "no-store").header("Pragma", "no-cache");
+      return {
+        ok: true,
+        historyId,
+        queue: options.gate?.snapshot() ?? null,
+        message: "Arquivo enviado. Voce pode sair da pagina e voltar depois para baixar o resultado.",
+        account: options.accountService.getPublicSession(request.headers.cookie)
+      };
+    } catch (error) {
+      request.log.warn({
+        event: "conversion.queue_failed",
+        toolId: toolId || "unknown",
+        uploadCount: uploads.length,
+        uploadBytes: uploads.reduce((total, upload) => total + upload.size, 0),
+        options: sanitizeOptionsForLogs(rawOptions),
+        errorMessage: error instanceof Error ? error.message : String(error),
+        durationMs: Math.round(performance.now() - startedAt)
+      }, "Async conversion could not be queued.");
+
+      if (historyId && options.accountService) {
+        await options.accountService.failConversionHistory(
+          historyId,
+          error instanceof Error ? error.message : String(error)
+        ).catch(() => undefined);
+      }
+
+      throw error;
+    }
+  });
+
   app.post("/api/convert", {
     config: {
       rateLimit: {
@@ -1206,30 +1461,8 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     assertInternalClientRequest(request);
 
     const startedAt = performance.now();
-    let toolId = "";
     let historyId: string | null = null;
-    const uploads: UploadedAsset[] = [];
-    const rawOptions: Record<string, string> = {};
-
-    for await (const part of request.parts()) {
-      if (part.type === "file") {
-        const buffer = await part.toBuffer();
-        uploads.push({
-          filename: part.filename ?? "arquivo",
-          declaredMime: part.mimetype,
-          buffer,
-          size: buffer.byteLength
-        });
-        continue;
-      }
-
-      if (part.fieldname === "toolId") {
-        toolId = String(part.value ?? "");
-        continue;
-      }
-
-      rawOptions[part.fieldname] = String(part.value ?? "");
-    }
+    const { toolId, uploads, rawOptions } = await parseMultipartConversionRequest(request);
     try {
       if (!toolId || !(toolId in toolCatalog)) {
         throw new AppError("Selecione uma ferramenta valida antes de converter.", 400, "INVALID_TOOL");
@@ -1276,7 +1509,19 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         toolId: toolDefinition.id,
         toolLabel: toolDefinition.label,
         sourceLabel: uploads.length === 1 ? uploads[0].filename : `${uploads.length} arquivos`,
-        inputCount: uploads.length
+        inputCount: uploads.length,
+        mode: "sync",
+        optionsJson: JSON.stringify(
+          Object.fromEntries(
+            Object.entries((safeOptions ?? {}) as Record<string, unknown>).map(([key, value]) => [key, String(value ?? "")])
+          )
+        ),
+        inputFiles: uploads.map((upload) => ({
+          storedFileName: "",
+          originalFilename: upload.filename,
+          declaredMime: upload.declaredMime ?? null,
+          size: upload.size
+        }))
       }) ?? null;
 
       request.log.info({
@@ -1353,7 +1598,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
 
       if (historyId && options.accountService) {
         try {
-          options.accountService.failConversionHistory(
+          await options.accountService.failConversionHistory(
             historyId,
             error instanceof Error ? error.message : String(error)
           );
