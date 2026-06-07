@@ -133,6 +133,27 @@ const billingYearlyMeta = document.getElementById("billing-yearly-meta");
 const inertableSurfaces = Array.from(document.querySelectorAll(".shell, .site-footer"));
 const billingStarterPrice = document.getElementById("billing-starter-price");
 const billingStarterMeta = document.getElementById("billing-starter-meta");
+const pricingKicker = document.getElementById("pricing-kicker");
+const pricingTitle = document.getElementById("pricing-title");
+const pricingCopy = document.getElementById("pricing-copy");
+const pricingFreeKicker = document.getElementById("pricing-free-kicker");
+const pricingFreeName = document.getElementById("pricing-free-name");
+const pricingFreePrice = document.getElementById("pricing-free-price");
+const pricingFreeMeta = document.getElementById("pricing-free-meta");
+const pricingFreeFeatures = document.getElementById("pricing-free-features");
+const pricingFreeButton = document.getElementById("pricing-free-button");
+const pricingProKicker = document.getElementById("pricing-pro-kicker");
+const pricingProName = document.getElementById("pricing-pro-name");
+const pricingProPrice = document.getElementById("pricing-pro-price");
+const pricingProMeta = document.getElementById("pricing-pro-meta");
+const pricingProFeatures = document.getElementById("pricing-pro-features");
+const pricingProButton = document.getElementById("pricing-pro-button");
+const pricingTeamKicker = document.getElementById("pricing-team-kicker");
+const pricingTeamName = document.getElementById("pricing-team-name");
+const pricingTeamPrice = document.getElementById("pricing-team-price");
+const pricingTeamMeta = document.getElementById("pricing-team-meta");
+const pricingTeamFeatures = document.getElementById("pricing-team-features");
+const pricingTeamButton = document.getElementById("pricing-team-button");
 const redeemForm = document.getElementById("redeem-form");
 const redeemCodeInput = document.getElementById("redeem-code");
 const redeemSubmitButton = document.getElementById("redeem-submit");
@@ -196,6 +217,10 @@ const accountAvatarActions = document.getElementById("account-avatar-actions");
 const accountAvatarRemoveButton = document.getElementById("account-avatar-remove-button");
 const accountSettingsTitle = document.getElementById("account-settings-title");
 const accountSettingsCopy = document.getElementById("account-settings-copy");
+const accountLanguageTitle = document.getElementById("account-language-title");
+const accountLanguageCopy = document.getElementById("account-language-copy");
+const accountLanguageLabel = document.getElementById("account-language-label");
+const accountLanguageSelect = document.getElementById("account-language-select");
 const accountVerificationKicker = document.getElementById("account-verification-kicker");
 const accountVerificationTitle = document.getElementById("account-verification-title");
 const accountVerificationCopy = document.getElementById("account-verification-copy");
@@ -449,6 +474,187 @@ const runtimeConfig = {
   siteUrl: String(initialPageData.siteUrl ?? defaultSiteUrl).trim() || defaultSiteUrl,
   maxFileSizeMB: 0
 };
+const localeStorageKey = "vaptdoc-locale";
+const supportedLanguages = ["pt-BR", "en"];
+
+const translations = {
+  "pt-BR": {
+    "common.skipToConverter": "Pular para o conversor",
+    "common.searchPlaceholder": "Pesquisar conversão",
+    "common.searchAria": "Pesquisar conversão",
+    "common.searchClear": "Limpar busca",
+    "common.close": "Fechar",
+    "common.loadingCatalog": "Não foi possível carregar o catálogo de ferramentas.",
+    "hero.eyebrow": "Conversor online rápido e leve",
+    "hero.title": "Converta arquivos em poucos toques",
+    "hero.copy": "Escolha o formato, envie o arquivo e baixe o resultado sem complicação.",
+    "hero.flowTitle": "Como funciona",
+    "hero.step1.title": "Escolha",
+    "hero.step1.copy": "Toque na conversão",
+    "hero.step2.title": "Envie",
+    "hero.step2.copy": "Selecione seu arquivo",
+    "hero.step3.title": "Baixe",
+    "hero.step3.copy": "Receba o resultado",
+    "tools.none": "Nenhuma conversão encontrada.",
+    "tools.showAll": "Exibir todas as ferramentas",
+    "tools.hideAll": "Ocultar ferramentas",
+    "route.back": "Voltar para ferramentas",
+    "route.kicker": "Ferramenta exclusiva",
+    "route.defaultTitle": "Converter arquivo",
+    "route.defaultCopy": "Escolha uma ferramenta, envie seu arquivo e baixe o resultado sem um painel carregado.",
+    "route.help": "Como usar esta ferramenta",
+    "workspace.canvasKicker": "Arquivos e prévia",
+    "workspace.canvasTitle": "Monte sua mesa de conversão",
+    "workspace.canvasCopy": "Envie, arraste, revise e troque arquivos sem sair desta área.",
+    "workspace.filesBadge.empty": "Sem arquivos",
+    "workspace.flowBadge.ready": "Pronto para enviar",
+    "workspace.convertButton": "Converter arquivo",
+    "workspace.status.idle": "Pronto para converter.",
+    "progress.waiting": "Aguardando arquivo",
+    "progress.preparing": "Preparando conversão...",
+    "progress.uploading": "Enviando arquivo...",
+    "progress.processing": "Processando conversão...",
+    "progress.queue": "Arquivo enviado para a fila",
+    "progress.ready": "Conversão concluída",
+    "progress.failed": "Falha na conversão",
+    "premium.kicker": "Ferramenta Pro",
+    "premium.title": "Desbloqueie para usar esta conversão.",
+    "premium.copy": "O plano Pro libera OCR, PDF avançado e conversões 3D com prioridade.",
+    "premium.button": "Acessar conta",
+    "faq.kicker": "Perguntas rápidas",
+    "faq.title": "Dúvidas comuns desta ferramenta",
+    "footer.copy": "Arquivos processados com foco em rapidez, privacidade e limpeza automática.",
+    "footer.legal": "Links legais",
+    "pricing.kicker": "Planos",
+    "pricing.title": "Escolha o acesso ideal para o seu ritmo",
+    "pricing.copy": "Compare os recursos de cada plano e destrave conversões mais completas quando fizer sentido.",
+    "pricing.free.kicker": "Grátis",
+    "pricing.free.name": "Comece sem pagar",
+    "pricing.free.meta": "Conversões essenciais por dia",
+    "pricing.free.button": "Continuar grátis",
+    "pricing.free.features": ["Conversões básicas", "Histórico recente na conta", "Prévia rápida de arquivos"],
+    "pricing.pro.kicker": "Pro",
+    "pricing.pro.name": "Mais velocidade e ferramentas premium",
+    "pricing.pro.button": "Abrir checkout Pro",
+    "pricing.pro.features": ["OCR e PDF avançado", "Conversões Office e 3D", "Lotes e prioridade no processamento"],
+    "pricing.team.kicker": "Team",
+    "pricing.team.name": "Equipe, volume e suporte dedicado",
+    "pricing.team.price": "Sob consulta",
+    "pricing.team.meta": "Plano para operação contínua",
+    "pricing.team.button": "Falar com a equipe",
+    "pricing.team.features": [
+      "Mais pessoas com o mesmo acesso",
+      "Processamento pesado com suporte prioritário",
+      "Atendimento comercial para campanhas e revenda"
+    ],
+    "settings.language.title": "Idioma do site",
+    "settings.language.copy": "Escolha como o vaptdoc aparece neste navegador.",
+    "settings.language.label": "Idioma",
+    "settings.language.pt": "Português (Brasil)",
+    "settings.language.en": "English",
+    "toast.errorGeneric": "Não foi possível concluir essa ação agora.",
+    "status.queueSubmitted": "Arquivo enviado. Você pode sair da página e voltar depois para baixar o resultado.",
+    "status.downloadStarted": "Conversão concluída. Download iniciado.",
+    "status.checkoutPreparing": "Preparando checkout seguro..."
+  },
+  en: {
+    "common.skipToConverter": "Skip to converter",
+    "common.searchPlaceholder": "Search conversion",
+    "common.searchAria": "Search conversion",
+    "common.searchClear": "Clear search",
+    "common.close": "Close",
+    "common.loadingCatalog": "Could not load the tools catalog.",
+    "hero.eyebrow": "Fast and lightweight online converter",
+    "hero.title": "Convert files in just a few taps",
+    "hero.copy": "Choose the format, send your file, and download the result without friction.",
+    "hero.flowTitle": "How it works",
+    "hero.step1.title": "Choose",
+    "hero.step1.copy": "Tap the conversion you need",
+    "hero.step2.title": "Upload",
+    "hero.step2.copy": "Select your file",
+    "hero.step3.title": "Download",
+    "hero.step3.copy": "Get the converted result",
+    "tools.none": "No conversion found.",
+    "tools.showAll": "Show all tools",
+    "tools.hideAll": "Hide tools",
+    "route.back": "Back to tools",
+    "route.kicker": "Dedicated tool",
+    "route.defaultTitle": "Convert file",
+    "route.defaultCopy": "Choose a tool, upload your file, and download the result without a heavy dashboard.",
+    "route.help": "How to use this tool",
+    "workspace.canvasKicker": "Files and preview",
+    "workspace.canvasTitle": "Build your conversion workspace",
+    "workspace.canvasCopy": "Upload, reorder, review, and replace files without leaving this area.",
+    "workspace.filesBadge.empty": "No files yet",
+    "workspace.flowBadge.ready": "Ready to upload",
+    "workspace.convertButton": "Convert file",
+    "workspace.status.idle": "Ready to convert.",
+    "progress.waiting": "Waiting for file",
+    "progress.preparing": "Preparing conversion...",
+    "progress.uploading": "Uploading file...",
+    "progress.processing": "Processing conversion...",
+    "progress.queue": "File sent to queue",
+    "progress.ready": "Conversion completed",
+    "progress.failed": "Conversion failed",
+    "premium.kicker": "Pro tool",
+    "premium.title": "Unlock this conversion to continue.",
+    "premium.copy": "Pro unlocks OCR, advanced PDF flows, and 3D conversions with priority.",
+    "premium.button": "Open account",
+    "faq.kicker": "Quick questions",
+    "faq.title": "Common questions about this tool",
+    "footer.copy": "Files are processed with speed, privacy, and automatic cleanup in mind.",
+    "footer.legal": "Legal links",
+    "pricing.kicker": "Plans",
+    "pricing.title": "Choose the access level that fits your workflow",
+    "pricing.copy": "Compare each plan and unlock more complete conversions when you need them.",
+    "pricing.free.kicker": "Free",
+    "pricing.free.name": "Start without paying",
+    "pricing.free.meta": "Essential conversions per day",
+    "pricing.free.button": "Keep using free",
+    "pricing.free.features": ["Basic conversions", "Recent history in your account", "Fast file previews"],
+    "pricing.pro.kicker": "Pro",
+    "pricing.pro.name": "More speed and premium tools",
+    "pricing.pro.button": "Open Pro checkout",
+    "pricing.pro.features": ["OCR and advanced PDF", "Office and 3D conversions", "Batch jobs and priority processing"],
+    "pricing.team.kicker": "Team",
+    "pricing.team.name": "Team access, volume, and dedicated support",
+    "pricing.team.price": "Contact us",
+    "pricing.team.meta": "For continuous operation",
+    "pricing.team.button": "Talk to sales",
+    "pricing.team.features": [
+      "More people on the same access plan",
+      "Heavy processing with priority support",
+      "Commercial help for campaigns and resale"
+    ],
+    "settings.language.title": "Site language",
+    "settings.language.copy": "Choose how vaptdoc appears in this browser.",
+    "settings.language.label": "Language",
+    "settings.language.pt": "Portuguese (Brazil)",
+    "settings.language.en": "English",
+    "toast.errorGeneric": "This action could not be completed right now.",
+    "status.queueSubmitted": "File sent to the queue. You can leave this page and come back later to download it.",
+    "status.downloadStarted": "Conversion finished. Download started.",
+    "status.checkoutPreparing": "Preparing secure checkout..."
+  }
+};
+
+function normalizeLanguageTag(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (normalized.startsWith("pt")) {
+    return "pt-BR";
+  }
+  return "en";
+}
+
+function resolveInitialLanguage() {
+  const stored = window.localStorage.getItem(localeStorageKey);
+  if (stored) {
+    return normalizeLanguageTag(stored);
+  }
+  return normalizeLanguageTag(navigator.language || navigator.languages?.[0] || "pt-BR");
+}
+
+let currentLanguage = resolveInitialLanguage();
 const lazyIconObserver =
   "IntersectionObserver" in window
     ? new IntersectionObserver((entries) => {
@@ -835,8 +1041,188 @@ const optionPresentation = {
 
 const favoriteToolIds = new Set(loadFavoriteToolIds());
 
+function getLocale() {
+  return currentLanguage === "en" ? "en-US" : "pt-BR";
+}
+
+function normalizeVisibleText(value) {
+  let output = String(value ?? "");
+  for (let index = 0; index < 2; index += 1) {
+    if (!/[ÃÂ]/u.test(output)) {
+      break;
+    }
+
+    try {
+      const bytes = Uint8Array.from(output, (character) => character.charCodeAt(0) & 0xff);
+      const decoded = new TextDecoder("utf-8").decode(bytes);
+      if (!decoded || decoded === output) {
+        break;
+      }
+      output = decoded;
+    } catch {
+      break;
+    }
+  }
+
+  return output;
+}
+
+function t(key, variables = {}) {
+  const dictionary = translations[currentLanguage] ?? translations["pt-BR"];
+  const fallbackDictionary = translations["pt-BR"];
+  const template = dictionary[key] ?? fallbackDictionary[key] ?? key;
+
+  if (Array.isArray(template)) {
+    return template.map((item) => normalizeVisibleText(item));
+  }
+
+  return normalizeVisibleText(String(template).replace(/\{(\w+)\}/g, (_, token) => String(variables[token] ?? "")));
+}
+
+function setElementText(element, value) {
+  if (!element) {
+    return;
+  }
+  element.textContent = normalizeVisibleText(value);
+}
+
+function setListContent(element, items = []) {
+  if (!element) {
+    return;
+  }
+
+  element.innerHTML = "";
+  items.forEach((item) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = normalizeVisibleText(item);
+    element.append(listItem);
+  });
+}
+
+function ensureButtonAriaLabels(root = document) {
+  root.querySelectorAll("button").forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    if (button.getAttribute("aria-label")) {
+      return;
+    }
+
+    const label = normalizeVisibleText(button.textContent || button.title || "").replace(/\s+/g, " ").trim();
+    if (label) {
+      button.setAttribute("aria-label", label);
+    }
+  });
+}
+
+function applyStaticTranslations() {
+  document.documentElement.lang = getLocale();
+
+  setElementText(document.querySelector(".skip-link"), t("common.skipToConverter"));
+  if (searchInput) {
+    searchInput.placeholder = t("common.searchPlaceholder");
+    searchInput.setAttribute("aria-label", t("common.searchAria"));
+  }
+  searchClear?.setAttribute("aria-label", t("common.searchClear"));
+  setElementText(document.querySelector(".hero-panel .eyebrow"), t("hero.eyebrow"));
+  setElementText(document.getElementById("hero-title"), t("hero.title"));
+  setElementText(document.querySelector(".hero-panel .section-copy"), t("hero.copy"));
+  setElementText(document.querySelector(".hero-panel .section-subtitle"), t("hero.flowTitle"));
+
+  const quickFlowSteps = Array.from(document.querySelectorAll(".quick-flow-step"));
+  if (quickFlowSteps[0]) {
+    setElementText(quickFlowSteps[0].querySelector("strong"), t("hero.step1.title"));
+    setElementText(quickFlowSteps[0].querySelector("span:last-child"), t("hero.step1.copy"));
+  }
+  if (quickFlowSteps[1]) {
+    setElementText(quickFlowSteps[1].querySelector("strong"), t("hero.step2.title"));
+    setElementText(quickFlowSteps[1].querySelector("span:last-child"), t("hero.step2.copy"));
+  }
+  if (quickFlowSteps[2]) {
+    setElementText(quickFlowSteps[2].querySelector("strong"), t("hero.step3.title"));
+    setElementText(quickFlowSteps[2].querySelector("span:last-child"), t("hero.step3.copy"));
+  }
+
+  setElementText(toolEmpty, t("tools.none"));
+  setElementText(toolDirectoryToggleCopy, isToolDirectoryExpanded ? t("tools.hideAll") : t("tools.showAll"));
+  toolDirectoryToggle?.setAttribute("aria-label", isToolDirectoryExpanded ? t("tools.hideAll") : t("tools.showAll"));
+  setElementText(routeHeroBack, t("route.back"));
+  setElementText(toolHelpButton, t("route.help"));
+  setElementText(workspaceCanvasTitle, t("workspace.canvasTitle"));
+  setElementText(workspaceCanvasCopy, t("workspace.canvasCopy"));
+  setElementText(workspaceFilesBadge, t("workspace.filesBadge.empty"));
+  setElementText(workspaceFlowBadge, t("workspace.flowBadge.ready"));
+  setElementText(convertButton, t("workspace.convertButton"));
+  setElementText(statusText, t("workspace.status.idle"));
+  setElementText(progressLabel, t("progress.waiting"));
+  setElementText(document.querySelector("[data-conversion-stage='queued']"), currentLanguage === "en" ? "Queued" : "Na fila");
+  setElementText(document.querySelector("[data-conversion-stage='processing']"), currentLanguage === "en" ? "Processing" : "Processando");
+  setElementText(document.querySelector("[data-conversion-stage='ready']"), currentLanguage === "en" ? "Ready" : "Pronto");
+  setElementText(document.querySelector("#premium-lock .selection-kicker"), t("premium.kicker"));
+  setElementText(document.getElementById("premium-lock-title"), t("premium.title"));
+  setElementText(document.getElementById("premium-lock-copy"), t("premium.copy"));
+  setElementText(unlockToolButton, t("premium.button"));
+  setElementText(document.querySelector("#tool-faq-section .eyebrow"), t("faq.kicker"));
+  setElementText(toolFaqSection?.querySelector(".section-subtitle"), t("faq.title"));
+  setElementText(document.querySelector(".site-footer-copy"), t("footer.copy"));
+  document.querySelector(".site-footer-links")?.setAttribute("aria-label", t("footer.legal"));
+
+  setElementText(pricingKicker, t("pricing.kicker"));
+  setElementText(pricingTitle, t("pricing.title"));
+  setElementText(pricingCopy, t("pricing.copy"));
+  setElementText(pricingFreeKicker, t("pricing.free.kicker"));
+  setElementText(pricingFreeName, t("pricing.free.name"));
+  setElementText(pricingFreeMeta, t("pricing.free.meta"));
+  setElementText(pricingFreeButton, t("pricing.free.button"));
+  setListContent(pricingFreeFeatures, t("pricing.free.features"));
+  setElementText(pricingProKicker, t("pricing.pro.kicker"));
+  setElementText(pricingProName, t("pricing.pro.name"));
+  setElementText(pricingProButton, t("pricing.pro.button"));
+  setListContent(pricingProFeatures, t("pricing.pro.features"));
+  setElementText(pricingTeamKicker, t("pricing.team.kicker"));
+  setElementText(pricingTeamName, t("pricing.team.name"));
+  setElementText(pricingTeamPrice, t("pricing.team.price"));
+  setElementText(pricingTeamMeta, t("pricing.team.meta"));
+  setElementText(pricingTeamButton, t("pricing.team.button"));
+  setListContent(pricingTeamFeatures, t("pricing.team.features"));
+
+  setElementText(accountLanguageTitle, t("settings.language.title"));
+  setElementText(accountLanguageCopy, t("settings.language.copy"));
+  setElementText(accountLanguageLabel, t("settings.language.label"));
+  if (accountLanguageSelect) {
+    const options = Array.from(accountLanguageSelect.options);
+    if (options[0]) {
+      options[0].textContent = t("settings.language.pt");
+    }
+    if (options[1]) {
+      options[1].textContent = t("settings.language.en");
+    }
+    accountLanguageSelect.value = currentLanguage;
+    accountLanguageSelect.setAttribute("aria-label", t("settings.language.label"));
+  }
+
+  ensureButtonAriaLabels();
+}
+
+function setLanguage(language, options = {}) {
+  const { persist = true } = options;
+  currentLanguage = normalizeLanguageTag(language);
+  if (persist) {
+    window.localStorage.setItem(localeStorageKey, currentLanguage);
+  }
+  applyStaticTranslations();
+  if (hasLoadedTools) {
+    renderTools();
+    renderSearchResults();
+    updatePageModeUi(getToolById());
+    updateFileLabel();
+  }
+  updateAccessUi();
+}
+
 function getToolDescription(tool) {
-  return toolSupportCopy[tool.id] ?? tool.fileHint ?? "Envie seu arquivo e baixe o resultado no formato escolhido.";
+  return normalizeVisibleText(toolSupportCopy[tool.id] ?? tool.fileHint ?? "Envie seu arquivo e baixe o resultado no formato escolhido.");
 }
 
 function buildAbsoluteSiteUrl(pathname = "/") {
@@ -845,7 +1231,7 @@ function buildAbsoluteSiteUrl(pathname = "/") {
 
 function getToolMetaDescription(tool) {
   const lead = getToolDescription(tool).replace(/\.$/u, "");
-  const detail = String(tool.description ?? "").replace(/\.$/u, "");
+  const detail = normalizeVisibleText(String(tool.description ?? "")).replace(/\.$/u, "");
   return `${lead}. ${detail}.`;
 }
 
@@ -965,21 +1351,21 @@ function updatePageModeUi(tool) {
 
   if (siteHeaderCurrent) {
     siteHeaderCurrent.hidden = !isToolPage;
-    siteHeaderCurrent.textContent = tool?.label ?? "";
+    siteHeaderCurrent.textContent = normalizeVisibleText(tool?.label ?? "");
   }
 
   if (routeKicker) {
-    routeKicker.textContent = isToolPage ? "Ferramenta exclusiva" : "Conversor online rápido e leve";
+    routeKicker.textContent = isToolPage ? t("route.kicker") : t("hero.eyebrow");
   }
 
   if (routeTitle) {
-    routeTitle.textContent = tool?.label ?? "Converter arquivo";
+    routeTitle.textContent = normalizeVisibleText(tool?.label ?? t("route.defaultTitle"));
   }
 
   if (routeCopy) {
     routeCopy.textContent = tool
-      ? `${getToolDescription(tool)} Envie o arquivo para liberar só os ajustes necessários desta conversão.`
-      : "Escolha uma ferramenta, envie seu arquivo e baixe o resultado sem um painel carregado.";
+      ? normalizeVisibleText(`${getToolDescription(tool)} Envie o arquivo para liberar só os ajustes necessários desta conversão.`)
+      : t("route.defaultCopy");
   }
 
   document.querySelectorAll(".tool-card").forEach((card) => {
@@ -1228,14 +1614,15 @@ function renderToolFaq(tool) {
 }
 
 function setStatus(message, options = {}) {
+  const normalizedMessage = normalizeVisibleText(message);
   if (!statusText) {
-    announceToast(message, options);
+    announceToast(normalizedMessage, options);
     return;
   }
 
-  statusText.textContent = message;
-  statusText.hidden = !message || quietStatusMessages.has(message);
-  announceToast(message, options);
+  statusText.textContent = normalizedMessage;
+  statusText.hidden = !normalizedMessage || quietStatusMessages.has(normalizedMessage);
+  announceToast(normalizedMessage, options);
 }
 
 function setConversionLifecycle(stage = "") {
@@ -1273,19 +1660,27 @@ function setProgress(value, label) {
     progressValue.textContent = `${safeValue}%`;
   }
   if (progressLabel) {
-    progressLabel.textContent = label;
+    progressLabel.textContent = normalizeVisibleText(label);
   }
 }
 
-function showUploadProgress() {
+function setProgressState(state = "idle") {
+  if (uploadProgress) {
+    uploadProgress.dataset.state = state;
+  }
+}
+
+function showUploadProgress(state = "uploading") {
   if (uploadProgress) {
     uploadProgress.hidden = false;
+    uploadProgress.dataset.state = state;
   }
 }
 
 function hideUploadProgress() {
   if (uploadProgress) {
     uploadProgress.hidden = true;
+    uploadProgress.dataset.state = "idle";
   }
 }
 
@@ -1298,11 +1693,12 @@ function stopProgressAnimation() {
 
 function startProcessingAnimation(startAt = 72) {
   stopProgressAnimation();
+  setProgressState("processing");
   let current = startAt;
 
   processingTimer = window.setInterval(() => {
     current = Math.min(94, current + Math.max(1, Math.round((94 - current) / 7)));
-    setProgress(current, "Convertendo seu arquivo...");
+    setProgress(current, t("progress.processing"));
 
     if (current >= 94) {
       stopProgressAnimation();
@@ -1457,7 +1853,7 @@ function getSupportUrl() {
 }
 
 function escapeHtml(value) {
-  return String(value ?? "")
+  return normalizeVisibleText(String(value ?? ""))
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -1471,7 +1867,7 @@ function formatCurrencyBRL(value) {
     return "R$ --";
   }
 
-  return new Intl.NumberFormat("pt-BR", {
+  return new Intl.NumberFormat(getLocale(), {
     style: "currency",
     currency: "BRL"
   }).format(numeric);
@@ -1483,7 +1879,7 @@ function formatDateTime(value) {
     return "";
   }
 
-  return new Intl.DateTimeFormat("pt-BR", {
+  return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: "medium"
   }).format(date);
 }
@@ -2429,6 +2825,28 @@ function renderBillingOffers() {
   if (billingStarterMeta) {
     billingStarterMeta.textContent = `${starterOffer?.accessDays ?? 7} dias de acesso rápido`;
   }
+
+  if (pricingFreePrice) {
+    pricingFreePrice.textContent = formatCurrencyBRL(0);
+  }
+  if (pricingFreeMeta) {
+    pricingFreeMeta.textContent = t("pricing.free.meta");
+  }
+  if (pricingProPrice) {
+    pricingProPrice.textContent = formatCurrencyBRL(monthlyOffer?.amountBRL ?? 19.9);
+  }
+  if (pricingProMeta) {
+    pricingProMeta.textContent =
+      currentLanguage === "en"
+        ? `${monthlyOffer?.accessDays ?? 30} days of access`
+        : `${monthlyOffer?.accessDays ?? 30} dias de acesso`;
+  }
+  if (pricingTeamPrice) {
+    pricingTeamPrice.textContent = t("pricing.team.price");
+  }
+  if (pricingTeamMeta) {
+    pricingTeamMeta.textContent = t("pricing.team.meta");
+  }
 }
 
 function getAccountPlanHeadline() {
@@ -3044,26 +3462,44 @@ function updateAccessUi() {
   applyOfferButton(
     billingMonthlyButton,
     "pro-monthly",
-    "Abrir plano mensal",
-    "Plano mensal em breve"
+    currentLanguage === "en" ? "Open monthly plan" : "Abrir plano mensal",
+    currentLanguage === "en" ? "Monthly plan coming soon" : "Plano mensal em breve"
   );
   applyOfferButton(
     billingYearlyButton,
     "pro-yearly",
-    "Abrir plano anual",
-    "Plano anual em breve"
+    currentLanguage === "en" ? "Open yearly plan" : "Abrir plano anual",
+    currentLanguage === "en" ? "Yearly plan coming soon" : "Plano anual em breve"
   );
   applyOfferButton(
     billingStarterButton,
     "starter-pack",
-    "Abrir pacote",
-    "Pacote em breve"
+    currentLanguage === "en" ? "Open starter pack" : "Abrir pacote",
+    currentLanguage === "en" ? "Starter pack coming soon" : "Pacote em breve"
   );
   applyBillingButton(
     billingSupportButton,
     getSupportUrl(),
-    accessSession?.billing?.whatsappUrl ? "Abrir WhatsApp" : "Abrir suporte",
-    "Suporte em breve"
+    accessSession?.billing?.whatsappUrl
+      ? currentLanguage === "en"
+        ? "Open WhatsApp"
+        : "Abrir WhatsApp"
+      : currentLanguage === "en"
+        ? "Open support"
+        : "Abrir suporte",
+    currentLanguage === "en" ? "Support coming soon" : "Suporte em breve"
+  );
+  applyBillingButton(
+    pricingTeamButton,
+    getSupportUrl(),
+    currentLanguage === "en" ? "Talk to sales" : "Falar com a equipe",
+    currentLanguage === "en" ? "Support coming soon" : "Suporte em breve"
+  );
+  applyOfferButton(
+    pricingProButton,
+    "pro-monthly",
+    t("pricing.pro.button"),
+    currentLanguage === "en" ? "Plan coming soon" : "Plano em breve"
   );
 
   if (accessLogoutButton) {
@@ -4318,11 +4754,15 @@ function updateToolDirectoryToggleState(directoryState) {
   }
 
   toolDirectoryToggleCopy.textContent = isToolDirectoryExpanded
-    ? "Ocultar ferramentas"
-    : "Exibir todas as ferramentas";
+    ? t("tools.hideAll")
+    : t("tools.showAll");
   toolDirectoryToggle.setAttribute(
     "aria-label",
-    isToolDirectoryExpanded ? "Ocultar lista completa de ferramentas" : `Exibir mais ${hiddenCount} ferramentas`
+    isToolDirectoryExpanded
+      ? t("tools.hideAll")
+      : currentLanguage === "en"
+        ? `Show ${hiddenCount} more tools`
+        : `Exibir mais ${hiddenCount} ferramentas`
   );
 }
 
@@ -4620,18 +5060,20 @@ function shouldUseFullscreenAccountMenu() {
 
 function getToolActionLabel(tool) {
   if (!tool) {
-    return "Converter arquivo";
+    return t("workspace.convertButton");
   }
 
   if (tool.id === "pdf-to-text") {
-    return "Extrair texto do PDF";
+    return currentLanguage === "en" ? "Extract text from PDF" : "Extrair texto do PDF";
   }
 
   if (tool.id === "3d-convert") {
-    return "Converter modelo 3D";
+    return currentLanguage === "en" ? "Convert 3D model" : "Converter modelo 3D";
   }
 
-  return `Converter ${tool.label}`;
+  return currentLanguage === "en"
+    ? `Convert ${normalizeVisibleText(tool.label)}`
+    : `Converter ${normalizeVisibleText(tool.label)}`;
 }
 
 function getToolMinimumFiles(tool) {
@@ -4998,55 +5440,58 @@ function updateToolFlowLayout(tool = getToolById()) {
 
 function getDropzoneTitleForTool(tool) {
   if (!tool) {
-    return "Envie seu arquivo";
+    return currentLanguage === "en" ? "Upload your file" : "Envie seu arquivo";
   }
 
   const { from } = getToolFormats(tool);
 
   if (tool.allowsMultipleFiles || (tool.maxFiles ?? 1) > 1 || (tool.minFiles ?? 1) > 1) {
-    return "Envie seus arquivos";
+    return currentLanguage === "en" ? "Upload your files" : "Envie seus arquivos";
   }
 
   if (from === "pdf") {
-    return "Envie seu PDF";
+    return currentLanguage === "en" ? "Upload your PDF" : "Envie seu PDF";
   }
 
   if (from === "office") {
-    return "Envie seu DOCX";
+    return currentLanguage === "en" ? "Upload your DOCX" : "Envie seu DOCX";
   }
 
   if (from === "image" || from === "jpg" || from === "jpeg" || from === "png") {
-    return "Envie sua imagem";
+    return currentLanguage === "en" ? "Upload your image" : "Envie sua imagem";
   }
 
   if (from === "mp4") {
-    return "Envie seu vídeo";
+    return currentLanguage === "en" ? "Upload your video" : "Envie seu vídeo";
   }
 
   if (from === "model3d") {
-    return "Envie seu modelo 3D";
+    return currentLanguage === "en" ? "Upload your 3D model" : "Envie seu modelo 3D";
   }
 
-  return "Envie seu arquivo";
+  return currentLanguage === "en" ? "Upload your file" : "Envie seu arquivo";
 }
 
 function getDropzoneCopyForTool(tool) {
   const touchCopy = isTouchViewport();
-  const tapVerb = touchCopy ? "Toque" : "Clique";
+  const tapVerb = touchCopy ? (currentLanguage === "en" ? "Tap" : "Toque") : currentLanguage === "en" ? "Click" : "Clique";
 
   if (!tool) {
-    return `${tapVerb} para escolher seu arquivo`;
+    return currentLanguage === "en" ? `${tapVerb} to choose your file` : `${tapVerb} para escolher seu arquivo`;
   }
 
   if (tool.allowsMultipleFiles || (tool.maxFiles ?? 1) > 1 || (tool.minFiles ?? 1) > 1) {
+    if (currentLanguage === "en") {
+      return touchCopy ? "Tap to choose and arrange files" : "Click or drag files here to organize them";
+    }
     return touchCopy ? "Toque para escolher e organizar os arquivos" : "Clique ou arraste para escolher e organizar os arquivos";
   }
 
   if (touchCopy) {
-    return tool.fileHint ?? "Toque para escolher seu arquivo";
+    return normalizeVisibleText(tool.fileHint ?? (currentLanguage === "en" ? "Tap to choose your file" : "Toque para escolher seu arquivo"));
   }
 
-  return tool.fileHint ?? "Clique ou arraste aqui para escolher seu arquivo";
+  return normalizeVisibleText(tool.fileHint ?? (currentLanguage === "en" ? "Click or drag here to choose your file" : "Clique ou arraste aqui para escolher seu arquivo"));
 }
 
 function formatFileSize(size) {
@@ -5749,6 +6194,7 @@ function renderStagedFiles() {
   });
 
   fileStage.append(header, list);
+  ensureButtonAriaLabels(fileStage);
   updateWorkspacePanels(tool);
 }
 
@@ -5776,13 +6222,16 @@ function updateFileLabel() {
   }
 
   if (!tool?.allowsMultipleFiles) {
-    dropzoneTitle.textContent = "Trocar arquivo";
+    dropzoneTitle.textContent = currentLanguage === "en" ? "Replace file" : "Trocar arquivo";
     dropzoneCopy.textContent = `${files[0].name} \u00B7 ${formatFileSize(files[0].size)}`;
     return;
   }
 
-  dropzoneTitle.textContent = "Adicionar mais arquivos";
-  dropzoneCopy.textContent = `${files.length} na grade \u00B7 arraste para reorganizar antes de converter`;
+  dropzoneTitle.textContent = currentLanguage === "en" ? "Add more files" : "Adicionar mais arquivos";
+  dropzoneCopy.textContent =
+    currentLanguage === "en"
+      ? `${files.length} in the grid \u00B7 drag to reorder before converting`
+      : `${files.length} na grade \u00B7 arraste para reorganizar antes de converter`;
 }
 
 function getPreferredScrollBehavior() {
@@ -5833,8 +6282,11 @@ function syncResponsiveUi() {
 
 function updateDropzonePrompt(tool) {
   if (isToolLocked(tool) && shouldRevealUpgradeContext(accessSession)) {
-    dropzoneTitle.textContent = "Disponivel no Pro";
-    dropzoneCopy.textContent = `${tool.label} fica liberado assim que você ativar um plano ou código.`;
+    dropzoneTitle.textContent = currentLanguage === "en" ? "Available on Pro" : "Disponível no Pro";
+    dropzoneCopy.textContent =
+      currentLanguage === "en"
+        ? `${normalizeVisibleText(tool.label)} unlocks as soon as you activate a plan or code.`
+        : `${normalizeVisibleText(tool.label)} fica liberado assim que você ativar um plano ou código.`;
     return;
   }
 
@@ -6729,8 +7181,8 @@ function selectToolFromSearch(tool) {
     activeFilter = "all";
   }
 
-  searchInput.value = tool.label;
-  searchQuery = tool.label;
+  searchInput.value = normalizeVisibleText(tool.label);
+  searchQuery = normalizeVisibleText(tool.label);
   updateSearchClearButton();
   renderTools();
   hideSearchResults();
@@ -6760,7 +7212,12 @@ function renderSearchResults() {
     item.type = "button";
     item.className = "search-result-item";
     item.setAttribute("role", "option");
-    item.setAttribute("aria-label", `Selecionar ${tool.label}`);
+    item.setAttribute(
+      "aria-label",
+      currentLanguage === "en"
+        ? `Select ${normalizeVisibleText(tool.label)}`
+        : `Selecionar ${normalizeVisibleText(tool.label)}`
+    );
 
     const formats = getToolFormats(tool);
 
@@ -6782,7 +7239,7 @@ function renderSearchResults() {
 
     const title = document.createElement("strong");
     title.className = "search-result-title";
-    title.textContent = tool.label;
+    title.textContent = normalizeVisibleText(tool.label);
 
     const meta = document.createElement("span");
     meta.className = "search-result-meta";
@@ -6838,7 +7295,7 @@ function applyActiveTool(toolId, options = {}) {
   }
 
   if (activeToolTitle) {
-    activeToolTitle.textContent = tool.label;
+    activeToolTitle.textContent = normalizeVisibleText(tool.label);
   }
   if (activeToolDescription) {
     activeToolDescription.textContent = getToolDescription(tool);
@@ -6921,9 +7378,14 @@ function renderTools() {
     const formats = getToolFormats(tool);
 
     card.dataset.toolId = tool.id;
-    card.setAttribute("aria-label", `${tool.label}. Abrir envio de arquivo com essa conversão.`);
-    card.title = tool.fileHint ?? tool.label;
-    label.textContent = tool.label;
+    card.setAttribute(
+      "aria-label",
+      currentLanguage === "en"
+        ? `${normalizeVisibleText(tool.label)}. Open this conversion tool.`
+        : `${normalizeVisibleText(tool.label)}. Abrir envio de arquivo com essa conversão.`
+    );
+    card.title = normalizeVisibleText(tool.fileHint ?? tool.label);
+    label.textContent = normalizeVisibleText(tool.label);
     card.classList.toggle("favorite", isFavorite(tool.id));
     renderFormatBadge(formats.from, fromIcon, "tool-icon-from");
     renderFormatBadge(formats.to, toIcon, "tool-icon-to");
@@ -6936,6 +7398,8 @@ function renderTools() {
   if (activeToolId) {
     applyActiveTool(activeToolId, { syncSeo: false });
   }
+
+  ensureButtonAriaLabels(toolGrid);
 }
 
 async function loadTools() {
@@ -7060,7 +7524,7 @@ async function resumeCheckoutIfNeeded() {
     return;
   }
 
-  setBillingStatus("Confirmando pagamento...", { toast: false });
+  setBillingStatus(currentLanguage === "en" ? "Confirming payment..." : "Confirmando pagamento...", { toast: false });
 
   try {
     const payload = await confirmCheckoutReturn(paymentId);
@@ -7100,6 +7564,9 @@ async function resumeCheckoutIfNeeded() {
 }
 
 themeToggle?.addEventListener("click", toggleThemePreference);
+accountLanguageSelect?.addEventListener("change", (event) => {
+  setLanguage(event.currentTarget?.value || "pt-BR");
+});
 
 reducedMotionQuery.addEventListener("change", () => {
   startSearchPlaceholderAnimation();
@@ -7249,6 +7716,14 @@ billingMonthlyButton?.addEventListener("click", () => handleBillingOfferClick(bi
 billingYearlyButton?.addEventListener("click", () => handleBillingOfferClick(billingYearlyButton));
 billingStarterButton?.addEventListener("click", () => handleBillingOfferClick(billingStarterButton));
 billingSupportButton?.addEventListener("click", () => openBillingTarget(billingSupportButton));
+pricingProButton?.addEventListener("click", () => handleBillingOfferClick(pricingProButton));
+pricingTeamButton?.addEventListener("click", () => openBillingTarget(pricingTeamButton));
+pricingFreeButton?.addEventListener("click", () => {
+  workbench?.scrollIntoView({
+    behavior: getPreferredScrollBehavior(),
+    block: "start"
+  });
+});
 accountSwitchToLoginButton?.addEventListener("click", () => showAccountModal({ focus: "login" }));
 accountSwitchToRegisterButton?.addEventListener("click", () => showAccountModal({ focus: "register" }));
 accountShortcutProfileButton?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
@@ -7893,9 +8368,9 @@ async function performConversion() {
   hideConversionModal();
   const formData = buildConversionFormData(toolId, files);
   setConversionLifecycle("queued");
-  setStatus("Enviando seu arquivo...");
-  setProgress(4, "Preparando conversão...");
-  showUploadProgress();
+  setStatus(currentLanguage === "en" ? "Uploading your file..." : "Enviando seu arquivo...");
+  setProgress(4, t("progress.preparing"));
+  showUploadProgress("uploading");
   setWorkspaceLoadingState(true, "Convertendo");
   if (conversionConfirmButton) {
     conversionConfirmButton.disabled = true;
@@ -7913,17 +8388,20 @@ async function performConversion() {
       });
       const payload = await response.json().catch(() => ({ message: "Falha inesperada." }));
 
-      hideUploadProgress();
       if (!response.ok) {
-        setProgress(0, "Falha na fila");
+        setProgressState("idle");
+        setProgress(0, currentLanguage === "en" ? "Queue failed" : "Falha na fila");
         throw new Error(payload.message ?? "Falha inesperada.");
       }
 
       setConversionLifecycle("processing");
-      setProgress(86, "Arquivo enviado para a fila");
+      setProgressState("processing");
+      setProgress(86, t("progress.queue"));
       await refreshAccessSession().catch(() => undefined);
       await refreshAccountWorkspaceData({ silent: true, toastNotifications: false }).catch(() => undefined);
-      setStatus(payload.message ?? "Arquivo enviado. Você pode sair da página e voltar depois para baixar o resultado.");
+      setProgressState("success");
+      setStatus(payload.message ?? t("status.queueSubmitted"));
+      window.setTimeout(hideUploadProgress, 1400);
       window.setTimeout(clearConversionLifecycle, 2600);
       return;
     }
@@ -7936,18 +8414,19 @@ async function performConversion() {
 
       xhr.upload.addEventListener("progress", (uploadEvent) => {
         if (!uploadEvent.lengthComputable) {
-          setProgress(18, "Enviando arquivo...");
+          setProgress(18, t("progress.uploading"));
           return;
         }
 
         const uploadProgress = 8 + (uploadEvent.loaded / uploadEvent.total) * 62;
-        setProgress(uploadProgress, "Enviando arquivo...");
+        setProgress(uploadProgress, t("progress.uploading"));
       });
 
       xhr.upload.addEventListener("load", () => {
-        hideUploadProgress();
         setConversionLifecycle("processing");
-        setProgress(74, "Processando conversão...");
+        setProgressState("processing");
+        setProgress(74, t("progress.processing"));
+        startProcessingAnimation(74);
       });
 
       xhr.addEventListener("load", () => {
@@ -7978,7 +8457,8 @@ async function performConversion() {
           return { message: "Falha inesperada." };
         }
       });
-      setProgress(0, "Falha na conversão");
+      setProgressState("idle");
+      setProgress(0, t("progress.failed"));
       throw new Error(payload.message ?? "Falha inesperada.");
     }
 
@@ -8006,13 +8486,20 @@ async function performConversion() {
       accessSession.usedToday = Math.max(0, accessSession.dailyLimit - accessSession.remainingToday);
     }
     setConversionLifecycle("ready");
+    stopProgressAnimation();
+    setProgressState("success");
+    setProgress(100, t("progress.ready"));
     updateAccessUi();
-    setStatus("Conversao concluida. Download iniciado.");
+    convertButton?.classList.add("is-success");
+    window.setTimeout(() => convertButton?.classList.remove("is-success"), 700);
+    setStatus(t("status.downloadStarted"));
     await refreshAccessSession().catch(() => undefined);
     await refreshAccountWorkspaceData({ silent: true, toastNotifications: false }).catch(() => undefined);
+    window.setTimeout(hideUploadProgress, 1400);
     window.setTimeout(clearConversionLifecycle, 2600);
   } catch (error) {
     stopProgressAnimation();
+    setProgressState("idle");
     hideUploadProgress();
     clearConversionLifecycle();
     const message = error instanceof Error ? error.message : "Não foi possível concluir a conversão.";
@@ -8038,7 +8525,8 @@ form.addEventListener("submit", (event) => {
 initializeTheme();
 syncDialogPresentationMode();
 hideUploadProgress();
-setProgress(0, "Aguardando arquivo");
+setLanguage(currentLanguage, { persist: false });
+setProgress(0, t("progress.waiting"));
 updateSearchClearButton();
 startSearchPlaceholderAnimation();
 updateBackToTopVisibility();
@@ -8047,7 +8535,7 @@ Promise.allSettled([loadTools(), refreshAccessSession()]).then((results) => {
   const [toolsResult, accessResult] = results;
 
   if (toolsResult.status === "rejected") {
-    setStatus("Não foi possível carregar o catálogo de ferramentas.");
+    setStatus(t("common.loadingCatalog"));
     return;
   }
 

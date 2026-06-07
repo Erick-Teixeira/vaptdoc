@@ -476,6 +476,62 @@
           <div class="tool-faq-list" id="tool-faq-list"></div>
         </section>
       </section>
+      <section class="pricing-section" id="pricing-section" aria-labelledby="pricing-title">
+        <div class="section-heading centered">
+          <p class="eyebrow" id="pricing-kicker">Planos</p>
+          <h2 class="section-subtitle" id="pricing-title">Escolha o acesso ideal para o seu ritmo</h2>
+          <p class="section-copy" id="pricing-copy">
+            Compare os recursos de cada plano e destrave conversões mais completas quando fizer sentido.
+          </p>
+        </div>
+
+        <div class="billing-grid pricing-grid">
+          <article class="billing-card pricing-card pricing-card-free">
+            <span class="billing-card-kicker" id="pricing-free-kicker">Grátis</span>
+            <strong id="pricing-free-name">Comece sem pagar</strong>
+            <div class="billing-price-wrap">
+              <strong class="billing-price" id="pricing-free-price">R$ 0,00</strong>
+              <span class="billing-price-meta" id="pricing-free-meta">Conversões essenciais por dia</span>
+            </div>
+            <ul class="pricing-feature-list" id="pricing-free-features" aria-label="Recursos do plano grátis">
+              <li>Conversões básicas</li>
+              <li>Histórico recente na conta</li>
+              <li>Prévia rápida de arquivos</li>
+            </ul>
+            <button type="button" class="button secondary wide" id="pricing-free-button">Continuar grátis</button>
+          </article>
+
+          <article class="billing-card billing-card-featured pricing-card">
+            <span class="billing-card-kicker" id="pricing-pro-kicker">Pro</span>
+            <strong id="pricing-pro-name">Mais velocidade e ferramentas premium</strong>
+            <div class="billing-price-wrap">
+              <strong class="billing-price" id="pricing-pro-price">R$ 19,90</strong>
+              <span class="billing-price-meta" id="pricing-pro-meta">30 dias de acesso</span>
+            </div>
+            <ul class="pricing-feature-list" id="pricing-pro-features" aria-label="Recursos do plano pro">
+              <li>OCR e PDF avançado</li>
+              <li>Conversões Office e 3D</li>
+              <li>Lotes e prioridade no processamento</li>
+            </ul>
+            <button type="button" class="button primary wide" id="pricing-pro-button">Abrir checkout Pro</button>
+          </article>
+
+          <article class="billing-card pricing-card">
+            <span class="billing-card-kicker" id="pricing-team-kicker">Team</span>
+            <strong id="pricing-team-name">Equipe, volume e suporte dedicado</strong>
+            <div class="billing-price-wrap">
+              <strong class="billing-price" id="pricing-team-price">Sob consulta</strong>
+              <span class="billing-price-meta" id="pricing-team-meta">Plano para operação contínua</span>
+            </div>
+            <ul class="pricing-feature-list" id="pricing-team-features" aria-label="Recursos do plano team">
+              <li>Mais pessoas com o mesmo acesso</li>
+              <li>Processamento pesado com suporte prioritário</li>
+              <li>Atendimento comercial para campanhas e revenda</li>
+            </ul>
+            <button type="button" class="button secondary wide" id="pricing-team-button">Falar com a equipe</button>
+          </article>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer" aria-label="Informacoes do site">
@@ -1085,6 +1141,30 @@
         </div>
 
         <div class="account-forms-grid account-settings-grid">
+          <article class="account-card account-setting-card">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5"></path>
+                  <path d="M3.8 12h16.4"></path>
+                  <path d="M12 3.8c2.4 2.4 3.8 5.2 3.8 8.2S14.4 17.8 12 20.2"></path>
+                  <path d="M12 3.8C9.6 6.2 8.2 9 8.2 12s1.4 5.8 3.8 8.2"></path>
+                </svg>
+              </span>
+              <div class="account-card-copy">
+                <strong id="account-language-title">Idioma do site</strong>
+                <span id="account-language-copy">Escolha como o vaptdoc aparece neste navegador.</span>
+              </div>
+            </div>
+            <label class="field" for="account-language-select">
+              <span id="account-language-label">Idioma</span>
+              <select id="account-language-select" aria-label="Idioma do site">
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+          </article>
+
           <article class="account-card account-setting-card">
             <div class="account-card-heading">
               <span class="account-card-icon" aria-hidden="true">

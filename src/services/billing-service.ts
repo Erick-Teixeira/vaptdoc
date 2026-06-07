@@ -196,7 +196,7 @@ export class BillingService {
     this.accessToken = String(config.accessToken ?? "").trim();
     this.webhookSecret = String(config.webhookSecret ?? "").trim();
     this.publicAppUrl = normalizePublicUrl(config.publicAppUrl);
-    this.stateSecret = String(config.stateSecret ?? "").trim() || "vaptdoc-billing-state-secret";
+    this.stateSecret = String(config.stateSecret ?? "").trim() || crypto.randomBytes(32).toString("hex");
     this.stateCookieName = config.stateCookieName ?? "vaptdoc-checkout";
     this.stateTtlSeconds = Math.max(300, config.stateTtlSeconds ?? 24 * 60 * 60);
     this.requestTimeoutMs = Math.max(3_000, config.requestTimeoutMs ?? 15_000);

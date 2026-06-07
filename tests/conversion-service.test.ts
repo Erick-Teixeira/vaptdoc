@@ -142,4 +142,42 @@ describe("conversion service", () => {
     expect(result.filename).toBe("modelo.stl");
     expect(result.contentType).toContain("model/stl");
   });
+
+  it("reuses a cached result for the same file and conversion", async () => {
+    const docxLikeBuffer = Buffer.concat([
+      Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+      Buffer.from("[Content_Types].xml\nword/document.xml", "utf8")
+    ]);
+    const officeToPdf = vi.fn().mockResolvedValue(Buffer.from("%PDF-1.7\ncached"));
+    const service = createConversionService({
+      convertApiClient: null,
+      ilovePdfClient: {
+        officeToPdf,
+        ocrPdf: vi.fn(),
+        runTask: vi.fn(),
+        validatePdfa: vi.fn(),
+        editPdfText: vi.fn()
+      }
+    });
+
+    const request = {
+      toolId: "docx-to-pdf" as const,
+      uploads: [
+        {
+          buffer: docxLikeBuffer,
+          filename: "Relatorio Final.docx",
+          size: docxLikeBuffer.byteLength,
+          declaredMime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        }
+      ]
+    };
+
+    const first = await service.convert(request);
+    const second = await service.convert(request);
+
+    expect(officeToPdf).toHaveBeenCalledTimes(1);
+    expect(first.filename).toBe("Relatorio-Final.pdf");
+    expect(second.filename).toBe("Relatorio-Final.pdf");
+    expect(Buffer.compare(first.data, second.data)).toBe(0);
+  });
 });

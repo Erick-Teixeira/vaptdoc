@@ -40,6 +40,8 @@ const envSchema = z.object({
   MAX_OCR_PAGES: defaultedInt(8, 1, 25),
   MAX_CONCURRENT_CONVERSIONS: defaultedInt(3, 1, 12),
   MAX_PENDING_CONVERSIONS: defaultedInt(12, 0, 60),
+  CONVERSION_CACHE_TTL_SECONDS: defaultedInt(600, 0, 86_400),
+  HEALTHCHECK_TIMEOUT_MS: defaultedInt(3000, 500, 15000),
   ACCESS_TOKEN_SECRET: defaultedString(""),
   FREE_DAILY_LIMIT: defaultedInt(8, 1, 50),
   PRO_DAILY_LIMIT: defaultedInt(80, 1, 500),

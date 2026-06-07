@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
@@ -76,17 +77,40 @@ interface ConversionServiceDeps {
   aspose3dClient?: Aspose3dClient | null;
 }
 
+interface ConversionCacheEntry {
+  expiresAt: number;
+  storedAt: number;
+  result: ConversionResult;
+}
+
+interface ExternalProbeSnapshot {
+  reachable: boolean;
+  responseTimeMs: number | null;
+  statusCode: number | null;
+  checkedAt: string | null;
+  note?: string;
+}
+
 export interface ConversionServiceHealthSnapshot {
   ilovePdf: {
     configured: boolean;
     status: "configured" | "fallback-only";
     ocrLanguages: string[];
+    probe: ExternalProbeSnapshot;
   };
   aspose3d: {
     cloudConfigured: boolean;
     localLibraryAvailable: boolean;
     localLibraryStatus: "available" | "unavailable";
     note: string;
+    probe: ExternalProbeSnapshot;
+  };
+  cache: {
+    enabled: boolean;
+    ttlSeconds: number;
+    entries: number;
+    hits: number;
+    misses: number;
   };
 }
 
@@ -98,6 +122,8 @@ interface PreparedUpload {
 
 const simpleRangesPattern = /^\d+(?:-\d+)?(?:\s*,\s*\d+(?:-\d+)?)*$/u;
 const pageSelectionPattern = /^(?:all|(?:-?\d+|end)(?:-(?:-?\d+|end))?)(?:\s*,\s*(?:all|(?:-?\d+|end)(?:-(?:-?\d+|end))?))*$/u;
+const ilovePdfProbeUrl = "https://api.ilovepdf.com/v1/start/compress";
+const asposeProbeUrl = "https://api.aspose.cloud/connect/token";
 const pdfaConformances: PdfaConformance[] = [
   "pdfa-1b",
   "pdfa-1a",
@@ -545,6 +571,26 @@ function toILovePdfFiles(
   }));
 }
 
+function cloneConversionResult(result: ConversionResult): ConversionResult {
+  return {
+    ...result,
+    data: Buffer.from(result.data),
+    warnings: result.warnings ? [...result.warnings] : undefined
+  };
+}
+
+function normalizeOptionsForCache(options: ConversionOptions | undefined): string {
+  if (!options) {
+    return "{}";
+  }
+
+  const entries = Object.entries(options as Record<string, unknown>)
+    .filter(([, value]) => value !== undefined)
+    .sort(([left], [right]) => left.localeCompare(right));
+
+  return JSON.stringify(Object.fromEntries(entries));
+}
+
 export class ConversionService {
   private readonly runCommandImpl: typeof runCommand;
   private readonly fetchImpl: typeof fetch;
@@ -552,6 +598,12 @@ export class ConversionService {
   private readonly ilovePdfClient: ILovePdfClient | null;
   private readonly aspose3dClient: Aspose3dClient | null;
   private readonly ilovePdfLanguages: string[];
+  private readonly cacheTtlMs: number;
+  private readonly conversionCache = new Map<string, ConversionCacheEntry>();
+  private cacheHits = 0;
+  private cacheMisses = 0;
+  private lastHealthSnapshot: ConversionServiceHealthSnapshot | null = null;
+  private lastHealthSnapshotExpiresAt = 0;
 
   constructor(deps: ConversionServiceDeps = {}) {
     this.runCommandImpl = deps.runCommandImpl ?? runCommand;
@@ -560,6 +612,7 @@ export class ConversionService {
     this.ilovePdfClient = pickILovePdfClient(deps.ilovePdfClient);
     this.aspose3dClient = pickAspose3dClient(deps.aspose3dClient, this.fetchImpl);
     this.ilovePdfLanguages = parseIlovePdfLanguages(env.ILOVEPDF_OCR_LANGUAGES);
+    this.cacheTtlMs = Math.max(0, env.CONVERSION_CACHE_TTL_SECONDS) * 1000;
 
     if (this.ilovePdfClient) {
       console.info("[vaptdoc] iLovePDF provider configured for document workflows.");
@@ -572,7 +625,156 @@ export class ConversionService {
     }
   }
 
+  private buildCacheKey(toolId: ToolId, preparedUploads: PreparedUpload[], options: ConversionOptions | undefined) {
+    const hash = createHash("sha256");
+    hash.update(toolId);
+    hash.update("\u0000");
+    hash.update(normalizeOptionsForCache(options));
+
+    for (const prepared of preparedUploads) {
+      hash.update("\u0000");
+      hash.update(prepared.detected.kind);
+      hash.update("\u0000");
+      hash.update(prepared.upload.buffer);
+    }
+
+    return hash.digest("hex");
+  }
+
+  private pruneCache(now = Date.now()) {
+    for (const [key, entry] of this.conversionCache.entries()) {
+      if (entry.expiresAt <= now) {
+        this.conversionCache.delete(key);
+      }
+    }
+
+    const maxEntries = 48;
+    while (this.conversionCache.size > maxEntries) {
+      const oldestKey = this.conversionCache.keys().next().value;
+      if (!oldestKey) {
+        break;
+      }
+
+      this.conversionCache.delete(oldestKey);
+    }
+  }
+
+  private getCachedResult(cacheKey: string) {
+    if (!this.cacheTtlMs) {
+      return null;
+    }
+
+    const entry = this.conversionCache.get(cacheKey);
+    if (!entry) {
+      this.cacheMisses += 1;
+      return null;
+    }
+
+    if (entry.expiresAt <= Date.now()) {
+      this.conversionCache.delete(cacheKey);
+      this.cacheMisses += 1;
+      return null;
+    }
+
+    this.cacheHits += 1;
+    this.conversionCache.delete(cacheKey);
+    this.conversionCache.set(cacheKey, entry);
+    return cloneConversionResult(entry.result);
+  }
+
+  private storeCachedResult(cacheKey: string, result: ConversionResult) {
+    if (!this.cacheTtlMs) {
+      return;
+    }
+
+    const now = Date.now();
+    this.pruneCache(now);
+    this.conversionCache.set(cacheKey, {
+      storedAt: now,
+      expiresAt: now + this.cacheTtlMs,
+      result: cloneConversionResult(result)
+    });
+  }
+
+  private async probeEndpoint(input: RequestInfo | URL, init: RequestInit = {}): Promise<ExternalProbeSnapshot> {
+    const startedAt = performance.now();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), env.HEALTHCHECK_TIMEOUT_MS);
+
+    try {
+      const response = await this.fetchImpl(input, {
+        ...init,
+        signal: controller.signal
+      });
+
+      return {
+        reachable: response.ok || response.status < 500,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        statusCode: response.status,
+        checkedAt: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        reachable: false,
+        responseTimeMs: null,
+        statusCode: null,
+        checkedAt: new Date().toISOString(),
+        note: toErrorMessage(error).slice(0, 160)
+      };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  private async probeILovePdf(): Promise<ExternalProbeSnapshot> {
+    if (!this.ilovePdfClient) {
+      return {
+        reachable: false,
+        responseTimeMs: null,
+        statusCode: null,
+        checkedAt: null,
+        note: "Provider nao configurado."
+      };
+    }
+
+    return this.probeEndpoint(ilovePdfProbeUrl, {
+      method: "GET",
+      headers: {
+        Accept: "application/json"
+      }
+    });
+  }
+
+  private async probeAsposeCloud(): Promise<ExternalProbeSnapshot> {
+    if (!env.ASPOSE3D_CLIENT_ID || !env.ASPOSE3D_CLIENT_SECRET) {
+      return {
+        reachable: false,
+        responseTimeMs: null,
+        statusCode: null,
+        checkedAt: null,
+        note: "Provider cloud nao configurado."
+      };
+    }
+
+    return this.probeEndpoint(asposeProbeUrl, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: env.ASPOSE3D_CLIENT_ID,
+        client_secret: env.ASPOSE3D_CLIENT_SECRET
+      })
+    });
+  }
+
   async getHealthSnapshot(): Promise<ConversionServiceHealthSnapshot> {
+    if (this.lastHealthSnapshot && Date.now() < this.lastHealthSnapshotExpiresAt) {
+      return this.lastHealthSnapshot;
+    }
+
     let localLibraryAvailable = false;
     let localLibraryStatus: "available" | "unavailable" = "unavailable";
     let note = "Biblioteca local indisponivel.";
@@ -586,19 +788,35 @@ export class ConversionService {
       note = toErrorMessage(error).slice(0, 180);
     }
 
-    return {
+    this.pruneCache();
+    const [ilovePdfProbe, asposeProbe] = await Promise.all([this.probeILovePdf(), this.probeAsposeCloud()]);
+
+    const snapshot = {
       ilovePdf: {
         configured: Boolean(this.ilovePdfClient),
         status: this.ilovePdfClient ? "configured" : "fallback-only",
-        ocrLanguages: this.ilovePdfLanguages
+        ocrLanguages: this.ilovePdfLanguages,
+        probe: ilovePdfProbe
       },
       aspose3d: {
         cloudConfigured: Boolean(this.aspose3dClient),
         localLibraryAvailable,
         localLibraryStatus,
-        note
+        note,
+        probe: asposeProbe
+      },
+      cache: {
+        enabled: this.cacheTtlMs > 0,
+        ttlSeconds: Math.round(this.cacheTtlMs / 1000),
+        entries: this.conversionCache.size,
+        hits: this.cacheHits,
+        misses: this.cacheMisses
       }
-    };
+    } satisfies ConversionServiceHealthSnapshot;
+
+    this.lastHealthSnapshot = snapshot;
+    this.lastHealthSnapshotExpiresAt = Date.now() + 20_000;
+    return snapshot;
   }
 
   async convert({ toolId, uploads, options }: ConversionRequest): Promise<ConversionResult> {
@@ -620,72 +838,108 @@ export class ConversionService {
       preparedUploads.map((item) => item.detected.kind)
     );
 
+    const cacheKey = this.buildCacheKey(toolId, preparedUploads, options);
+    const cachedResult = this.getCachedResult(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
+    let result: ConversionResult;
+
     switch (toolId) {
       case "3d-convert":
-        return this.convert3dModel(preparedUploads[0], options);
+        result = await this.convert3dModel(preparedUploads[0], options);
+        break;
       case "jpg-to-png":
       case "jpeg-to-png":
-        return this.convertImageToPng(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem);
+        result = await this.convertImageToPng(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem);
+        break;
       case "png-to-jpg":
-        return this.convertPngToJpeg(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem, "jpg");
+        result = await this.convertPngToJpeg(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem, "jpg");
+        break;
       case "png-to-jpeg":
-        return this.convertPngToJpeg(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem, "jpeg");
+        result = await this.convertPngToJpeg(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem, "jpeg");
+        break;
       case "mp4-to-mp3":
-        return this.convertMp4ToMp3(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem);
+        result = await this.convertMp4ToMp3(preparedUploads[0].upload.buffer, preparedUploads[0].detected.safeStem);
+        break;
       case "pdf-to-text":
-        return this.convertPdfToText(
+        result = await this.convertPdfToText(
           preparedUploads[0].upload.buffer,
           preparedUploads[0].detected.safeStem,
           this.resolveTextLayout(toolId, options?.textLayout)
         );
+        break;
       case "pdf-to-docx":
-        return this.convertPdfToDocx(
+        result = await this.convertPdfToDocx(
           preparedUploads[0].upload.buffer,
           preparedUploads[0].detected.safeStem,
           this.resolveTextLayout(toolId, options?.textLayout)
         );
+        break;
       case "docx-to-pdf":
       case "office-to-pdf":
-        return this.convertOfficeToPdf(preparedUploads[0]);
+        result = await this.convertOfficeToPdf(preparedUploads[0]);
+        break;
       case "pdf-merge":
-        return this.convertPdfMerge(preparedUploads);
+        result = await this.convertPdfMerge(preparedUploads);
+        break;
       case "pdf-split":
-        return this.convertPdfSplit(preparedUploads[0], options);
+        result = await this.convertPdfSplit(preparedUploads[0], options);
+        break;
       case "pdf-compress":
-        return this.convertPdfCompress(preparedUploads[0], options);
+        result = await this.convertPdfCompress(preparedUploads[0], options);
+        break;
       case "pdf-ocr":
-        return this.convertPdfOcr(preparedUploads[0]);
+        result = await this.convertPdfOcr(preparedUploads[0]);
+        break;
       case "pdf-to-jpg":
-        return this.convertPdfToJpg(preparedUploads[0], options);
+        result = await this.convertPdfToJpg(preparedUploads[0], options);
+        break;
       case "image-to-pdf":
-        return this.convertImagesToPdf(preparedUploads, options);
+        result = await this.convertImagesToPdf(preparedUploads, options);
+        break;
       case "pdf-to-pdfa":
-        return this.convertPdfToPdfa(preparedUploads[0], options);
+        result = await this.convertPdfToPdfa(preparedUploads[0], options);
+        break;
       case "html-to-pdf":
-        return this.convertHtmlToPdf(preparedUploads[0], options);
+        result = await this.convertHtmlToPdf(preparedUploads[0], options);
+        break;
       case "pdf-validate-pdfa":
-        return this.validatePdfa(preparedUploads[0], options);
+        result = await this.validatePdfa(preparedUploads[0], options);
+        break;
       case "pdf-rotate":
-        return this.rotatePdf(preparedUploads[0], options);
+        result = await this.rotatePdf(preparedUploads[0], options);
+        break;
       case "pdf-unlock":
-        return this.unlockPdf(preparedUploads[0], options);
+        result = await this.unlockPdf(preparedUploads[0], options);
+        break;
       case "pdf-protect":
-        return this.protectPdf(preparedUploads[0], options);
+        result = await this.protectPdf(preparedUploads[0], options);
+        break;
       case "pdf-watermark":
-        return this.watermarkPdf(preparedUploads[0], options);
+        result = await this.watermarkPdf(preparedUploads[0], options);
+        break;
       case "pdf-page-numbers":
-        return this.numberPdfPages(preparedUploads[0], options);
+        result = await this.numberPdfPages(preparedUploads[0], options);
+        break;
       case "pdf-repair":
-        return this.repairPdf(preparedUploads[0]);
+        result = await this.repairPdf(preparedUploads[0]);
+        break;
       case "pdf-extract":
-        return this.extractPdf(preparedUploads[0], options);
+        result = await this.extractPdf(preparedUploads[0], options);
+        break;
       case "pdf-edit":
-        return this.editPdf(preparedUploads[0], options);
+        result = await this.editPdf(preparedUploads[0], options);
+        break;
       default: {
         const unreachable: never = toolId;
         throw new AppError(`Ferramenta nao implementada: ${unreachable}`, 400, "UNKNOWN_TOOL");
       }
     }
+
+    this.storeCachedResult(cacheKey, result);
+    return cloneConversionResult(result);
   }
 
   private getOptionValue(options: ConversionOptions | undefined, key: keyof ConversionOptions | string) {

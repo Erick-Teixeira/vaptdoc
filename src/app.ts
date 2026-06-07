@@ -4,6 +4,7 @@ import Fastify, { type FastifyRequest } from "fastify";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
+import swagger from "@fastify/swagger";
 import fastifyStatic from "@fastify/static";
 import { ZodError } from "zod";
 import { toolCatalog, type ToolId } from "./catalog.js";
@@ -146,6 +147,25 @@ export async function createApp(options: AppOptions = {}) {
     gate: conversionGate,
     logger: app.log
   });
+
+  await app.register(swagger, {
+    openapi: {
+      openapi: "3.0.3",
+      info: {
+        title: "vaptdoc API",
+        version: "1.0.0",
+        description: "API principal do vaptdoc para conversao, conta, billing e administracao."
+      },
+      tags: [
+        { name: "tools", description: "Catalogo e descoberta de ferramentas" },
+        { name: "access", description: "Sessao publica, planos e resgate" },
+        { name: "account", description: "Conta do usuario, favoritos, arquivos e historico" },
+        { name: "billing", description: "Checkout, confirmacao e webhooks" },
+        { name: "admin", description: "Painel administrativo" },
+        { name: "system", description: "Healthchecks e estado do servico" }
+      ]
+    }
+  });
   conversionJobService.start();
 
   if (accessSecretConfig.usedFallback) {
@@ -179,6 +199,44 @@ export async function createApp(options: AppOptions = {}) {
     return request.protocol && request.headers.host
       ? `${request.protocol}://${request.headers.host}`
       : resolvePublicBaseUrl();
+  }
+
+  const sensitiveLogValues = [
+    env.ACCESS_TOKEN_SECRET,
+    env.BILLING_STATE_SECRET,
+    env.MERCADOPAGO_ACCESS_TOKEN,
+    env.MERCADOPAGO_WEBHOOK_SECRET,
+    env.ASPOSE3D_CLIENT_SECRET,
+    env.ILOVEPDF_SECRET_KEY,
+    env.CONVERTAPI_TOKEN,
+    env.OCR_SPACE_API_KEY,
+    env.BREVO_API_KEY,
+    env.SMTP_PASS
+  ]
+    .map((value) => String(value ?? "").trim())
+    .filter((value) => value.length >= 8);
+
+  function redactSensitiveText(value: string) {
+    return sensitiveLogValues.reduce((accumulator, secret) => accumulator.split(secret).join("[redacted]"), value);
+  }
+
+  function buildSafeErrorLog(error: unknown) {
+    if (error instanceof Error) {
+      return {
+        name: error.name,
+        code: (error as { code?: string }).code,
+        statusCode: (error as { statusCode?: number }).statusCode,
+        message: redactSensitiveText(error.message),
+        stack:
+          typeof error.stack === "string"
+            ? redactSensitiveText(error.stack)
+            : undefined
+      };
+    }
+
+    return {
+      message: redactSensitiveText(String(error))
+    };
   }
 
   app.get("/", async (request, reply) => {
@@ -248,8 +306,10 @@ export async function createApp(options: AppOptions = {}) {
       limits: {
         maxFileSizeMB: env.MAX_FILE_SIZE_MB,
         maxConcurrentConversions: env.MAX_CONCURRENT_CONVERSIONS,
-        maxPendingConversions: env.MAX_PENDING_CONVERSIONS
+        maxPendingConversions: env.MAX_PENDING_CONVERSIONS,
+        conversionCacheTtlSeconds: env.CONVERSION_CACHE_TTL_SECONDS
       },
+      queue: conversionGate.snapshot(),
       integrations: {
         ilovePdf: integrationHealth && typeof integrationHealth === "object" ? (integrationHealth as { ilovePdf?: unknown }).ilovePdf : {
           configured: false,
@@ -270,6 +330,11 @@ export async function createApp(options: AppOptions = {}) {
         }
       }
     };
+  });
+
+  app.get("/documentation/json", async (_request, reply) => {
+    reply.header("Cache-Control", "no-store").type("application/json; charset=utf-8");
+    return app.swagger();
   });
 
   app.get("/readyz", async (request, reply) => {
@@ -326,7 +391,7 @@ export async function createApp(options: AppOptions = {}) {
   });
 
   app.setErrorHandler((error, _request, reply) => {
-    app.log.error(error);
+    app.log.error(buildSafeErrorLog(error));
 
     if ((error as { code?: string }).code === "FST_REQ_FILE_TOO_LARGE") {
       return reply.code(413).send({

@@ -130,12 +130,30 @@ describe("app routes", () => {
     expect(health.statusCode).toBe(200);
     expect(health.json().service).toBe("vaptdoc");
     expect(health.json().limits.maxFileSizeMB).toBeGreaterThan(0);
+    expect(health.json().limits.conversionCacheTtlSeconds).toBeGreaterThanOrEqual(0);
+    expect(health.json().queue).toBeDefined();
+    expect(health.json().queue.maxConcurrent).toBeGreaterThan(0);
     expect(health.json().integrations).toBeDefined();
     expect(health.json().integrations.ilovePdf).toBeDefined();
     expect(health.json().integrations.aspose3d).toBeDefined();
     expect(health.json().integrations.email.provider).toBeDefined();
     expect(ready.statusCode).toBe(200);
     expect(ready.json().status).toBe("ready");
+  });
+
+  it("exposes the generated OpenAPI document", async () => {
+    const app = await createApp();
+    apps.push(app);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/documentation/json"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().openapi).toBe("3.0.3");
+    expect(response.json().info.title).toBe("vaptdoc API");
+    expect(response.json().paths["/api/tools"]).toBeDefined();
   });
 
   it("serves SEO routes for sitemap, robots and tool pages", async () => {

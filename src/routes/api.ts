@@ -156,6 +156,19 @@ const webpRiffSignature = Buffer.from("RIFF", "ascii");
 const webpMarkerSignature = Buffer.from("WEBP", "ascii");
 const sensitiveOptionFields = new Set(["pdfPassword", "protectPassword", "currentPassword", "newPassword"]);
 
+function jsonSchemaFromZod(schema: z.ZodTypeAny) {
+  const jsonSchema = z.toJSONSchema(schema, {
+    target: "draft-7"
+  }) as Record<string, unknown>;
+  delete jsonSchema.$schema;
+  return jsonSchema;
+}
+
+const genericObjectResponseSchema = {
+  type: "object",
+  additionalProperties: true
+} as const;
+
 function buildDownloadFileName(filename: string) {
   const normalized = sanitizeFilename(filename)
     .replace(/[\u0000-\u001f\u007f]+/g, "")
@@ -479,7 +492,15 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     };
   }
 
-  app.get("/api/tools", async () => ({
+  app.get("/api/tools", {
+    schema: {
+      tags: ["tools"],
+      summary: "Lista o catalogo publico de ferramentas",
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async () => ({
     tools: toolList.map((tool) => ({
       ...tool,
       routePath: getToolPath(tool.id as ToolId)
@@ -489,19 +510,44 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     }
   }));
 
-  app.get("/api/access/session", async (request, reply) => {
+  app.get("/api/access/session", {
+    schema: {
+      tags: ["access"],
+      summary: "Retorna a sessao publica atual",
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
     return buildPublicClientState(request, options);
   });
 
-  app.get("/api/account/session", async (request, reply) => {
+  app.get("/api/account/session", {
+    schema: {
+      tags: ["account"],
+      summary: "Retorna a sessao publica da conta",
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
     return buildPublicClientState(request, options);
   });
 
-  app.put("/api/account/favorites", async (request, reply) => {
+  app.put("/api/account/favorites", {
+    schema: {
+      tags: ["account"],
+      summary: "Atualiza as ferramentas favoritas da conta",
+      body: jsonSchemaFromZod(accountFavoritesSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     assertInternalClientRequest(request);
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
@@ -516,7 +562,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     return buildPublicClientState(request, options, accessSession, accountSession);
   });
 
-  app.get("/api/account/history", async (request, reply) => {
+  app.get("/api/account/history", {
+    schema: {
+      tags: ["account"],
+      summary: "Lista o historico recente de conversoes",
+      querystring: jsonSchemaFromZod(accountHistoryQuerySchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
 
@@ -530,7 +585,19 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     };
   });
 
-  app.get("/api/account/history/:historyId/download", async (request, reply) => {
+  app.get("/api/account/history/:historyId/download", {
+    schema: {
+      tags: ["account"],
+      summary: "Baixa novamente um resultado salvo no historico",
+      params: jsonSchemaFromZod(accountHistoryParamsSchema),
+      response: {
+        200: {
+          type: "string",
+          format: "binary"
+        }
+      }
+    }
+  }, async (request, reply) => {
     reply.header("Cache-Control", "private, no-store");
     reply.header("Pragma", "no-cache");
 
@@ -546,7 +613,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     return reply.send(asset.buffer);
   });
 
-  app.get("/api/account/files", async (request, reply) => {
+  app.get("/api/account/files", {
+    schema: {
+      tags: ["account"],
+      summary: "Lista Meus arquivos por status",
+      querystring: jsonSchemaFromZod(accountFilesQuerySchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
 
@@ -587,7 +663,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     };
   });
 
-  app.get("/api/account/notifications", async (request, reply) => {
+  app.get("/api/account/notifications", {
+    schema: {
+      tags: ["account"],
+      summary: "Lista notificacoes internas da conta",
+      querystring: jsonSchemaFromZod(accountNotificationsQuerySchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
 
@@ -601,7 +686,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     };
   });
 
-  app.post("/api/account/notifications/read", async (request, reply) => {
+  app.post("/api/account/notifications/read", {
+    schema: {
+      tags: ["account"],
+      summary: "Marca notificacoes como lidas",
+      body: jsonSchemaFromZod(accountNotificationsReadSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     assertInternalClientRequest(request);
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
@@ -638,6 +732,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         max: 8,
         timeWindow: "1 minute"
       }
+    },
+    schema: {
+      tags: ["account"],
+      summary: "Cria uma conta e envia o codigo de verificacao",
+      body: jsonSchemaFromZod(registerSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
     }
   }, async (request, reply) => {
     assertInternalClientRequest(request);
@@ -657,6 +759,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       rateLimit: {
         max: 12,
         timeWindow: "1 minute"
+      }
+    },
+    schema: {
+      tags: ["account"],
+      summary: "Confirma o cadastro com o codigo enviado por e-mail",
+      body: jsonSchemaFromZod(verificationConfirmSchema),
+      response: {
+        200: genericObjectResponseSchema
       }
     }
   }, async (request, reply) => {
@@ -686,6 +796,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         max: 10,
         timeWindow: "1 minute"
       }
+    },
+    schema: {
+      tags: ["account"],
+      summary: "Reenvia um codigo de verificacao pendente",
+      body: jsonSchemaFromZod(verificationResendSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
     }
   }, async (request, reply) => {
     assertInternalClientRequest(request);
@@ -705,6 +823,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       rateLimit: {
         max: 12,
         timeWindow: "1 minute"
+      }
+    },
+    schema: {
+      tags: ["account"],
+      summary: "Autentica a conta do usuario",
+      body: jsonSchemaFromZod(loginSchema),
+      response: {
+        200: genericObjectResponseSchema
       }
     }
   }, async (request, reply) => {
@@ -860,6 +986,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         max: 10,
         timeWindow: "1 minute"
       }
+    },
+    schema: {
+      tags: ["account"],
+      summary: "Solicita a troca de senha da conta",
+      body: jsonSchemaFromZod(passwordSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
     }
   }, async (request, reply) => {
     assertInternalClientRequest(request);
@@ -879,6 +1013,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       rateLimit: {
         max: 10,
         timeWindow: "1 minute"
+      }
+    },
+    schema: {
+      tags: ["account"],
+      summary: "Confirma a troca de senha com codigo",
+      body: jsonSchemaFromZod(verificationConfirmSchema),
+      response: {
+        200: genericObjectResponseSchema
       }
     }
   }, async (request, reply) => {
@@ -911,7 +1053,15 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     return buildPublicClientState(request, options, getBaseFreeSession(options.accessService), buildAnonymousAccountSession());
   });
 
-  app.get("/api/admin/dashboard", async (request, reply) => {
+  app.get("/api/admin/dashboard", {
+    schema: {
+      tags: ["admin"],
+      summary: "Retorna os indicadores do painel administrativo",
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     assertInternalClientRequest(request);
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
@@ -925,7 +1075,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     };
   });
 
-  app.get("/api/admin/users", async (request, reply) => {
+  app.get("/api/admin/users", {
+    schema: {
+      tags: ["admin"],
+      summary: "Lista usuarios com busca textual",
+      querystring: jsonSchemaFromZod(adminUsersQuerySchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     assertInternalClientRequest(request);
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
@@ -940,7 +1099,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     };
   });
 
-  app.get("/api/admin/users/:userId", async (request, reply) => {
+  app.get("/api/admin/users/:userId", {
+    schema: {
+      tags: ["admin"],
+      summary: "Retorna os detalhes de um usuario no admin",
+      params: jsonSchemaFromZod(adminUserParamsSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     assertInternalClientRequest(request);
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
@@ -1156,6 +1324,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
         max: 12,
         timeWindow: "1 minute"
       }
+    },
+    schema: {
+      tags: ["billing"],
+      summary: "Cria o checkout ou resolve um link manual de plano",
+      body: jsonSchemaFromZod(checkoutOfferSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
     }
   }, async (request, reply) => {
     assertInternalClientRequest(request);
@@ -1204,6 +1380,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       rateLimit: {
         max: 24,
         timeWindow: "1 minute"
+      }
+    },
+    schema: {
+      tags: ["billing"],
+      summary: "Confirma o retorno do checkout e atualiza a sessao",
+      body: jsonSchemaFromZod(confirmReturnSchema),
+      response: {
+        200: genericObjectResponseSchema,
+        202: genericObjectResponseSchema,
+        409: genericObjectResponseSchema
       }
     }
   }, async (request, reply) => {
@@ -1297,7 +1483,17 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     });
   });
 
-  app.post("/api/billing/mercadopago/webhook", async (request, reply) => {
+  app.post("/api/billing/mercadopago/webhook", {
+    schema: {
+      tags: ["billing"],
+      summary: "Recebe notificacoes de pagamento do Mercado Pago",
+      response: {
+        200: genericObjectResponseSchema,
+        202: genericObjectResponseSchema,
+        401: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     if (!options.billingService) {
       return reply.code(202).send({ ok: false });
     }
@@ -1320,7 +1516,16 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     });
   });
 
-  app.post("/api/access/redeem", async (request, reply) => {
+  app.post("/api/access/redeem", {
+    schema: {
+      tags: ["access"],
+      summary: "Resgata um codigo promocional ou de acesso",
+      body: jsonSchemaFromZod(redeemSchema),
+      response: {
+        200: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
     assertInternalClientRequest(request);
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
@@ -1381,6 +1586,14 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       rateLimit: {
         max: 12,
         timeWindow: "1 minute"
+      }
+    },
+    schema: {
+      tags: ["tools"],
+      summary: "Enfileira uma conversao assincrona",
+      consumes: ["multipart/form-data"],
+      response: {
+        202: genericObjectResponseSchema
       }
     }
   }, async (request, reply) => {
@@ -1455,6 +1668,17 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       rateLimit: {
         max: 18,
         timeWindow: "1 minute"
+      }
+    },
+    schema: {
+      tags: ["tools"],
+      summary: "Executa uma conversao imediata",
+      consumes: ["multipart/form-data"],
+      response: {
+        200: {
+          type: "string",
+          format: "binary"
+        }
       }
     }
   }, async (request, reply) => {
