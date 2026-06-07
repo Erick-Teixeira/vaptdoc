@@ -1,6 +1,5 @@
 FROM node:24-bookworm-slim AS base
 
-ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -34,6 +33,8 @@ RUN npm run build
 RUN npm prune --omit=dev
 
 FROM base AS production
+
+ENV NODE_ENV=production
 
 COPY package*.json ./
 COPY --from=build /app/node_modules ./node_modules
