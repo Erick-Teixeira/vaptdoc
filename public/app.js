@@ -327,6 +327,7 @@ let toolOptionState = {};
 let conversionModalRenderedCards = [];
 const filePreviewUrlCache = new Map();
 const pdfPreviewUrlCache = new Map();
+const pdfPreviewPromiseCache = new Map();
 let pdfJsModulePromise = null;
 let currentConversionLifecycleStage = "";
 let accessSession = {
@@ -5586,8 +5587,16 @@ function syncPreviewUrlCache(files) {
       continue;
     }
 
-    URL.revokeObjectURL(previewUrl);
+    if (typeof previewUrl === "string" && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
     pdfPreviewUrlCache.delete(file);
+  }
+
+  for (const file of pdfPreviewPromiseCache.keys()) {
+    if (!activeFiles.has(file)) {
+      pdfPreviewPromiseCache.delete(file);
+    }
   }
 }
 
@@ -5643,6 +5652,99 @@ async function getPdfPreviewUrl(file) {
   const previewUrl = URL.createObjectURL(blob);
   pdfPreviewUrlCache.set(file, previewUrl);
   return previewUrl;
+}
+
+async function getReliablePdfPreviewUrl(file) {
+  if (pdfPreviewUrlCache.has(file)) {
+    return pdfPreviewUrlCache.get(file) ?? "";
+  }
+
+  if (pdfPreviewPromiseCache.has(file)) {
+    return pdfPreviewPromiseCache.get(file);
+  }
+
+  const previewPromise = (async () => {
+    const pdfjs = await loadPdfJsModule();
+    const documentTask = pdfjs.getDocument({
+      data: new Uint8Array(await file.arrayBuffer()),
+      isEvalSupported: false,
+      disableWorker: true,
+      useWorkerFetch: false
+    });
+
+    let pdfDocument = null;
+    let page = null;
+
+    try {
+      pdfDocument = await documentTask.promise;
+      page = await pdfDocument.getPage(1);
+      const viewport = page.getViewport({ scale: 1 });
+      const targetWidth = 440;
+      const scale = targetWidth / Math.max(1, viewport.width);
+      const scaledViewport = page.getViewport({ scale: Math.min(1.8, Math.max(0.9, scale)) });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d", { alpha: false });
+
+      if (!context) {
+        throw new Error("Canvas indisponivel para gerar miniatura.");
+      }
+
+      canvas.width = Math.ceil(scaledViewport.width);
+      canvas.height = Math.ceil(scaledViewport.height);
+      context.save();
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.restore();
+
+      await page.render({
+        canvasContext: context,
+        viewport: scaledViewport,
+        background: "rgb(255,255,255)"
+      }).promise;
+
+      const previewUrl = canvas.toDataURL("image/png");
+      pdfPreviewUrlCache.set(file, previewUrl);
+      return previewUrl;
+    } finally {
+      pdfPreviewPromiseCache.delete(file);
+      try {
+        page?.cleanup?.();
+      } catch {}
+      try {
+        pdfDocument?.cleanup?.();
+      } catch {}
+      try {
+        pdfDocument?.destroy?.();
+      } catch {}
+      try {
+        documentTask?.destroy?.();
+      } catch {}
+    }
+  })();
+
+  pdfPreviewPromiseCache.set(file, previewPromise);
+  return previewPromise;
+}
+
+function createFilePreviewFallback(kind, hint = "Arquivo pronto") {
+  const fallback = document.createElement("div");
+  fallback.className = "file-preview-fallback";
+
+  const glyph = createFileStageIcon(kind);
+  glyph.classList.add("file-preview-fallback-glyph");
+
+  const fallbackCopy = document.createElement("div");
+  fallbackCopy.className = "file-preview-fallback-copy";
+
+  const fallbackTitle = document.createElement("strong");
+  fallbackTitle.textContent = getReadableFormatName(kind);
+
+  const fallbackHint = document.createElement("span");
+  fallbackHint.textContent = hint;
+
+  fallbackCopy.append(fallbackTitle, fallbackHint);
+  fallback.append(glyph, fallbackCopy);
+  return fallback;
 }
 
 function createFileStageIcon(kind) {
@@ -5719,21 +5821,21 @@ function createFilePreviewSurface(file, kind, tool, index, total) {
     mediaElement.preload = "metadata";
   } else if (kind === "pdf") {
     mediaElement = document.createElement("img");
-    mediaElement.alt = "";
+    mediaElement.alt = "Previa da primeira pagina do PDF";
     mediaElement.loading = "lazy";
     mediaElement.decoding = "async";
     mediaElement.className = "file-preview-media file-preview-document";
 
-    getPdfPreviewUrl(file)
+    getReliablePdfPreviewUrl(file)
       .then((previewUrl) => {
         if (mediaElement?.isConnected) {
           mediaElement.src = previewUrl;
         }
       })
       .catch(() => {
-        const fallbackUrl = getFilePreviewUrl(file);
-        if (mediaElement?.isConnected) {
-          mediaElement.src = fallbackUrl;
+        if (surface.isConnected) {
+          mediaElement?.remove();
+          surface.append(createFilePreviewFallback(kind, "Previa indisponivel neste arquivo"));
         }
       });
   }
@@ -5741,20 +5843,7 @@ function createFilePreviewSurface(file, kind, tool, index, total) {
   if (mediaElement) {
     surface.append(mediaElement);
   } else {
-    const fallback = document.createElement("div");
-    fallback.className = "file-preview-fallback";
-
-    const glyph = createFileStageIcon(kind);
-    glyph.classList.add("file-preview-fallback-glyph");
-
-    const fallbackCopy = document.createElement("div");
-    fallbackCopy.className = "file-preview-fallback-copy";
-
-    const fallbackTitle = document.createElement("strong");
-    fallbackTitle.textContent = getReadableFormatName(kind);
-
-    const fallbackHint = document.createElement("span");
-    fallbackHint.textContent =
+    const fallbackHint =
       kind === "model3d"
         ? "Pronto para converter"
         : kind === "office"
@@ -5762,9 +5851,7 @@ function createFilePreviewSurface(file, kind, tool, index, total) {
           : kind === "text"
             ? "Conteudo pronto"
             : "Arquivo pronto";
-
-    fallbackCopy.append(fallbackTitle, fallbackHint);
-    fallback.append(glyph, fallbackCopy);
+    const fallback = createFilePreviewFallback(kind, fallbackHint);
     surface.append(fallback);
   }
 
