@@ -4482,6 +4482,28 @@ html[data-theme="dark"] .file-preview-surface {
   object-fit: contain;
 }
 
+.file-preview-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.15rem;
+}
+
+.file-preview-pdf .file-preview-document {
+  width: 7.4rem;
+  height: 9.6rem;
+  min-height: 0;
+  flex: 0 0 auto;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(32, 49, 61, 0.08);
+  box-shadow: 0 14px 28px rgba(32, 49, 61, 0.14);
+}
+
+html[data-theme="dark"] .file-preview-pdf .file-preview-document {
+  border-color: rgba(233, 240, 244, 0.1);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+}
+
 .file-preview-fallback {
   display: grid;
   place-items: center;
