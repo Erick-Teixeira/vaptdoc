@@ -93,6 +93,8 @@ const accountMenuProfile = document.getElementById("account-menu-profile");
 const accountMenuSubscription = document.getElementById("account-menu-subscription");
 const accountMenuTheme = document.getElementById("account-menu-theme");
 const accountMenuThemeLabel = document.getElementById("account-menu-theme-label");
+const accountMenuLanguage = document.getElementById("account-menu-language");
+const accountMenuLanguageLabel = document.getElementById("account-menu-language-label");
 const accountMenuAdmin = document.getElementById("account-menu-admin");
 const accountMenuLogout = document.getElementById("account-menu-logout");
 const premiumLock = document.getElementById("premium-lock");
@@ -548,6 +550,7 @@ const translations = {
       "Processamento pesado com suporte prioritário",
       "Atendimento comercial para campanhas e revenda"
     ],
+    "account.menu.language": "Idioma",
     "settings.language.title": "Idioma do site",
     "settings.language.copy": "Escolha como o vaptdoc aparece neste navegador.",
     "settings.language.label": "Idioma",
@@ -627,6 +630,7 @@ const translations = {
       "Heavy processing with priority support",
       "Commercial help for campaigns and resale"
     ],
+    "account.menu.language": "Language",
     "settings.language.title": "Site language",
     "settings.language.copy": "Choose how vaptdoc appears in this browser.",
     "settings.language.label": "Language",
@@ -1188,6 +1192,7 @@ function applyStaticTranslations() {
   setElementText(pricingTeamButton, t("pricing.team.button"));
   setListContent(pricingTeamFeatures, t("pricing.team.features"));
 
+  setElementText(accountMenuLanguageLabel, t("account.menu.language"));
   setElementText(accountLanguageTitle, t("settings.language.title"));
   setElementText(accountLanguageCopy, t("settings.language.copy"));
   setElementText(accountLanguageLabel, t("settings.language.label"));
@@ -7841,6 +7846,10 @@ accountMenuSubscription?.addEventListener("click", () => {
 accountMenuTheme?.addEventListener("click", () => {
   hideAccountMenu();
   toggleThemePreference();
+});
+accountMenuLanguage?.addEventListener("click", () => {
+  hideAccountMenu();
+  showAccountModal({ focus: "settings" });
 });
 accountMenuAdmin?.addEventListener("click", () => {
   hideAccountMenu();

@@ -82,6 +82,30 @@ describe("app routes", () => {
     expect(response.json().limits.maxFileSizeMB).toBeGreaterThan(0);
   });
 
+  it("exposes the language selector from the account menu", async () => {
+    const app = await createApp();
+    apps.push(app);
+
+    const page = await app.inject({
+      method: "GET",
+      url: "/"
+    });
+    const script = await app.inject({
+      method: "GET",
+      url: "/app.js"
+    });
+
+    expect(page.statusCode).toBe(200);
+    expect(page.body).toContain('id="account-menu-language"');
+    expect(page.body).toContain('id="account-menu-language-label">Idioma</span>');
+    expect(page.body).toContain('id="account-language-select"');
+    expect(page.body).toContain('<option value="pt-BR">');
+    expect(page.body).toContain('<option value="en">English</option>');
+    expect(script.statusCode).toBe(200);
+    expect(script.body).toContain('accountMenuLanguage?.addEventListener("click"');
+    expect(script.body).toContain('showAccountModal({ focus: "settings" })');
+  });
+
   it("returns the current access session", async () => {
     const app = await createApp();
     apps.push(app);
