@@ -161,7 +161,7 @@ const redeemSubmitButton = document.getElementById("redeem-submit");
 const billingStatus = document.getElementById("billing-status");
 const accountRegisterModal = document.getElementById("account-register-modal");
 const accountLoginModal = document.getElementById("account-login-modal");
-const accountOverviewModal = document.getElementById("account-overview-modal");
+const accountOverviewModal = document.getElementById("account-overview-page");
 const accountSubscriptionModal = document.getElementById("account-subscription-modal");
 const accountProfileModal = document.getElementById("account-profile-modal");
 const accountSettingsModal = document.getElementById("account-settings-modal");
@@ -178,6 +178,17 @@ const accountSwitchToRegisterButton = document.getElementById("account-switch-to
 const accountShortcutProfileButton = document.getElementById("account-shortcut-profile");
 const accountShortcutSettingsButton = document.getElementById("account-shortcut-settings");
 const accountShortcutAdminButton = document.getElementById("account-shortcut-admin");
+const accountDashboardProfileNav = document.getElementById("account-dashboard-profile-nav");
+const accountDashboardSettingsNav = document.getElementById("account-dashboard-settings-nav");
+const accountDashboardSubscriptionNav = document.getElementById("account-dashboard-subscription-nav");
+const accountDashboardAdminNav = document.getElementById("account-dashboard-admin-nav");
+const accountDashboardLogoutButton = document.getElementById("account-dashboard-logout");
+const accountDashboardNavButtons = Array.from(document.querySelectorAll("[data-account-dashboard-target]"));
+const accountDashboardMain = document.getElementById("account-dashboard-main");
+const accountDashboardAvatarImage = document.getElementById("account-dashboard-avatar-image");
+const accountDashboardAvatarInitials = document.getElementById("account-dashboard-avatar-initials");
+const accountAccessDisplay = document.getElementById("account-access-display");
+const accountAccessCopy = document.getElementById("account-access-copy");
 const accountFileFilterButtons = Array.from(document.querySelectorAll("[data-account-file-filter]"));
 const accountFileCountTotal = document.getElementById("account-file-count-total");
 const accountFileCountTemporary = document.getElementById("account-file-count-temporary");
@@ -612,12 +623,29 @@ const translations = {
     "account.menu.themeDark": "Tema escuro",
     "account.menu.admin": "Painel Administrativo",
     "account.menu.logout": "Sair",
+    "account.dashboard.kicker": "Minha conta",
+    "account.dashboard.title": "Seu painel rápido",
+    "account.dashboard.copy": "Gerencie seu plano, arquivos, créditos e acessos em um só lugar.",
+    "account.dashboard.overview": "Visão geral",
+    "account.dashboard.files": "Arquivos e resultados",
+    "account.dashboard.credits": "Créditos e descontos",
+    "account.dashboard.usage": "Consumo por conversão",
+    "account.dashboard.profile": "Dados e credenciais",
+    "account.dashboard.session": "Segurança e sessão",
+    "account.dashboard.subscription": "Meu Plano",
+    "account.dashboard.admin": "Painel Administrativo",
+    "account.dashboard.logout": "Sair da conta",
+    "account.dashboard.planLabel": "Plano atual",
+    "account.dashboard.creditsLabel": "Créditos disponíveis",
+    "account.dashboard.accessLabel": "Acesso válido até",
+    "account.dashboard.manageCopy": "Atualize, cancele ou altere seu plano atual.",
+    "account.dashboard.accountCopy": "Seus dados ficam protegidos e centralizados.",
     "account.launcher.guest": "Entrar ou criar conta",
     "account.launcher.open": "Abrir menu da conta",
     "account.register": "Criar conta",
     "account.login": "Entrar",
     "account.loginButton": "Entrar na conta",
-    "account.manage": "Gerenciar",
+    "account.manage": "Gerenciar plano",
     "account.manageSubscription": "Gerenciar assinatura",
     "account.saveData": "Salvar dados",
     "account.updatePassword": "Atualizar senha",
@@ -788,12 +816,29 @@ const translations = {
     "account.menu.themeDark": "Dark theme",
     "account.menu.admin": "Admin Panel",
     "account.menu.logout": "Sign out",
+    "account.dashboard.kicker": "My account",
+    "account.dashboard.title": "Your quick dashboard",
+    "account.dashboard.copy": "Manage your plan, files, credits, and access in one place.",
+    "account.dashboard.overview": "Overview",
+    "account.dashboard.files": "Files and results",
+    "account.dashboard.credits": "Credits and discounts",
+    "account.dashboard.usage": "Usage by conversion",
+    "account.dashboard.profile": "Profile and credentials",
+    "account.dashboard.session": "Security and session",
+    "account.dashboard.subscription": "My Plan",
+    "account.dashboard.admin": "Admin Panel",
+    "account.dashboard.logout": "Sign out",
+    "account.dashboard.planLabel": "Current plan",
+    "account.dashboard.creditsLabel": "Available credits",
+    "account.dashboard.accessLabel": "Access valid until",
+    "account.dashboard.manageCopy": "Upgrade, cancel, or change your current plan.",
+    "account.dashboard.accountCopy": "Your account data stays protected and centralized.",
     "account.launcher.guest": "Sign in or create account",
     "account.launcher.open": "Open account menu",
     "account.register": "Create account",
     "account.login": "Sign in",
     "account.loginButton": "Sign in to account",
-    "account.manage": "Manage",
+    "account.manage": "Manage plan",
     "account.manageSubscription": "Manage subscription",
     "account.saveData": "Save details",
     "account.updatePassword": "Update password",
@@ -1567,6 +1612,23 @@ function applyStaticTranslations() {
   setElementText(accountMenuLanguageLabel, t("account.menu.language"));
   setElementText(accountMenuAdmin?.querySelector(".menu-action-label"), t("account.menu.admin"));
   setElementText(accountMenuLogout?.querySelector(".menu-action-label"), t("account.menu.logout"));
+  setElementText(document.getElementById("account-dashboard-kicker"), t("account.dashboard.kicker"));
+  setElementText(document.getElementById("account-overview-title"), t("account.dashboard.title"));
+  setElementText(document.getElementById("account-dashboard-intro"), t("account.dashboard.copy"));
+  setElementText(document.querySelector("[data-account-dashboard-label='overview']"), t("account.dashboard.overview"));
+  setElementText(document.querySelector("[data-account-dashboard-label='files']"), t("account.dashboard.files"));
+  setElementText(document.querySelector("[data-account-dashboard-label='credits']"), t("account.dashboard.credits"));
+  setElementText(document.querySelector("[data-account-dashboard-label='usage']"), t("account.dashboard.usage"));
+  setElementText(document.querySelector("[data-account-dashboard-label='profile']"), t("account.dashboard.profile"));
+  setElementText(document.querySelector("[data-account-dashboard-label='session']"), t("account.dashboard.session"));
+  setElementText(document.querySelector("[data-account-dashboard-label='subscription']"), t("account.dashboard.subscription"));
+  setElementText(document.querySelector("[data-account-dashboard-label='admin']"), t("account.dashboard.admin"));
+  setElementText(document.querySelector("[data-account-dashboard-label='logout']"), t("account.dashboard.logout"));
+  setElementText(document.getElementById("account-dashboard-plan-label"), t("account.dashboard.planLabel"));
+  setElementText(document.getElementById("account-dashboard-credits-label"), t("account.dashboard.creditsLabel"));
+  setElementText(document.getElementById("account-dashboard-access-label"), t("account.dashboard.accessLabel"));
+  setElementText(document.getElementById("account-dashboard-manage-copy"), t("account.dashboard.manageCopy"));
+  setElementText(document.getElementById("account-dashboard-account-copy"), t("account.dashboard.accountCopy"));
   setElementText(accountSwitchToLoginButton, t("account.login"));
   setElementText(accountSwitchToRegisterButton, t("account.register"));
   setElementText(document.getElementById("account-register-submit"), t("account.register"));
@@ -1599,6 +1661,7 @@ function applyStaticTranslations() {
   setElementText(document.getElementById("admin-promo-submit"), t("admin.createPromo"));
   document.querySelectorAll(".billing-close").forEach((button) => button.setAttribute("aria-label", t("common.close")));
   document.querySelectorAll(".billing-backdrop").forEach((button) => button.setAttribute("aria-label", t("common.close")));
+  accountOverviewCloseButton?.setAttribute("aria-label", t("common.close"));
   setElementText(accountLanguageTitle, t("settings.language.title"));
   setElementText(accountLanguageCopy, t("settings.language.copy"));
   setElementText(accountLanguageLabel, t("settings.language.label"));
@@ -3255,7 +3318,14 @@ function showAccountModal(options = {}) {
   }
   updateBodyScrollLock();
   renderAccountUi();
-  if (focus === "overview" && isAccountAuthenticated()) {
+  if (modal === accountOverviewModal) {
+    accountDashboardMain?.scrollTo({ top: 0 });
+    accountDashboardNavButtons.forEach((button, index) => {
+      button.classList.toggle("is-active", index === 0);
+      button.setAttribute("aria-current", index === 0 ? "page" : "false");
+    });
+  }
+  if (modal === accountOverviewModal && isAccountAuthenticated()) {
     void refreshAccountWorkspaceData({ silent: true }).catch(() => undefined);
   }
   if (focus === "admin") {
@@ -3397,6 +3467,30 @@ function getPopoverPlanMeta() {
   }
 
   return "Uso rápido no navegador";
+}
+
+function getAccountAccessSummary() {
+  const accountState = getAccountState();
+  const isEnglish = getLocale().toLowerCase().startsWith("en");
+
+  if (accountState.plan?.status === "active" && accountState.plan.accessExpiresAt) {
+    return {
+      title: formatDateTime(accountState.plan.accessExpiresAt),
+      copy: isEnglish ? "Your paid access remains active until this date." : "Seu acesso pago permanece ativo até esta data."
+    };
+  }
+
+  if (accessSession?.premium) {
+    return {
+      title: isEnglish ? "Premium active" : "Premium ativo",
+      copy: isEnglish ? "Premium access is active on this device." : "O acesso premium está ativo neste dispositivo."
+    };
+  }
+
+  return {
+    title: isEnglish ? "Free plan" : "Plano gratuito",
+    copy: isEnglish ? "Essential conversions are available within the daily limit." : "Conversões essenciais disponíveis dentro do limite diário."
+  };
 }
 
 function getConversionStatusLabel(status) {
@@ -3804,6 +3898,7 @@ function renderAccountUi() {
   applyAvatarToElements(accountLauncherImage, accountLauncherInitials, avatarUrl, initials);
   applyAvatarToElements(accountPopoverImage, accountPopoverInitials, avatarUrl, initials);
   applyAvatarToElements(accountAvatarImage, accountAvatarInitials, avatarUrl, initials);
+  applyAvatarToElements(accountDashboardAvatarImage, accountDashboardAvatarInitials, avatarUrl, initials);
   toggleAvatarActionReveal(avatarActionReveal && authenticated);
 
   if (pendingAccountVerification?.verification) {
@@ -3841,8 +3936,19 @@ function renderAccountUi() {
     if (accountDiscountDisplay) {
       accountDiscountDisplay.textContent = "Nenhum desconto ativo no momento.";
     }
+    if (accountAccessDisplay) {
+      accountAccessDisplay.textContent = getLocale().toLowerCase().startsWith("en") ? "Free plan" : "Plano gratuito";
+    }
+    if (accountAccessCopy) {
+      accountAccessCopy.textContent = getLocale().toLowerCase().startsWith("en")
+        ? "Sign in to view your current access."
+        : "Entre para visualizar seu acesso atual.";
+    }
     if (accountShortcutAdminButton) {
       accountShortcutAdminButton.hidden = true;
+    }
+    if (accountDashboardAdminNav) {
+      accountDashboardAdminNav.hidden = true;
     }
     if (accountPopoverAvatarButton) {
       accountPopoverAvatarButton.disabled = true;
@@ -3885,8 +3991,18 @@ function renderAccountUi() {
   if (accountDiscountDisplay) {
     accountDiscountDisplay.textContent = getAccountDiscountCopy();
   }
+  const accessSummary = getAccountAccessSummary();
+  if (accountAccessDisplay) {
+    accountAccessDisplay.textContent = accessSummary.title;
+  }
+  if (accountAccessCopy) {
+    accountAccessCopy.textContent = accessSummary.copy;
+  }
   if (accountShortcutAdminButton) {
     accountShortcutAdminButton.hidden = !isAdmin;
+  }
+  if (accountDashboardAdminNav) {
+    accountDashboardAdminNav.hidden = !isAdmin;
   }
   if (accountSettingsTitle) {
     accountSettingsTitle.textContent = "Sessão e segurança";
@@ -8324,6 +8440,27 @@ accountSwitchToRegisterButton?.addEventListener("click", () => showAccountModal(
 accountShortcutProfileButton?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
 accountShortcutSettingsButton?.addEventListener("click", () => showAccountModal({ focus: "settings" }));
 accountShortcutAdminButton?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
+accountDashboardProfileNav?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
+accountDashboardSettingsNav?.addEventListener("click", () => showAccountModal({ focus: "settings" }));
+accountDashboardSubscriptionNav?.addEventListener("click", () => showAccountModal({ focus: "subscription" }));
+accountDashboardAdminNav?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
+accountDashboardNavButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = document.getElementById(button.dataset.accountDashboardTarget ?? "");
+    if (!target) {
+      return;
+    }
+
+    accountDashboardNavButtons.forEach((item) => {
+      item.classList.toggle("is-active", item === button);
+      item.setAttribute("aria-current", item === button ? "page" : "false");
+    });
+    target.scrollIntoView({
+      behavior: getPreferredScrollBehavior(),
+      block: "start"
+    });
+  });
+});
 accountFileFilterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const nextFilter = normalizeAccountFileFilter(button.dataset.accountFileFilter);
@@ -8370,6 +8507,16 @@ accountSubscriptionManageButton?.addEventListener("click", () => {
   showBillingModal({ tool: getToolById() });
 });
 accountLogoutButton?.addEventListener("click", async () => {
+  try {
+    await logoutAccount();
+    setAccountStatus("Sua conta foi encerrada neste navegador.");
+    hideAccountModal();
+    setStatus("Conta encerrada neste navegador.", { toast: false });
+  } catch (error) {
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
+  }
+});
+accountDashboardLogoutButton?.addEventListener("click", async () => {
   try {
     await logoutAccount();
     setAccountStatus("Sua conta foi encerrada neste navegador.");
