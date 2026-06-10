@@ -104,6 +104,13 @@ describe("app routes", () => {
     expect(script.statusCode).toBe(200);
     expect(script.body).toContain('accountMenuLanguage?.addEventListener("click"');
     expect(script.body).toContain('showAccountModal({ focus: "settings" })');
+    expect(script.body).toContain('"common.searchExamples": ["pdf to docx"');
+    expect(script.body).toContain('"workspace.convertTool": "Convert {tool}"');
+    expect(script.body).toContain('"account.menu.subscription": "My Plan"');
+    expect(script.body).toContain("startSearchPlaceholderAnimation();");
+    expect(script.body).toContain("getLocalizedToolLabel(tool)");
+    expect(script.body).toContain("localizeInterfaceText(field.label)");
+    expect(script.body).toContain('document.body.dataset.pageMode === "tool" ? getToolById() : null');
   });
 
   it("returns the current access session", async () => {

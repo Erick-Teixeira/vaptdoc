@@ -484,9 +484,18 @@ const translations = {
   "pt-BR": {
     "common.skipToConverter": "Pular para o conversor",
     "common.searchPlaceholder": "Pesquisar conversão",
+    "common.searchExamples": ["pdf para docx", "png para jpg", "docx para pdf", "mp4 para mp3", "pdf para texto", "stl para obj"],
     "common.searchAria": "Pesquisar conversão",
     "common.searchClear": "Limpar busca",
     "common.close": "Fechar",
+    "common.back": "Voltar",
+    "common.cancel": "Cancelar",
+    "common.save": "Salvar",
+    "common.download": "Baixar",
+    "common.delete": "Excluir",
+    "common.update": "Atualizar",
+    "common.themeLightAria": "Ativar tema claro",
+    "common.themeDarkAria": "Ativar tema escuro",
     "common.loadingCatalog": "Não foi possível carregar o catálogo de ferramentas.",
     "hero.eyebrow": "Conversor online rápido e leve",
     "hero.title": "Converta arquivos em poucos toques",
@@ -501,6 +510,23 @@ const translations = {
     "tools.none": "Nenhuma conversão encontrada.",
     "tools.showAll": "Exibir todas as ferramentas",
     "tools.hideAll": "Ocultar ferramentas",
+    "tools.tab.all": "Todas",
+    "tools.tab.favorites": "Favoritas",
+    "tools.tab.3d": "Impressão 3D",
+    "tools.toolbar.mobile": "Toque numa opção para ir ao envio",
+    "tools.toolbar.all": "Todas as ferramentas",
+    "tools.toolbar.featured": "Mais usadas no momento",
+    "tools.toolbar.ready": "Conversões prontas para você",
+    "tools.toolbar.noFavorites": "Nenhuma favorita ainda",
+    "tools.toolbar.noResults": "Nada encontrado",
+    "tools.favorite.add": "Favoritar",
+    "tools.favorite.remove": "Favorita",
+    "tools.favorite.addAria": "Favoritar conversão",
+    "tools.favorite.removeAria": "Remover dos favoritos",
+    "tools.search.select": "Selecionar {tool}",
+    "tools.search.pro": "Desbloqueie no Pro",
+    "tools.search.favorite": "Favorita",
+    "tools.search.ready": "Conversão pronta",
     "route.back": "Voltar para ferramentas",
     "route.kicker": "Ferramenta exclusiva",
     "route.defaultTitle": "Converter arquivo",
@@ -509,9 +535,20 @@ const translations = {
     "workspace.canvasKicker": "Arquivos e prévia",
     "workspace.canvasTitle": "Monte sua mesa de conversão",
     "workspace.canvasCopy": "Envie, arraste, revise e troque arquivos sem sair desta área.",
+    "workspace.uploadAria": "Enviar arquivos para a conversão",
+    "workspace.uploadKicker": "Envio do arquivo",
+    "workspace.afterUploadCopy": "Depois do envio, mostramos apenas os ajustes e a ação final desta conversão.",
     "workspace.filesBadge.empty": "Sem arquivos",
     "workspace.flowBadge.ready": "Pronto para enviar",
     "workspace.convertButton": "Converter arquivo",
+    "workspace.convertTool": "Converter {tool}",
+    "workspace.extractText": "Extrair texto do PDF",
+    "workspace.convert3d": "Converter modelo 3D",
+    "workspace.unlockButton": "Desbloquear esta ferramenta",
+    "workspace.clearAll": "Limpar tudo",
+    "workspace.replaceFile": "Trocar arquivo",
+    "workspace.addFiles": "Adicionar mais arquivos",
+    "workspace.gridCount": "{count} na grade · arraste para reorganizar antes de converter",
     "workspace.status.idle": "Pronto para converter.",
     "progress.waiting": "Aguardando arquivo",
     "progress.preparing": "Preparando conversão...",
@@ -524,6 +561,25 @@ const translations = {
     "premium.title": "Desbloqueie para usar esta conversão.",
     "premium.copy": "O plano Pro libera OCR, PDF avançado e conversões 3D com prioridade.",
     "premium.button": "Acessar conta",
+    "conversion.modal.back": "Voltar",
+    "conversion.modal.confirm": "Converter arquivo",
+    "conversion.modal.noOptionsTitle": "Sem ajustes extras",
+    "conversion.modal.noOptionsCopy": "Essa conversão já está pronta. Clique em converter para iniciar o envio real do arquivo.",
+    "conversion.modal.readyTitle": "{tool} pronto para converter",
+    "conversion.modal.reviewTitle": "Revise antes de converter",
+    "conversion.modal.copy": "Ajuste apenas o necessário, confirme as opções desta ferramenta e conclua a conversão real.",
+    "conversion.modal.reviewCopy": "Revise os ajustes necessários antes de converter.",
+    "conversion.modal.fileCount": "{count} {label}",
+    "conversion.modal.file": "arquivo",
+    "conversion.modal.files": "arquivos",
+    "conversion.modal.status": "Revise os ajustes e clique em converter para iniciar o envio real do arquivo.",
+    "billing.monthly": "Abrir plano mensal",
+    "billing.yearly": "Abrir plano anual",
+    "billing.starter": "Abrir pacote",
+    "billing.redeem": "Ativar código",
+    "billing.support": "Suporte",
+    "billing.accessDays": "{count} dias de acesso",
+    "billing.accessDaysFast": "{count} dias de acesso rápido",
     "faq.kicker": "Perguntas rápidas",
     "faq.title": "Dúvidas comuns desta ferramenta",
     "footer.copy": "Arquivos processados com foco em rapidez, privacidade e limpeza automática.",
@@ -551,6 +607,47 @@ const translations = {
       "Atendimento comercial para campanhas e revenda"
     ],
     "account.menu.language": "Idioma",
+    "account.menu.overview": "Minha conta",
+    "account.menu.profile": "Dados",
+    "account.menu.subscription": "Meu Plano",
+    "account.menu.themeLight": "Tema claro",
+    "account.menu.themeDark": "Tema escuro",
+    "account.menu.admin": "Painel Administrativo",
+    "account.menu.logout": "Sair",
+    "account.launcher.guest": "Entrar ou criar conta",
+    "account.launcher.open": "Abrir menu da conta",
+    "account.register": "Criar conta",
+    "account.login": "Entrar",
+    "account.loginButton": "Entrar na conta",
+    "account.manage": "Gerenciar",
+    "account.manageSubscription": "Gerenciar assinatura",
+    "account.saveData": "Salvar dados",
+    "account.updatePassword": "Atualizar senha",
+    "account.logout": "Sair da conta",
+    "account.removeAvatar": "Remover foto",
+    "account.confirmCode": "Confirmar código",
+    "account.resendCode": "Reenviar código",
+    "account.downloadAgain": "Baixar novamente",
+    "account.markRead": "Marcar como lido",
+    "account.shortcut.profile": "Dados e credenciais",
+    "account.shortcut.profileCopy": "Atualize nome, email e senha",
+    "account.shortcut.settings": "Sessão",
+    "account.shortcut.settingsCopy": "Revise a sessão deste navegador",
+    "account.shortcut.admin": "Painel Administrativo",
+    "account.shortcut.adminCopy": "Usuários, planos, créditos e cupons",
+    "account.files.all": "Todos",
+    "account.files.temporary": "Temporários",
+    "account.files.ready": "Concluídos",
+    "account.files.failed": "Falhas",
+    "admin.saveData": "Salvar dados",
+    "admin.updatePlan": "Atualizar plano",
+    "admin.saveCredits": "Salvar créditos",
+    "admin.saveDiscount": "Salvar desconto",
+    "admin.removeAccount": "Remover conta",
+    "admin.createPromo": "Criar código promocional",
+    "admin.copyCode": "Copiar código",
+    "admin.pause": "Pausar",
+    "admin.reactivate": "Reativar",
     "settings.language.title": "Idioma do site",
     "settings.language.copy": "Escolha como o vaptdoc aparece neste navegador.",
     "settings.language.label": "Idioma",
@@ -564,9 +661,18 @@ const translations = {
   en: {
     "common.skipToConverter": "Skip to converter",
     "common.searchPlaceholder": "Search conversion",
+    "common.searchExamples": ["pdf to docx", "png to jpg", "docx to pdf", "mp4 to mp3", "pdf to text", "stl to obj"],
     "common.searchAria": "Search conversion",
     "common.searchClear": "Clear search",
     "common.close": "Close",
+    "common.back": "Back",
+    "common.cancel": "Cancel",
+    "common.save": "Save",
+    "common.download": "Download",
+    "common.delete": "Delete",
+    "common.update": "Refresh",
+    "common.themeLightAria": "Switch to light theme",
+    "common.themeDarkAria": "Switch to dark theme",
     "common.loadingCatalog": "Could not load the tools catalog.",
     "hero.eyebrow": "Fast and lightweight online converter",
     "hero.title": "Convert files in just a few taps",
@@ -581,6 +687,23 @@ const translations = {
     "tools.none": "No conversion found.",
     "tools.showAll": "Show all tools",
     "tools.hideAll": "Hide tools",
+    "tools.tab.all": "All",
+    "tools.tab.favorites": "Favorites",
+    "tools.tab.3d": "3D printing",
+    "tools.toolbar.mobile": "Tap an option to open its upload screen",
+    "tools.toolbar.all": "All tools",
+    "tools.toolbar.featured": "Most used right now",
+    "tools.toolbar.ready": "Conversions ready for you",
+    "tools.toolbar.noFavorites": "No favorites yet",
+    "tools.toolbar.noResults": "Nothing found",
+    "tools.favorite.add": "Favorite",
+    "tools.favorite.remove": "Favorited",
+    "tools.favorite.addAria": "Add conversion to favorites",
+    "tools.favorite.removeAria": "Remove from favorites",
+    "tools.search.select": "Select {tool}",
+    "tools.search.pro": "Unlock with Pro",
+    "tools.search.favorite": "Favorited",
+    "tools.search.ready": "Conversion ready",
     "route.back": "Back to tools",
     "route.kicker": "Dedicated tool",
     "route.defaultTitle": "Convert file",
@@ -589,9 +712,20 @@ const translations = {
     "workspace.canvasKicker": "Files and preview",
     "workspace.canvasTitle": "Build your conversion workspace",
     "workspace.canvasCopy": "Upload, reorder, review, and replace files without leaving this area.",
+    "workspace.uploadAria": "Upload files for conversion",
+    "workspace.uploadKicker": "File upload",
+    "workspace.afterUploadCopy": "After upload, only the settings and final action for this conversion are shown.",
     "workspace.filesBadge.empty": "No files yet",
     "workspace.flowBadge.ready": "Ready to upload",
     "workspace.convertButton": "Convert file",
+    "workspace.convertTool": "Convert {tool}",
+    "workspace.extractText": "Extract text from PDF",
+    "workspace.convert3d": "Convert 3D model",
+    "workspace.unlockButton": "Unlock this tool",
+    "workspace.clearAll": "Clear all",
+    "workspace.replaceFile": "Replace file",
+    "workspace.addFiles": "Add more files",
+    "workspace.gridCount": "{count} in the grid · drag to reorder before converting",
     "workspace.status.idle": "Ready to convert.",
     "progress.waiting": "Waiting for file",
     "progress.preparing": "Preparing conversion...",
@@ -604,6 +738,25 @@ const translations = {
     "premium.title": "Unlock this conversion to continue.",
     "premium.copy": "Pro unlocks OCR, advanced PDF flows, and 3D conversions with priority.",
     "premium.button": "Open account",
+    "conversion.modal.back": "Back",
+    "conversion.modal.confirm": "Convert file",
+    "conversion.modal.noOptionsTitle": "No extra settings",
+    "conversion.modal.noOptionsCopy": "This conversion is ready. Click convert to start the actual file upload.",
+    "conversion.modal.readyTitle": "{tool} is ready to convert",
+    "conversion.modal.reviewTitle": "Review before converting",
+    "conversion.modal.copy": "Adjust only what you need, confirm this tool's options, and complete the conversion.",
+    "conversion.modal.reviewCopy": "Review the required settings before converting.",
+    "conversion.modal.fileCount": "{count} {label}",
+    "conversion.modal.file": "file",
+    "conversion.modal.files": "files",
+    "conversion.modal.status": "Review the settings and click convert to start the actual file upload.",
+    "billing.monthly": "Open monthly plan",
+    "billing.yearly": "Open yearly plan",
+    "billing.starter": "Open starter pack",
+    "billing.redeem": "Activate code",
+    "billing.support": "Support",
+    "billing.accessDays": "{count} days of access",
+    "billing.accessDaysFast": "{count} days of fast access",
     "faq.kicker": "Quick questions",
     "faq.title": "Common questions about this tool",
     "footer.copy": "Files are processed with speed, privacy, and automatic cleanup in mind.",
@@ -631,6 +784,47 @@ const translations = {
       "Commercial help for campaigns and resale"
     ],
     "account.menu.language": "Language",
+    "account.menu.overview": "My account",
+    "account.menu.profile": "Profile",
+    "account.menu.subscription": "My Plan",
+    "account.menu.themeLight": "Light theme",
+    "account.menu.themeDark": "Dark theme",
+    "account.menu.admin": "Admin Panel",
+    "account.menu.logout": "Sign out",
+    "account.launcher.guest": "Sign in or create account",
+    "account.launcher.open": "Open account menu",
+    "account.register": "Create account",
+    "account.login": "Sign in",
+    "account.loginButton": "Sign in to account",
+    "account.manage": "Manage",
+    "account.manageSubscription": "Manage subscription",
+    "account.saveData": "Save details",
+    "account.updatePassword": "Update password",
+    "account.logout": "Sign out",
+    "account.removeAvatar": "Remove photo",
+    "account.confirmCode": "Confirm code",
+    "account.resendCode": "Resend code",
+    "account.downloadAgain": "Download again",
+    "account.markRead": "Mark as read",
+    "account.shortcut.profile": "Profile and credentials",
+    "account.shortcut.profileCopy": "Update your name, email, and password",
+    "account.shortcut.settings": "Session",
+    "account.shortcut.settingsCopy": "Review this browser session",
+    "account.shortcut.admin": "Admin Panel",
+    "account.shortcut.adminCopy": "Users, plans, credits, and coupons",
+    "account.files.all": "All",
+    "account.files.temporary": "Temporary",
+    "account.files.ready": "Completed",
+    "account.files.failed": "Failed",
+    "admin.saveData": "Save details",
+    "admin.updatePlan": "Update plan",
+    "admin.saveCredits": "Save credits",
+    "admin.saveDiscount": "Save discount",
+    "admin.removeAccount": "Remove account",
+    "admin.createPromo": "Create promo code",
+    "admin.copyCode": "Copy code",
+    "admin.pause": "Pause",
+    "admin.reactivate": "Reactivate",
     "settings.language.title": "Site language",
     "settings.language.copy": "Choose how vaptdoc appears in this browser.",
     "settings.language.label": "Language",
@@ -894,14 +1088,6 @@ const formatBadgeThemes = {
   model3d: "format-badge-video"
 };
 
-const searchPlaceholderExamples = [
-  "pdf para docx",
-  "png para jpg",
-  "docx para pdf",
-  "mp4 para mp3",
-  "pdf para texto",
-  "stl para obj"
-];
 const searchResultsLimit = 12;
 const featuredToolRowDesktopLimit = 5;
 const featuredToolRowMobileLimit = 6;
@@ -917,6 +1103,132 @@ const defaultFeaturedToolIds = [
 ];
 const orderSensitiveTools = new Set(["pdf-merge", "image-to-pdf"]);
 const specializedWorkspaceTools = new Set(["pdf-merge", "pdf-split", "image-to-pdf"]);
+const englishToolLabels = {
+  "pdf-to-docx": "PDF to DOCX",
+  "3d-convert": "3D Converter",
+  "docx-to-pdf": "DOCX to PDF",
+  "office-to-pdf": "Office to PDF",
+  "jpg-to-png": "JPG to PNG",
+  "jpeg-to-png": "JPEG to PNG",
+  "png-to-jpg": "PNG to JPG",
+  "png-to-jpeg": "PNG to JPEG",
+  "mp4-to-mp3": "MP4 to MP3",
+  "pdf-to-text": "PDF to text",
+  "pdf-merge": "Merge PDFs",
+  "pdf-split": "Split PDF",
+  "pdf-compress": "Compress PDF",
+  "pdf-ocr": "PDF OCR",
+  "pdf-to-jpg": "PDF to JPG",
+  "image-to-pdf": "Image to PDF",
+  "pdf-to-pdfa": "PDF to PDF/A",
+  "html-to-pdf": "HTML to PDF",
+  "pdf-validate-pdfa": "Validate PDF/A",
+  "pdf-rotate": "Rotate PDF",
+  "pdf-unlock": "Unlock PDF",
+  "pdf-protect": "Protect PDF",
+  "pdf-watermark": "Watermark PDF",
+  "pdf-page-numbers": "Add page numbers",
+  "pdf-repair": "Repair PDF",
+  "pdf-extract": "Advanced extraction",
+  "pdf-edit": "Edit PDF"
+};
+
+const englishInterfaceText = {
+  "Converter para": "Convert to",
+  "Como dividir": "How to split",
+  "Por intervalos": "By ranges",
+  "Separar trechos": "Split ranges",
+  "Você escolhe os intervalos": "Choose the page ranges",
+  "A cada N páginas": "Every N pages",
+  "Dividir em partes": "Split into parts",
+  "Mesmo número de páginas": "Same number of pages",
+  "Remover páginas": "Remove pages",
+  "Retira páginas e devolve 1 PDF": "Removes pages and returns one PDF",
+  "Intervalos": "Ranges",
+  "Use virgulas para separar grupos.": "Use commas to separate groups.",
+  "Páginas por arquivo": "Pages per file",
+  "Páginas para remover": "Pages to remove",
+  "O resultado volta como um único PDF sem essas páginas.": "The result is one PDF without those pages.",
+  "Unir os intervalos novamente em um único PDF": "Merge the ranges back into one PDF",
+  "Nível de compressão": "Compression level",
+  "Baixa compressão": "Low compression",
+  "Mais qualidade": "Higher quality",
+  "Menos compressão": "Less compression",
+  "Equilibrada": "Balanced",
+  "Equilibrado": "Balanced",
+  "Qualidade e tamanho": "Quality and size",
+  "Máxima compressão": "Maximum compression",
+  "Arquivo menor": "Smaller file",
+  "Modo": "Mode",
+  "Renderizar páginas": "Render pages",
+  "Extrair imagens internas": "Extract embedded images",
+  "Resolução (DPI)": "Resolution (DPI)",
+  "Orientação": "Orientation",
+  "Retrato": "Portrait",
+  "Paisagem": "Landscape",
+  "Tamanho da página": "Page size",
+  "Ajustar ao conteúdo": "Fit to content",
+  "Margem": "Margin",
+  "Gerar um único PDF": "Create a single PDF",
+  "Conformidade": "Compliance",
+  "Conformidade esperada": "Expected compliance",
+  "Permitir ajuste automático de conformidade": "Allow automatic compliance adjustment",
+  "Tentar gerar em página única": "Try to generate a single page",
+  "Rotação": "Rotation",
+  "Senha atual do PDF": "Current PDF password",
+  "Digite a senha atual do arquivo": "Enter the file's current password",
+  "Nova senha": "New password",
+  "Mínimo de 4 caracteres": "At least 4 characters",
+  "Texto da marca d'agua": "Watermark text",
+  "Páginas": "Pages",
+  "Todas ou ex.: 1-3,5": "All or e.g. 1-3,5",
+  "Deixe vazio para aplicar em todas.": "Leave blank to apply to all pages.",
+  "Posição vertical": "Vertical position",
+  "Topo": "Top",
+  "Meio": "Middle",
+  "Rodapé": "Bottom",
+  "Posição horizontal": "Horizontal position",
+  "Esquerda": "Left",
+  "Centro": "Center",
+  "Direita": "Right",
+  "Opacidade": "Opacity",
+  "Iniciar em": "Start at",
+  "Deixe vazio para numerar todas.": "Leave blank to number every page.",
+  "Texto opcional": "Optional text",
+  "Ex.: Página": "E.g. Page",
+  "Gerar CSV detalhado": "Generate detailed CSV",
+  "Separar por palavra": "Split by word",
+  "Texto para inserir": "Text to insert",
+  "Digite o texto que será inserido": "Enter the text to insert",
+  "1 ou 1-3": "1 or 1-3",
+  "Deixe vazio para aplicar na primeira página.": "Leave blank to apply to the first page.",
+  "Posição": "Position",
+  "Topo esquerdo": "Top left",
+  "Topo centro": "Top center",
+  "Topo direito": "Top right",
+  "Rodapé esquerdo": "Bottom left",
+  "Rodapé centro": "Bottom center",
+  "Rodapé direito": "Bottom right",
+  "Impressão 3D e slicers": "3D printing and slicers",
+  "Modelagem e textura": "Modeling and textures",
+  "Animação e cena": "Animation and scenes",
+  "Visualização rápida": "Fast preview",
+  "Web e apps 3D": "Web and 3D apps",
+  "Malha e scan": "Mesh and scan",
+  "Impressão 3D": "3D printing",
+  "Formato legado": "Legacy format",
+  "Visualização em PDF": "PDF preview",
+  "Inverter ordem": "Reverse order",
+  "Ordenar A-Z": "Sort A-Z",
+  "Inverter páginas": "Reverse pages",
+  "Mover para cima": "Move up",
+  "Mover para baixo": "Move down",
+  "Remover arquivo": "Remove file",
+  "Girar para a esquerda": "Rotate left",
+  "Girar para a direita": "Rotate right",
+  "Confirmar código": "Confirm code",
+  "Atualizar senha": "Update password"
+};
 
 const workspaceBlueprints = {
   default: {
@@ -1084,11 +1396,47 @@ function t(key, variables = {}) {
   return normalizeVisibleText(String(template).replace(/\{(\w+)\}/g, (_, token) => String(variables[token] ?? "")));
 }
 
+function getSearchPlaceholderExamples() {
+  const examples = t("common.searchExamples");
+  return Array.isArray(examples) && examples.length > 0 ? examples : [t("common.searchPlaceholder")];
+}
+
+function getLocalizedToolLabel(tool) {
+  if (!tool) {
+    return t("route.defaultTitle");
+  }
+
+  if (currentLanguage === "en") {
+    return englishToolLabels[tool.id] ?? normalizeVisibleText(tool.label).replace(/\s+para\s+/giu, " to ");
+  }
+
+  return normalizeVisibleText(tool.label);
+}
+
+function localizeInterfaceText(value) {
+  const normalized = normalizeVisibleText(value);
+  if (currentLanguage !== "en") {
+    return normalized;
+  }
+  return englishInterfaceText[normalized] ?? normalized;
+}
+
 function setElementText(element, value) {
   if (!element) {
     return;
   }
   element.textContent = normalizeVisibleText(value);
+}
+
+function setLeadingText(element, value) {
+  if (!element) {
+    return;
+  }
+
+  const textNode = Array.from(element.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+  if (textNode) {
+    textNode.textContent = `${normalizeVisibleText(value)} `;
+  }
 }
 
 function setListContent(element, items = []) {
@@ -1115,6 +1463,18 @@ function ensureButtonAriaLabels(root = document) {
     }
 
     const label = normalizeVisibleText(button.textContent || button.title || "").replace(/\s+/g, " ").trim();
+    if (label) {
+      button.setAttribute("aria-label", label);
+    }
+  });
+}
+
+function syncButtonAriaLabels(elements) {
+  elements.forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+    const label = normalizeVisibleText(button.textContent).replace(/\s+/g, " ").trim();
     if (label) {
       button.setAttribute("aria-label", label);
     }
@@ -1152,10 +1512,16 @@ function applyStaticTranslations() {
   setElementText(toolEmpty, t("tools.none"));
   setElementText(toolDirectoryToggleCopy, isToolDirectoryExpanded ? t("tools.hideAll") : t("tools.showAll"));
   toolDirectoryToggle?.setAttribute("aria-label", isToolDirectoryExpanded ? t("tools.hideAll") : t("tools.showAll"));
+  setElementText(document.getElementById("tab-all"), t("tools.tab.all"));
+  setElementText(document.getElementById("tab-favorites"), t("tools.tab.favorites"));
+  setElementText(document.getElementById("tab-3d"), t("tools.tab.3d"));
   setElementText(routeHeroBack, t("route.back"));
   setElementText(toolHelpButton, t("route.help"));
   setElementText(workspaceCanvasTitle, t("workspace.canvasTitle"));
   setElementText(workspaceCanvasCopy, t("workspace.canvasCopy"));
+  setElementText(document.querySelector("#workspace-canvas-card .selection-kicker"), t("workspace.canvasKicker"));
+  setElementText(dropzone?.querySelector(".dropzone-kicker"), t("workspace.uploadKicker"));
+  dropzone?.setAttribute("aria-label", t("workspace.uploadAria"));
   setElementText(workspaceFilesBadge, t("workspace.filesBadge.empty"));
   setElementText(workspaceFlowBadge, t("workspace.flowBadge.ready"));
   setElementText(convertButton, t("workspace.convertButton"));
@@ -1168,6 +1534,13 @@ function applyStaticTranslations() {
   setElementText(document.getElementById("premium-lock-title"), t("premium.title"));
   setElementText(document.getElementById("premium-lock-copy"), t("premium.copy"));
   setElementText(unlockToolButton, t("premium.button"));
+  setElementText(conversionModalCancelButton, t("conversion.modal.back"));
+  setElementText(conversionConfirmButton, getToolActionLabel(getToolById()));
+  setElementText(billingMonthlyButton, t("billing.monthly"));
+  setElementText(billingYearlyButton, t("billing.yearly"));
+  setElementText(billingStarterButton, t("billing.starter"));
+  setElementText(redeemSubmitButton, t("billing.redeem"));
+  setElementText(billingSupportButton, t("billing.support"));
   setElementText(document.querySelector("#tool-faq-section .eyebrow"), t("faq.kicker"));
   setElementText(toolFaqSection?.querySelector(".section-subtitle"), t("faq.title"));
   setElementText(document.querySelector(".site-footer-copy"), t("footer.copy"));
@@ -1192,7 +1565,44 @@ function applyStaticTranslations() {
   setElementText(pricingTeamButton, t("pricing.team.button"));
   setListContent(pricingTeamFeatures, t("pricing.team.features"));
 
+  setElementText(accountMenuOverviewLabel, t("account.menu.overview"));
+  setElementText(accountMenuProfile?.querySelector(".menu-action-label"), t("account.menu.profile"));
+  setElementText(accountMenuSubscription?.querySelector(".menu-action-label"), t("account.menu.subscription"));
   setElementText(accountMenuLanguageLabel, t("account.menu.language"));
+  setElementText(accountMenuAdmin?.querySelector(".menu-action-label"), t("account.menu.admin"));
+  setElementText(accountMenuLogout?.querySelector(".menu-action-label"), t("account.menu.logout"));
+  setElementText(accountSwitchToLoginButton, t("account.login"));
+  setElementText(accountSwitchToRegisterButton, t("account.register"));
+  setElementText(document.getElementById("account-register-submit"), t("account.register"));
+  setElementText(document.getElementById("account-login-submit"), t("account.loginButton"));
+  setElementText(accountUpgradeButton, t("account.manage"));
+  setElementText(accountSubscriptionManageButton, t("account.manageSubscription"));
+  setElementText(document.getElementById("account-profile-submit"), t("account.saveData"));
+  setElementText(document.getElementById("account-password-submit"), t("account.updatePassword"));
+  setElementText(accountLogoutButton, t("account.logout"));
+  setElementText(accountAvatarRemoveButton, t("account.removeAvatar"));
+  setElementText(accountVerificationSubmitButton, t("account.confirmCode"));
+  setElementText(accountVerificationResendButton, t("account.resendCode"));
+  setElementText(document.querySelector("#account-shortcut-profile strong"), t("account.shortcut.profile"));
+  setElementText(document.querySelector("#account-shortcut-profile .account-shortcut-copy > span"), t("account.shortcut.profileCopy"));
+  setElementText(document.querySelector("#account-shortcut-settings strong"), t("account.shortcut.settings"));
+  setElementText(document.querySelector("#account-shortcut-settings .account-shortcut-copy > span"), t("account.shortcut.settingsCopy"));
+  setElementText(document.querySelector("#account-shortcut-admin strong"), t("account.shortcut.admin"));
+  setElementText(document.querySelector("#account-shortcut-admin .account-shortcut-copy > span"), t("account.shortcut.adminCopy"));
+  setLeadingText(document.querySelector("[data-account-file-filter='all']"), t("account.files.all"));
+  setLeadingText(document.querySelector("[data-account-file-filter='temporary']"), t("account.files.temporary"));
+  setLeadingText(document.querySelector("[data-account-file-filter='ready']"), t("account.files.ready"));
+  setLeadingText(document.querySelector("[data-account-file-filter='failed']"), t("account.files.failed"));
+  setElementText(document.getElementById("admin-refresh-users"), t("common.update"));
+  setElementText(document.getElementById("admin-refresh-promos"), t("common.update"));
+  setElementText(document.getElementById("admin-user-profile-submit"), t("admin.saveData"));
+  setElementText(document.getElementById("admin-user-plan-submit"), t("admin.updatePlan"));
+  setElementText(document.getElementById("admin-user-credits-submit"), t("admin.saveCredits"));
+  setElementText(document.getElementById("admin-user-discount-submit"), t("admin.saveDiscount"));
+  setElementText(document.getElementById("admin-user-delete"), t("admin.removeAccount"));
+  setElementText(document.getElementById("admin-promo-submit"), t("admin.createPromo"));
+  document.querySelectorAll(".billing-close").forEach((button) => button.setAttribute("aria-label", t("common.close")));
+  document.querySelectorAll(".billing-backdrop").forEach((button) => button.setAttribute("aria-label", t("common.close")));
   setElementText(accountLanguageTitle, t("settings.language.title"));
   setElementText(accountLanguageCopy, t("settings.language.copy"));
   setElementText(accountLanguageLabel, t("settings.language.label"));
@@ -1208,20 +1618,55 @@ function applyStaticTranslations() {
     accountLanguageSelect.setAttribute("aria-label", t("settings.language.label"));
   }
 
+  renderAccountUi();
+  updateThemeButton(document.documentElement.dataset.theme ?? "light");
+  updateToolbarCopy(getVisibleTools().length);
+  updateFavoriteButton(activeToolId);
+  syncButtonAriaLabels([
+    convertButton,
+    conversionModalCancelButton,
+    conversionConfirmButton,
+    billingMonthlyButton,
+    billingYearlyButton,
+    billingStarterButton,
+    redeemSubmitButton,
+    billingSupportButton,
+    pricingFreeButton,
+    pricingProButton,
+    pricingTeamButton,
+    accountSwitchToLoginButton,
+    accountSwitchToRegisterButton,
+    accountUpgradeButton,
+    accountSubscriptionManageButton,
+    accountLogoutButton,
+    accountAvatarRemoveButton,
+    accountVerificationSubmitButton,
+    accountVerificationResendButton
+  ]);
   ensureButtonAriaLabels();
 }
 
 function setLanguage(language, options = {}) {
   const { persist = true } = options;
+  const activeTool = getToolById();
+  const selectedToolLabels = activeTool
+    ? [normalizeVisibleText(activeTool.label), englishToolLabels[activeTool.id]].filter(Boolean)
+    : [];
+  const shouldTranslateSelectedSearch = selectedToolLabels.includes(searchQuery) || selectedToolLabels.includes(searchInput?.value);
   currentLanguage = normalizeLanguageTag(language);
   if (persist) {
     window.localStorage.setItem(localeStorageKey, currentLanguage);
   }
+  if (activeTool && shouldTranslateSelectedSearch) {
+    searchQuery = getLocalizedToolLabel(activeTool);
+    searchInput.value = searchQuery;
+  }
   applyStaticTranslations();
+  startSearchPlaceholderAnimation();
   if (hasLoadedTools) {
     renderTools();
     renderSearchResults();
-    updatePageModeUi(getToolById());
+    updatePageModeUi(document.body.dataset.pageMode === "tool" ? getToolById() : null);
     updateFileLabel();
   }
   updateAccessUi();
@@ -1357,7 +1802,7 @@ function updatePageModeUi(tool) {
 
   if (siteHeaderCurrent) {
     siteHeaderCurrent.hidden = !isToolPage;
-    siteHeaderCurrent.textContent = normalizeVisibleText(tool?.label ?? "");
+    siteHeaderCurrent.textContent = tool ? getLocalizedToolLabel(tool) : "";
   }
 
   if (routeKicker) {
@@ -1365,13 +1810,17 @@ function updatePageModeUi(tool) {
   }
 
   if (routeTitle) {
-    routeTitle.textContent = normalizeVisibleText(tool?.label ?? t("route.defaultTitle"));
+    routeTitle.textContent = tool ? getLocalizedToolLabel(tool) : t("route.defaultTitle");
   }
 
   if (routeCopy) {
     routeCopy.textContent = tool
       ? normalizeVisibleText(`${getToolDescription(tool)} Envie o arquivo para liberar só os ajustes necessários desta conversão.`)
       : t("route.defaultCopy");
+  }
+
+  if (routeCopy && tool && currentLanguage === "en") {
+    routeCopy.textContent = "Upload your file to reveal only the settings needed for this conversion.";
   }
 
   document.querySelectorAll(".tool-card").forEach((card) => {
@@ -2473,6 +2922,10 @@ function renderConversionModalCards(tool) {
       <strong>Sem ajustes extras</strong>
       <p>Essa conversão já está pronta. Clique em converter para iniciar o envio real do arquivo.</p>
     `;
+    emptyState.innerHTML = `
+      <strong>${t("conversion.modal.noOptionsTitle")}</strong>
+      <p>${t("conversion.modal.noOptionsCopy")}</p>
+    `;
     conversionModalBody.append(emptyState);
     return;
   }
@@ -2489,14 +2942,31 @@ function syncConversionModalSummary(tool, files) {
     conversionModalTitle.textContent = tool ? `${tool.label} pronto para converter` : "Revise antes de converter";
   }
 
+  if (conversionModalTitle) {
+    conversionModalTitle.textContent = tool
+      ? t("conversion.modal.readyTitle", { tool: getLocalizedToolLabel(tool) })
+      : t("conversion.modal.reviewTitle");
+  }
+
   if (conversionModalCopy) {
     conversionModalCopy.textContent = tool
       ? "Ajuste apenas o necessário, confirme as opções desta ferramenta e conclua a conversão real."
       : "Revise os ajustes necessários antes de converter.";
   }
 
+  if (conversionModalCopy) {
+    conversionModalCopy.textContent = tool ? t("conversion.modal.copy") : t("conversion.modal.reviewCopy");
+  }
+
   if (conversionSummaryFiles) {
     conversionSummaryFiles.textContent = `${files.length} ${files.length === 1 ? "arquivo" : "arquivos"}`;
+  }
+
+  if (conversionSummaryFiles) {
+    conversionSummaryFiles.textContent = t("conversion.modal.fileCount", {
+      count: files.length,
+      label: files.length === 1 ? t("conversion.modal.file") : t("conversion.modal.files")
+    });
   }
 
   if (conversionSummaryOutput) {
@@ -2507,7 +2977,7 @@ function syncConversionModalSummary(tool, files) {
     conversionConfirmButton.textContent = getToolActionLabel(tool);
   }
 
-  setConversionModalStatus("Revise os ajustes e clique em converter para iniciar o envio real do arquivo.");
+  setConversionModalStatus(t("conversion.modal.status"));
 }
 
 function hideConversionModal() {
@@ -2815,21 +3285,21 @@ function renderBillingOffers() {
     billingMonthlyPrice.textContent = formatCurrencyBRL(monthlyOffer?.amountBRL ?? 19.9);
   }
   if (billingMonthlyMeta) {
-    billingMonthlyMeta.textContent = `${monthlyOffer?.accessDays ?? 30} dias de acesso`;
+    billingMonthlyMeta.textContent = t("billing.accessDays", { count: monthlyOffer?.accessDays ?? 30 });
   }
 
   if (billingYearlyPrice) {
     billingYearlyPrice.textContent = formatCurrencyBRL(yearlyOffer?.amountBRL ?? 149.9);
   }
   if (billingYearlyMeta) {
-    billingYearlyMeta.textContent = `${yearlyOffer?.accessDays ?? 365} dias de acesso`;
+    billingYearlyMeta.textContent = t("billing.accessDays", { count: yearlyOffer?.accessDays ?? 365 });
   }
 
   if (billingStarterPrice) {
     billingStarterPrice.textContent = formatCurrencyBRL(starterOffer?.amountBRL ?? 9.9);
   }
   if (billingStarterMeta) {
-    billingStarterMeta.textContent = `${starterOffer?.accessDays ?? 7} dias de acesso rápido`;
+    billingStarterMeta.textContent = t("billing.accessDaysFast", { count: starterOffer?.accessDays ?? 7 });
   }
 
   if (pricingFreePrice) {
@@ -3097,7 +3567,7 @@ function renderAccountHistory() {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "ghost-action";
-      button.textContent = "Baixar novamente";
+      button.textContent = t("account.downloadAgain");
       button.addEventListener("click", async () => {
         try {
           await redownloadHistoryItem(item.id);
@@ -3112,7 +3582,7 @@ function renderAccountHistory() {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "ghost-action";
-    deleteButton.textContent = "Excluir";
+    deleteButton.textContent = t("common.delete");
     deleteButton.addEventListener("click", async () => {
       try {
         await deleteAccountFile(item.id);
@@ -3210,7 +3680,7 @@ function renderAccountNotifications() {
       const actionButton = document.createElement("button");
       actionButton.type = "button";
       actionButton.className = "ghost-action";
-      actionButton.textContent = "Baixar";
+      actionButton.textContent = t("common.download");
       actionButton.addEventListener("click", async () => {
         try {
           if (item.historyId) {
@@ -3231,7 +3701,7 @@ function renderAccountNotifications() {
       const readButton = document.createElement("button");
       readButton.type = "button";
       readButton.className = "ghost-action";
-      readButton.textContent = "Marcar como lido";
+      readButton.textContent = t("account.markRead");
       readButton.addEventListener("click", async () => {
         try {
           await markAccountNotificationsRead([item.id]);
@@ -3257,12 +3727,16 @@ function renderAccountUi() {
 
   accountLauncher?.classList.toggle("is-authenticated", authenticated);
   accountLauncher?.classList.toggle("is-guest", !authenticated);
-  accountLauncher?.setAttribute("aria-label", authenticated ? "Abrir menu da conta" : "Entrar ou criar conta");
+  accountLauncher?.setAttribute("aria-label", authenticated ? t("account.launcher.open") : t("account.launcher.guest"));
   if (accountLauncherCopy) {
-    accountLauncherCopy.textContent = authenticated ? (accountState.user?.displayName ?? "Minha conta") : "Entrar ou criar conta";
+    accountLauncherCopy.textContent = authenticated
+      ? (accountState.user?.displayName ?? t("account.menu.overview"))
+      : t("account.launcher.guest");
   }
   if (accountPopoverName) {
-    accountPopoverName.textContent = authenticated ? (accountState.user?.displayName ?? "Minha conta") : "Entrar ou crie sua conta";
+    accountPopoverName.textContent = authenticated
+      ? (accountState.user?.displayName ?? t("account.menu.overview"))
+      : t("account.launcher.guest");
   }
   if (accountPopoverEmail) {
     accountPopoverEmail.textContent = authenticated ? (accountState.user?.email ?? "") : "Salve seu plano e seus dados";
@@ -3314,7 +3788,7 @@ function renderAccountUi() {
       element.textContent = usageProgress.meta;
     }
   });
-  for (const menuButton of [accountMenuProfile, accountMenuSubscription, accountMenuTheme, accountMenuLogout]) {
+  for (const menuButton of [accountMenuProfile, accountMenuSubscription, accountMenuTheme, accountMenuLanguage, accountMenuLogout]) {
     if (menuButton) {
       menuButton.hidden = !authenticated;
     }
@@ -3323,12 +3797,13 @@ function renderAccountUi() {
     accountMenuAdmin.hidden = !authenticated || !isAdmin;
   }
   if (accountMenuOverviewLabel) {
-    accountMenuOverviewLabel.textContent = authenticated ? "Minha conta" : "Entrar ou criar conta";
+    accountMenuOverviewLabel.textContent = authenticated ? t("account.menu.overview") : t("account.launcher.guest");
   } else if (accountMenuOverview) {
-    accountMenuOverview.textContent = authenticated ? "Minha conta" : "Entrar ou criar conta";
+    accountMenuOverview.textContent = authenticated ? t("account.menu.overview") : t("account.launcher.guest");
   }
   if (accountMenuThemeLabel) {
-    accountMenuThemeLabel.textContent = document.documentElement.dataset.theme === "dark" ? "Tema claro" : "Tema escuro";
+    accountMenuThemeLabel.textContent =
+      document.documentElement.dataset.theme === "dark" ? t("account.menu.themeLight") : t("account.menu.themeDark");
   }
   applyAvatarToElements(accountLauncherImage, accountLauncherInitials, avatarUrl, initials);
   applyAvatarToElements(accountPopoverImage, accountPopoverInitials, avatarUrl, initials);
@@ -3352,7 +3827,7 @@ function renderAccountUi() {
       accountVerificationExpiry.textContent = `Válido até ${formatDateTime(pendingAccountVerification.verification.expiresAt)}.`;
     }
     if (accountVerificationSubmitButton) {
-      accountVerificationSubmitButton.textContent = pendingAccountVerification.submitLabel;
+      accountVerificationSubmitButton.textContent = localizeInterfaceText(pendingAccountVerification.submitLabel);
     }
   }
 
@@ -3507,6 +3982,15 @@ function updateAccessUi() {
     t("pricing.pro.button"),
     currentLanguage === "en" ? "Plan coming soon" : "Plano em breve"
   );
+  syncButtonAriaLabels([
+    billingMonthlyButton,
+    billingYearlyButton,
+    billingStarterButton,
+    billingSupportButton,
+    pricingFreeButton,
+    pricingProButton,
+    pricingTeamButton
+  ]);
 
   if (accessLogoutButton) {
     accessLogoutButton.hidden = !accessSession?.premium || isAccountAuthenticated();
@@ -4291,9 +4775,9 @@ function renderAdminPromoList() {
       <span class="account-copy">${escapeHtml(promo.description || rewards || "Codigo promocional do vaptdoc")}</span>
       <span class="account-copy">${escapeHtml(rewards || "Sem beneficios configurados")}</span>
       <div class="admin-promo-actions">
-        <button type="button" class="ghost-action" data-admin-copy-promo="${escapeHtml(promo.code)}">Copiar código</button>
-        <button type="button" class="ghost-action" data-admin-toggle-promo="${escapeHtml(promo.code)}">${promo.active ? "Pausar" : "Reativar"}</button>
-        <button type="button" class="ghost-action danger" data-admin-delete-promo="${escapeHtml(promo.code)}">Excluir</button>
+        <button type="button" class="ghost-action" data-admin-copy-promo="${escapeHtml(promo.code)}">${escapeHtml(t("admin.copyCode"))}</button>
+        <button type="button" class="ghost-action" data-admin-toggle-promo="${escapeHtml(promo.code)}">${escapeHtml(promo.active ? t("admin.pause") : t("admin.reactivate"))}</button>
+        <button type="button" class="ghost-action danger" data-admin-delete-promo="${escapeHtml(promo.code)}">${escapeHtml(t("common.delete"))}</button>
       </div>
     `;
     adminPromoList.append(item);
@@ -4671,6 +5155,7 @@ function getToolSearchText(tool) {
   return normalizeText(
     [
       tool.label,
+      getLocalizedToolLabel(tool),
       tool.id,
       tool.category,
       tool.outputExtension,
@@ -4798,7 +5283,7 @@ function getCookie(name) {
 }
 
 function updateThemeButton(theme) {
-  themeToggle?.setAttribute("aria-label", theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro");
+  themeToggle?.setAttribute("aria-label", theme === "dark" ? t("common.themeLightAria") : t("common.themeDarkAria"));
   themeToggle?.setAttribute("aria-pressed", String(theme === "dark"));
 }
 
@@ -4869,9 +5354,10 @@ function scheduleSearchPlaceholderAnimation(delay) {
 
 function startSearchPlaceholderAnimation() {
   clearSearchPlaceholderAnimation();
+  const examples = getSearchPlaceholderExamples();
 
   if (reducedMotionQuery.matches) {
-    searchInput.placeholder = searchPlaceholderExamples[0];
+    searchInput.placeholder = examples[0];
     return;
   }
 
@@ -4882,12 +5368,13 @@ function startSearchPlaceholderAnimation() {
 }
 
 function runSearchPlaceholderAnimation() {
+  const examples = getSearchPlaceholderExamples();
   if (reducedMotionQuery.matches) {
-    searchInput.placeholder = searchPlaceholderExamples[0];
+    searchInput.placeholder = examples[0];
     return;
   }
 
-  const currentExample = searchPlaceholderExamples[searchPlaceholderIndex];
+  const currentExample = examples[searchPlaceholderIndex % examples.length];
 
   if (searchPlaceholderPhase === "typing") {
     searchPlaceholderText = currentExample.slice(0, searchPlaceholderText.length + 1);
@@ -4913,7 +5400,7 @@ function runSearchPlaceholderAnimation() {
   searchInput.placeholder = searchPlaceholderText;
 
   if (searchPlaceholderText.length === 0) {
-    searchPlaceholderIndex = (searchPlaceholderIndex + 1) % searchPlaceholderExamples.length;
+    searchPlaceholderIndex = (searchPlaceholderIndex + 1) % examples.length;
     searchPlaceholderPhase = "typing";
     scheduleSearchPlaceholderAnimation(250);
     return;
@@ -4937,6 +5424,34 @@ function updateToolTabs() {
 }
 
 function updateToolbarCopy(visibleCount) {
+  if (currentLanguage === "en") {
+    if (isCompactViewport() && activeFilter === "all" && !searchQuery) {
+      toolToolbarCopy.textContent = t("tools.toolbar.mobile");
+      return;
+    }
+
+    if (activeFilter === "favorites") {
+      toolToolbarCopy.textContent =
+        visibleCount > 0 ? `${visibleCount} favorite${visibleCount === 1 ? "" : "s"}` : t("tools.toolbar.noFavorites");
+      return;
+    }
+
+    if (activeFilter === "3d") {
+      toolToolbarCopy.textContent =
+        visibleCount > 0 ? `${visibleCount} 3D conversion${visibleCount === 1 ? "" : "s"} ready` : "No 3D conversion found";
+      return;
+    }
+
+    if (searchQuery) {
+      toolToolbarCopy.textContent =
+        visibleCount > 0 ? `${visibleCount} result${visibleCount === 1 ? "" : "s"}` : t("tools.toolbar.noResults");
+      return;
+    }
+
+    toolToolbarCopy.textContent = isToolDirectoryExpanded ? t("tools.toolbar.all") : t("tools.toolbar.featured");
+    return;
+  }
+
   if (isCompactViewport() && activeFilter === "all" && !searchQuery) {
     toolToolbarCopy.textContent = "Toque numa opção para ir ao envio";
     return;
@@ -4982,8 +5497,8 @@ function updateFavoriteButton(toolId) {
   const favorite = isFavorite(toolId);
   favoriteToggle.classList.toggle("active", favorite);
   favoriteToggle.setAttribute("aria-pressed", String(favorite));
-  favoriteToggle.setAttribute("aria-label", favorite ? "Remover dos favoritos" : "Favoritar conversão");
-  favoriteToggleCopy.textContent = favorite ? "Favorita" : "Favoritar";
+  favoriteToggle.setAttribute("aria-label", favorite ? t("tools.favorite.removeAria") : t("tools.favorite.addAria"));
+  favoriteToggleCopy.textContent = favorite ? t("tools.favorite.remove") : t("tools.favorite.add");
 }
 
 function getToolById(toolId = activeToolId) {
@@ -5070,16 +5585,14 @@ function getToolActionLabel(tool) {
   }
 
   if (tool.id === "pdf-to-text") {
-    return currentLanguage === "en" ? "Extract text from PDF" : "Extrair texto do PDF";
+    return t("workspace.extractText");
   }
 
   if (tool.id === "3d-convert") {
-    return currentLanguage === "en" ? "Convert 3D model" : "Converter modelo 3D";
+    return t("workspace.convert3d");
   }
 
-  return currentLanguage === "en"
-    ? `Convert ${normalizeVisibleText(tool.label)}`
-    : `Converter ${normalizeVisibleText(tool.label)}`;
+  return t("workspace.convertTool", { tool: getLocalizedToolLabel(tool) });
 }
 
 function getToolMinimumFiles(tool) {
@@ -5373,7 +5886,7 @@ function updateWorkspacePanels(tool = getToolById()) {
   if (workspaceCanvasCopy) {
     workspaceCanvasCopy.textContent = hasFiles
       ? blueprint.canvasCopy
-      : "Depois do envio, mostramos apenas os ajustes e a ação final desta conversão.";
+      : t("workspace.afterUploadCopy");
   }
   if (workspaceSubmitTitle) {
     workspaceSubmitTitle.textContent = blueprint.submitTitle;
@@ -5877,7 +6390,7 @@ function createStageActionButton({ label, iconMarkup, className = "", onClick, d
   const button = document.createElement("button");
   button.type = "button";
   button.className = `mini-action file-stage-action-button ${className}`.trim();
-  button.setAttribute("aria-label", label);
+  button.setAttribute("aria-label", localizeInterfaceText(label));
   button.disabled = disabled;
   button.innerHTML = `<span aria-hidden="true">${iconMarkup}</span>`;
   button.addEventListener("click", onClick);
@@ -6129,7 +6642,7 @@ function renderStagedFiles() {
   const clearButton = document.createElement("button");
   clearButton.type = "button";
   clearButton.className = "ghost-action";
-  clearButton.textContent = "Limpar tudo";
+  clearButton.textContent = t("workspace.clearAll");
   clearButton.addEventListener("click", clearStagedFiles);
   headerActions.append(clearButton);
 
@@ -6314,16 +6827,13 @@ function updateFileLabel() {
   }
 
   if (!tool?.allowsMultipleFiles) {
-    dropzoneTitle.textContent = currentLanguage === "en" ? "Replace file" : "Trocar arquivo";
+    dropzoneTitle.textContent = t("workspace.replaceFile");
     dropzoneCopy.textContent = `${files[0].name} \u00B7 ${formatFileSize(files[0].size)}`;
     return;
   }
 
-  dropzoneTitle.textContent = currentLanguage === "en" ? "Add more files" : "Adicionar mais arquivos";
-  dropzoneCopy.textContent =
-    currentLanguage === "en"
-      ? `${files.length} in the grid \u00B7 drag to reorder before converting`
-      : `${files.length} na grade \u00B7 arraste para reorganizar antes de converter`;
+  dropzoneTitle.textContent = t("workspace.addFiles");
+  dropzoneCopy.textContent = t("workspace.gridCount", { count: files.length });
 }
 
 function getPreferredScrollBehavior() {
@@ -6377,7 +6887,7 @@ function updateDropzonePrompt(tool) {
     dropzoneTitle.textContent = currentLanguage === "en" ? "Available on Pro" : "Disponível no Pro";
     dropzoneCopy.textContent =
       currentLanguage === "en"
-        ? `${normalizeVisibleText(tool.label)} unlocks as soon as you activate a plan or code.`
+        ? `${getLocalizedToolLabel(tool)} unlocks as soon as you activate a plan or code.`
         : `${normalizeVisibleText(tool.label)} fica liberado assim que você ativar um plano ou código.`;
     return;
   }
@@ -6397,7 +6907,7 @@ function updateLockedToolState(tool) {
   dropzone.classList.toggle("is-locked", revealUpgrade);
   fileInput.disabled = revealUpgrade;
   convertButton.classList.toggle("is-locked", revealUpgrade);
-  convertButton.textContent = revealUpgrade ? "Desbloquear esta ferramenta" : getToolActionLabel(tool);
+  convertButton.textContent = revealUpgrade ? t("workspace.unlockButton") : getToolActionLabel(tool);
 
   if (revealUpgrade) {
     clearStagedFiles();
@@ -6454,8 +6964,8 @@ function renderFormatBadge(format, element, edgeClass, options = {}) {
 function getChoiceDisplay(field, choice) {
   const presentation = optionPresentation[field.name]?.choices?.[choice.value] ?? {};
   return {
-    label: presentation.label ?? choice.label,
-    hint: presentation.hint ?? ""
+    label: localizeInterfaceText(presentation.label ?? choice.label),
+    hint: localizeInterfaceText(presentation.hint ?? "")
   };
 }
 
@@ -6530,12 +7040,12 @@ function createOptionInput(field) {
     const select = document.createElement("select");
     select.name = field.name;
     select.dataset.optionName = field.name;
-    select.setAttribute("aria-label", field.label);
+    select.setAttribute("aria-label", localizeInterfaceText(field.label));
 
     (field.choices ?? []).forEach((choice) => {
       const option = document.createElement("option");
       option.value = choice.value;
-      option.textContent = choice.label;
+      option.textContent = localizeInterfaceText(choice.label);
       if (String(initialValue ?? "") === choice.value) {
         option.selected = true;
       }
@@ -6551,7 +7061,7 @@ function createOptionInput(field) {
     input.name = field.name;
     input.dataset.optionName = field.name;
     input.checked = Boolean(initialValue);
-    input.setAttribute("aria-label", field.label);
+    input.setAttribute("aria-label", localizeInterfaceText(field.label));
     return input;
   }
 
@@ -6559,10 +7069,10 @@ function createOptionInput(field) {
   input.type = field.type;
   input.name = field.name;
   input.dataset.optionName = field.name;
-  input.setAttribute("aria-label", field.label);
+  input.setAttribute("aria-label", localizeInterfaceText(field.label));
 
   if (field.placeholder) {
-    input.placeholder = field.placeholder;
+    input.placeholder = localizeInterfaceText(field.placeholder);
   }
 
   if (initialValue !== undefined && initialValue !== null && String(initialValue).length > 0) {
@@ -6704,12 +7214,12 @@ function createCheckboxControl(field) {
   copy.className = "toggle-copy";
 
   const title = document.createElement("strong");
-  title.textContent = field.label;
+  title.textContent = localizeInterfaceText(field.label);
   copy.append(title);
 
   if (field.help) {
     const hint = document.createElement("small");
-    hint.textContent = field.help;
+    hint.textContent = localizeInterfaceText(field.help);
     copy.append(hint);
   }
 
@@ -6736,7 +7246,7 @@ function createRotateGestureControl(field) {
   header.className = "rotate-gesture-header";
 
   const title = document.createElement("strong");
-  title.textContent = "Gire do jeito mais confortavel";
+  title.textContent = currentLanguage === "en" ? "Rotate it comfortably" : "Gire do jeito mais confortável";
 
   const angleBadge = document.createElement("span");
   angleBadge.className = "rotate-angle-badge";
@@ -6746,7 +7256,7 @@ function createRotateGestureControl(field) {
   const stage = document.createElement("div");
   stage.className = "rotate-stage";
   stage.tabIndex = 0;
-  stage.setAttribute("aria-label", "Arraste para girar o PDF");
+  stage.setAttribute("aria-label", currentLanguage === "en" ? "Drag to rotate the PDF" : "Arraste para girar o PDF");
 
   const preview = document.createElement("div");
   preview.className = "rotate-sheet";
@@ -6755,7 +7265,10 @@ function createRotateGestureControl(field) {
 
   const helper = document.createElement("p");
   helper.className = "rotate-helper";
-  helper.textContent = "Arraste com o mouse ou toque para escolher a nova direcao.";
+  helper.textContent =
+    currentLanguage === "en"
+      ? "Drag with the mouse or swipe to choose a new direction."
+      : "Arraste com o mouse ou toque para escolher a nova direção.";
 
   const controls = document.createElement("div");
   controls.className = "rotate-actions";
@@ -6763,17 +7276,17 @@ function createRotateGestureControl(field) {
   const rotateLeft = document.createElement("button");
   rotateLeft.type = "button";
   rotateLeft.className = "ghost-action";
-  rotateLeft.textContent = "Girar para a esquerda";
+  rotateLeft.textContent = localizeInterfaceText("Girar para a esquerda");
 
   const rotateRight = document.createElement("button");
   rotateRight.type = "button";
   rotateRight.className = "ghost-action";
-  rotateRight.textContent = "Girar para a direita";
+  rotateRight.textContent = localizeInterfaceText("Girar para a direita");
 
   const emitAngle = () => {
     hiddenInput.value = String(angle);
     preview.style.transform = `rotate(${angle}deg)`;
-    angleBadge.textContent = `${angle} graus`;
+    angleBadge.textContent = currentLanguage === "en" ? `${angle} degrees` : `${angle} graus`;
     hiddenInput.dispatchEvent(new Event("input", { bubbles: true }));
     hiddenInput.dispatchEvent(new Event("change", { bubbles: true }));
   };
@@ -6872,7 +7385,7 @@ function createOptionFieldWrapper(tool, field) {
 
   if (field.type !== "checkbox" && !(tool.id === "pdf-rotate" && field.name === "rotateAngle")) {
     const label = document.createElement("span");
-    label.textContent = field.label;
+    label.textContent = localizeInterfaceText(field.label);
     wrapper.append(label);
   }
 
@@ -6881,7 +7394,7 @@ function createOptionFieldWrapper(tool, field) {
   if (field.help && field.type !== "checkbox") {
     const hint = document.createElement("p");
     hint.className = "field-hint";
-    hint.textContent = field.help;
+    hint.textContent = localizeInterfaceText(field.help);
     wrapper.append(hint);
   }
 
@@ -6907,12 +7420,12 @@ function createWorkspaceActionButton({ label, meta = "", iconMarkup, onClick, di
   copy.className = "workspace-side-action-copy";
 
   const title = document.createElement("strong");
-  title.textContent = label;
+  title.textContent = localizeInterfaceText(label);
   copy.append(title);
 
   if (meta) {
     const hint = document.createElement("small");
-    hint.textContent = meta;
+    hint.textContent = localizeInterfaceText(meta);
     copy.append(hint);
   }
 
@@ -7273,8 +7786,8 @@ function selectToolFromSearch(tool) {
     activeFilter = "all";
   }
 
-  searchInput.value = normalizeVisibleText(tool.label);
-  searchQuery = normalizeVisibleText(tool.label);
+  searchInput.value = getLocalizedToolLabel(tool);
+  searchQuery = getLocalizedToolLabel(tool);
   updateSearchClearButton();
   renderTools();
   hideSearchResults();
@@ -7294,7 +7807,7 @@ function renderSearchResults() {
   if (matches.length === 0) {
     const empty = document.createElement("div");
     empty.className = "search-empty";
-    empty.textContent = "Nenhuma conversão encontrada.";
+    empty.textContent = t("tools.none");
     searchResults.append(empty);
     return;
   }
@@ -7304,13 +7817,7 @@ function renderSearchResults() {
     item.type = "button";
     item.className = "search-result-item";
     item.setAttribute("role", "option");
-    item.setAttribute(
-      "aria-label",
-      currentLanguage === "en"
-        ? `Select ${normalizeVisibleText(tool.label)}`
-        : `Selecionar ${normalizeVisibleText(tool.label)}`
-    );
-
+    item.setAttribute("aria-label", t("tools.search.select", { tool: getLocalizedToolLabel(tool) }));
     const formats = getToolFormats(tool);
 
     const top = document.createElement("span");
@@ -7331,15 +7838,15 @@ function renderSearchResults() {
 
     const title = document.createElement("strong");
     title.className = "search-result-title";
-    title.textContent = normalizeVisibleText(tool.label);
+    title.textContent = getLocalizedToolLabel(tool);
 
     const meta = document.createElement("span");
     meta.className = "search-result-meta";
     meta.textContent = isPremiumTool(tool)
-      ? "Desbloqueie no Pro"
+      ? t("tools.search.pro")
       : isFavorite(tool.id)
-        ? "Favorita"
-        : "Conversão pronta";
+        ? t("tools.search.favorite")
+        : t("tools.search.ready");
 
     if (isPremiumTool(tool)) {
       const planMark = document.createElement("span");
@@ -7387,7 +7894,7 @@ function applyActiveTool(toolId, options = {}) {
   }
 
   if (activeToolTitle) {
-    activeToolTitle.textContent = normalizeVisibleText(tool.label);
+    activeToolTitle.textContent = getLocalizedToolLabel(tool);
   }
   if (activeToolDescription) {
     activeToolDescription.textContent = getToolDescription(tool);
@@ -7473,11 +7980,11 @@ function renderTools() {
     card.setAttribute(
       "aria-label",
       currentLanguage === "en"
-        ? `${normalizeVisibleText(tool.label)}. Open this conversion tool.`
+        ? `${getLocalizedToolLabel(tool)}. Open this conversion tool.`
         : `${normalizeVisibleText(tool.label)}. Abrir envio de arquivo com essa conversão.`
     );
-    card.title = normalizeVisibleText(tool.fileHint ?? tool.label);
-    label.textContent = normalizeVisibleText(tool.label);
+    card.title = currentLanguage === "en" ? getLocalizedToolLabel(tool) : normalizeVisibleText(tool.fileHint ?? tool.label);
+    label.textContent = getLocalizedToolLabel(tool);
     card.classList.toggle("favorite", isFavorite(tool.id));
     renderFormatBadge(formats.from, fromIcon, "tool-icon-from");
     renderFormatBadge(formats.to, toIcon, "tool-icon-to");
@@ -8624,7 +9131,6 @@ hideUploadProgress();
 setLanguage(currentLanguage, { persist: false });
 setProgress(0, t("progress.waiting"));
 updateSearchClearButton();
-startSearchPlaceholderAnimation();
 updateBackToTopVisibility();
 updateAccessUi();
 Promise.allSettled([loadTools(), refreshAccessSession()]).then((results) => {
