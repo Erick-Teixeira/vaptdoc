@@ -115,6 +115,7 @@ transmuta-lab/
 - [Ferramentas e matriz de conversao](docs/TOOLS.md)
 - [Integracoes externas](docs/INTEGRATIONS.md)
 - [Deploy e ambiente](docs/DEPLOYMENT.md)
+- [Handover e Codex de Desenvolvimento](docs/HANDOVER_CODEX.md)
 - [Contribuindo](CONTRIBUTING.md)
 - [Seguranca operacional](SECURITY.md)
 
