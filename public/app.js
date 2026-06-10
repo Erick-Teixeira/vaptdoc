@@ -89,7 +89,6 @@ const accountSubscriptionProgressLabel = document.getElementById("account-subscr
 const accountSubscriptionProgressMeta = document.getElementById("account-subscription-progress-meta");
 const accountMenuOverview = document.getElementById("account-menu-overview");
 const accountMenuOverviewLabel = document.getElementById("account-menu-overview-label");
-const accountMenuProfile = document.getElementById("account-menu-profile");
 const accountMenuSubscription = document.getElementById("account-menu-subscription");
 const accountMenuTheme = document.getElementById("account-menu-theme");
 const accountMenuThemeLabel = document.getElementById("account-menu-theme-label");
@@ -608,7 +607,6 @@ const translations = {
     ],
     "account.menu.language": "Idioma",
     "account.menu.overview": "Minha conta",
-    "account.menu.profile": "Dados",
     "account.menu.subscription": "Meu Plano",
     "account.menu.themeLight": "Tema claro",
     "account.menu.themeDark": "Tema escuro",
@@ -785,7 +783,6 @@ const translations = {
     ],
     "account.menu.language": "Language",
     "account.menu.overview": "My account",
-    "account.menu.profile": "Profile",
     "account.menu.subscription": "My Plan",
     "account.menu.themeLight": "Light theme",
     "account.menu.themeDark": "Dark theme",
@@ -1566,7 +1563,6 @@ function applyStaticTranslations() {
   setListContent(pricingTeamFeatures, t("pricing.team.features"));
 
   setElementText(accountMenuOverviewLabel, t("account.menu.overview"));
-  setElementText(accountMenuProfile?.querySelector(".menu-action-label"), t("account.menu.profile"));
   setElementText(accountMenuSubscription?.querySelector(".menu-action-label"), t("account.menu.subscription"));
   setElementText(accountMenuLanguageLabel, t("account.menu.language"));
   setElementText(accountMenuAdmin?.querySelector(".menu-action-label"), t("account.menu.admin"));
@@ -3788,7 +3784,7 @@ function renderAccountUi() {
       element.textContent = usageProgress.meta;
     }
   });
-  for (const menuButton of [accountMenuProfile, accountMenuSubscription, accountMenuTheme, accountMenuLanguage, accountMenuLogout]) {
+  for (const menuButton of [accountMenuSubscription, accountMenuTheme, accountMenuLanguage, accountMenuLogout]) {
     if (menuButton) {
       menuButton.hidden = !authenticated;
     }
@@ -8341,10 +8337,6 @@ accountPopoverCloseButton?.addEventListener("click", hideAccountMenu);
 accountMenuOverview?.addEventListener("click", () => {
   hideAccountMenu();
   showAccountModal({ focus: "close" });
-});
-accountMenuProfile?.addEventListener("click", () => {
-  hideAccountMenu();
-  showAccountModal({ focus: "profile" });
 });
 accountMenuSubscription?.addEventListener("click", () => {
   hideAccountMenu();

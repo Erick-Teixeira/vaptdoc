@@ -113,6 +113,30 @@ describe("app routes", () => {
     expect(script.body).toContain('document.body.dataset.pageMode === "tool" ? getToolById() : null');
   });
 
+  it("keeps profile management only inside My Account", async () => {
+    const app = await createApp();
+    apps.push(app);
+
+    const page = await app.inject({
+      method: "GET",
+      url: "/"
+    });
+    const script = await app.inject({
+      method: "GET",
+      url: "/app.js"
+    });
+
+    expect(page.statusCode).toBe(200);
+    expect(page.body).not.toContain('id="account-menu-profile"');
+    expect(page.body).toContain('id="account-menu-overview"');
+    expect(page.body).toContain('id="account-shortcut-profile"');
+    expect(page.body).toContain("Dados e credenciais");
+    expect(script.statusCode).toBe(200);
+    expect(script.body).not.toContain('accountMenuProfile?.addEventListener("click"');
+    expect(script.body).toContain('accountShortcutProfileButton?.addEventListener("click"');
+    expect(script.body).toContain('showAccountModal({ focus: "profile" })');
+  });
+
   it("returns the current access session", async () => {
     const app = await createApp();
     apps.push(app);
