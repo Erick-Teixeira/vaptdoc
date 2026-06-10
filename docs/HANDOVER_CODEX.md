@@ -1195,9 +1195,9 @@ Nunca faça rollback de banco sem backup.
 
 # 5. STATUS ATUAL E ROADMAP
 
-## 5.1 Último commit
+## 5.1 Último commit funcional auditado antes deste handover
 
-Commit remoto confirmado:
+Commit remoto funcional confirmado imediatamente antes da criação deste documento:
 
 ```text
 894c83e0e663ae5d721bd5476db7e6a35bb8e34b
@@ -1205,7 +1205,7 @@ refactor: centralize profile access in account panel
 2026-06-10T01:34:55Z
 ```
 
-O commit removeu o acesso direto “Dados” do menu e manteve edição/visualização de perfil dentro de “Minha conta”.
+O commit removeu o acesso direto “Dados” do menu e manteve edição/visualização de perfil dentro de “Minha conta”. O próprio handover foi publicado posteriormente em commit documental, portanto a IA deve consultar o HEAD remoto para descobrir o hash mais recente.
 
 Commits recentes relevantes:
 
