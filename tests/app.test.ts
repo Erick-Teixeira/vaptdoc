@@ -133,10 +133,15 @@ describe("app routes", () => {
     expect(page.body).toContain('class="account-dashboard-sidebar"');
     expect(page.body).toContain('class="account-dashboard-main"');
     expect(page.body).not.toContain('id="account-overview-modal"');
+    expect(page.body).toContain('data-account-dashboard-view="overview"');
+    expect(page.body).toContain('data-account-dashboard-view="files" hidden');
+    expect(page.body).toContain('data-account-dashboard-view="credits" hidden');
+    expect(page.body).toContain('data-account-dashboard-view="usage" hidden');
     expect(page.body).toContain('id="account-shortcut-profile"');
     expect(page.body).toContain("Dados e credenciais");
     expect(script.statusCode).toBe(200);
     expect(script.body).toContain('document.getElementById("account-overview-page")');
+    expect(script.body).toContain("function showAccountDashboardView(viewId)");
     expect(script.body).not.toContain('accountMenuProfile?.addEventListener("click"');
     expect(script.body).toContain('accountShortcutProfileButton?.addEventListener("click"');
     expect(script.body).toContain('showAccountModal({ focus: "profile" })');

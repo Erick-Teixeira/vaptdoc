@@ -1341,6 +1341,31 @@ html[data-theme="dark"] .account-dashboard-nav-item.is-active {
   line-height: 1.55;
 }
 
+.account-dashboard-views,
+.account-dashboard-view {
+  min-width: 0;
+}
+
+.account-dashboard-view {
+  animation: account-dashboard-view-in 0.22s ease both;
+}
+
+.account-dashboard-view[hidden] {
+  display: none !important;
+}
+
+@keyframes account-dashboard-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .account-dashboard-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1421,6 +1446,21 @@ html[data-theme="dark"] .account-dashboard-nav-item.is-active {
   align-items: start;
 }
 
+.account-dashboard-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.account-dashboard-overview-grid .account-dashboard-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.account-dashboard-overview-grid .account-dashboard-account-card {
+  grid-column: 1 / -1;
+}
+
 .account-dashboard-content,
 .account-dashboard-actions {
   display: grid;
@@ -1433,6 +1473,17 @@ html[data-theme="dark"] .account-dashboard-nav-item.is-active {
   border-radius: 1.35rem;
   background: color-mix(in srgb, var(--panel-strong) 89%, transparent);
   box-shadow: 0 14px 34px rgba(32, 49, 61, 0.055);
+}
+
+.account-dashboard-detail-card {
+  width: min(100%, 72rem);
+  min-height: min(34rem, calc(100dvh - 14rem));
+  align-content: start;
+  padding: clamp(1rem, 2vw, 1.4rem);
+}
+
+.account-dashboard-detail-card .account-history-list {
+  max-height: calc(100dvh - 22rem);
 }
 
 .account-dashboard-section-head {
@@ -1474,6 +1525,31 @@ html[data-theme="dark"] .account-dashboard-nav-item.is-active {
 
 .account-dashboard-credit-card {
   align-content: start;
+}
+
+.account-dashboard-credit-balance {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--field-border);
+  border-radius: 1.15rem;
+  background: color-mix(in srgb, var(--surface) 76%, transparent);
+}
+
+.account-dashboard-credit-balance > div {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.account-dashboard-credit-balance span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.account-dashboard-credit-balance strong {
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
 }
 
 .account-dashboard-credit-amount {
@@ -6492,6 +6568,10 @@ html[data-theme="dark"] .choice-chip {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .account-dashboard-overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .account-dashboard-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -6563,6 +6643,14 @@ html[data-theme="dark"] .choice-chip {
 
   .account-dashboard-bottom-grid {
     grid-template-columns: 1fr;
+  }
+
+  .account-dashboard-detail-card {
+    min-height: 0;
+  }
+
+  .account-dashboard-detail-card .account-history-list {
+    max-height: none;
   }
 
   .account-dashboard-page .account-history-list {

@@ -844,7 +844,7 @@
         </div>
 
         <nav class="account-dashboard-nav" aria-label="Navegação da conta">
-          <button type="button" class="account-dashboard-nav-item is-active" data-account-dashboard-target="account-dashboard-top">
+          <button type="button" class="account-dashboard-nav-item is-active" data-account-dashboard-view-button="overview" aria-current="page">
             <span class="account-dashboard-nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="4" y="4" width="6" height="6" rx="1.5"></rect>
@@ -855,7 +855,7 @@
             </span>
             <span data-account-dashboard-label="overview">Visão geral</span>
           </button>
-          <button type="button" class="account-dashboard-nav-item" data-account-dashboard-target="account-dashboard-files">
+          <button type="button" class="account-dashboard-nav-item" data-account-dashboard-view-button="files">
             <span class="account-dashboard-nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M7 3.75h7l4 4v12.5H7z"></path>
@@ -866,7 +866,7 @@
             </span>
             <span data-account-dashboard-label="files">Arquivos e resultados</span>
           </button>
-          <button type="button" class="account-dashboard-nav-item" data-account-dashboard-target="account-dashboard-credits">
+          <button type="button" class="account-dashboard-nav-item" data-account-dashboard-view-button="credits">
             <span class="account-dashboard-nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3.5" y="6" width="17" height="12" rx="3"></rect>
@@ -876,7 +876,7 @@
             </span>
             <span data-account-dashboard-label="credits">Créditos e descontos</span>
           </button>
-          <button type="button" class="account-dashboard-nav-item" data-account-dashboard-target="account-dashboard-usage">
+          <button type="button" class="account-dashboard-nav-item" data-account-dashboard-view-button="usage">
             <span class="account-dashboard-nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 19V9"></path>
@@ -947,67 +947,138 @@
           </svg>
         </button>
 
-        <header class="account-dashboard-header" id="account-dashboard-top">
+        <header class="account-dashboard-header">
           <span class="selection-kicker" id="account-dashboard-kicker">Minha conta</span>
           <h2 id="account-overview-title">Seu painel rápido</h2>
           <p id="account-dashboard-intro">Gerencie seu plano, arquivos, créditos e acessos em um só lugar.</p>
         </header>
 
-        <section class="account-dashboard-summary" aria-label="Resumo da conta">
-          <article class="account-dashboard-stat">
-            <span class="account-card-icon account-dashboard-stat-icon is-purple" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m5 17-1.5-8 5 3L12 5l3.5 7 5-3-1.5 8z"></path>
-                <path d="M5.5 20h13"></path>
-              </svg>
-            </span>
-            <span class="account-dashboard-stat-copy">
-              <span id="account-dashboard-plan-label">Plano atual</span>
-              <strong id="account-plan-value">Grátis</strong>
-              <small id="account-plan-copy">Recursos essenciais para começar.</small>
-            </span>
-          </article>
+        <div class="account-dashboard-views">
+          <section class="account-dashboard-view" data-account-dashboard-view="overview">
+            <section class="account-dashboard-summary" aria-label="Resumo da conta">
+              <article class="account-dashboard-stat">
+                <span class="account-card-icon account-dashboard-stat-icon is-purple" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m5 17-1.5-8 5 3L12 5l3.5 7 5-3-1.5 8z"></path>
+                    <path d="M5.5 20h13"></path>
+                  </svg>
+                </span>
+                <span class="account-dashboard-stat-copy">
+                  <span id="account-dashboard-plan-label">Plano atual</span>
+                  <strong id="account-plan-value">Grátis</strong>
+                  <small id="account-plan-copy">Recursos essenciais para começar.</small>
+                </span>
+              </article>
 
-          <article class="account-dashboard-stat">
-            <span class="account-card-icon account-dashboard-stat-icon is-green" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3.5" y="6" width="17" height="12" rx="3"></rect>
-                <path d="M3.5 10h17"></path>
-                <path d="M8 14h3"></path>
-              </svg>
-            </span>
-            <span class="account-dashboard-stat-copy">
-              <span id="account-dashboard-credits-label">Créditos disponíveis</span>
-              <strong id="account-credits-display">0,00 créditos</strong>
-              <small id="account-dashboard-credits-copy">Saldo pronto para novas conversões.</small>
-            </span>
-          </article>
+              <article class="account-dashboard-stat">
+                <span class="account-card-icon account-dashboard-stat-icon is-green" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3.5" y="6" width="17" height="12" rx="3"></rect>
+                    <path d="M3.5 10h17"></path>
+                    <path d="M8 14h3"></path>
+                  </svg>
+                </span>
+                <span class="account-dashboard-stat-copy">
+                  <span id="account-dashboard-credits-label">Créditos disponíveis</span>
+                  <strong id="account-credits-display">0,00 créditos</strong>
+                  <small id="account-dashboard-credits-copy">Saldo pronto para novas conversões.</small>
+                </span>
+              </article>
 
-          <article class="account-dashboard-stat">
-            <span class="account-card-icon account-dashboard-stat-icon is-blue" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="4" y="5.5" width="16" height="14" rx="3"></rect>
-                <path d="M8 3.5v4"></path>
-                <path d="M16 3.5v4"></path>
-                <path d="M4 9.5h16"></path>
-              </svg>
-            </span>
-            <span class="account-dashboard-stat-copy">
-              <span id="account-dashboard-access-label">Acesso válido até</span>
-              <strong id="account-access-display">Plano gratuito</strong>
-              <small id="account-access-copy">Seu acesso atual aparece aqui.</small>
-            </span>
-          </article>
+              <article class="account-dashboard-stat">
+                <span class="account-card-icon account-dashboard-stat-icon is-blue" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="5.5" width="16" height="14" rx="3"></rect>
+                    <path d="M8 3.5v4"></path>
+                    <path d="M16 3.5v4"></path>
+                    <path d="M4 9.5h16"></path>
+                  </svg>
+                </span>
+                <span class="account-dashboard-stat-copy">
+                  <span id="account-dashboard-access-label">Acesso válido até</span>
+                  <strong id="account-access-display">Plano gratuito</strong>
+                  <small id="account-access-copy">Seu acesso atual aparece aqui.</small>
+                </span>
+              </article>
 
-          <article class="account-dashboard-stat account-dashboard-manage-card">
-            <button type="button" class="button primary wide" id="account-upgrade-button">Gerenciar plano</button>
-            <p id="account-dashboard-manage-copy">Atualize, cancele ou altere seu plano atual.</p>
-          </article>
-        </section>
+              <article class="account-dashboard-stat account-dashboard-manage-card">
+                <button type="button" class="button primary wide" id="account-upgrade-button">Gerenciar plano</button>
+                <p id="account-dashboard-manage-copy">Atualize, cancele ou altere seu plano atual.</p>
+              </article>
+            </section>
 
-        <div class="account-dashboard-layout">
-          <div class="account-dashboard-content">
-            <section class="account-card account-history-card account-dashboard-card" id="account-dashboard-files" aria-labelledby="account-history-title">
+            <div class="account-dashboard-overview-grid">
+              <section class="account-dashboard-actions" aria-label="Ações da conta">
+                <article class="account-card account-dashboard-account-card">
+                  <span class="account-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="8" r="3.25"></circle>
+                      <path d="M5.5 19c.8-3.3 3-5 6.5-5s5.7 1.7 6.5 5"></path>
+                    </svg>
+                  </span>
+                  <span class="account-card-copy">
+                    <span class="selection-kicker" id="account-dashboard-account-label">Conta</span>
+                    <strong id="account-created-display">Conta ativa agora.</strong>
+                    <span id="account-dashboard-account-copy">Seus dados ficam protegidos e centralizados.</span>
+                  </span>
+                </article>
+
+                <button type="button" class="account-shortcut-card" id="account-shortcut-profile">
+                  <span class="account-shortcut-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M7.5 7.25h9"></path>
+                      <path d="M7.5 11.75h9"></path>
+                      <path d="M7.5 16.25h5.5"></path>
+                    </svg>
+                  </span>
+                  <span class="account-shortcut-copy">
+                    <strong>Dados e credenciais</strong>
+                    <span>Atualize nome, email e senha</span>
+                  </span>
+                </button>
+                <button type="button" class="account-shortcut-card" id="account-shortcut-settings">
+                  <span class="account-shortcut-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3.5 18.5 6v5.25c0 4-2.35 7.2-6.5 9.25-4.15-2.05-6.5-5.25-6.5-9.25V6z"></path>
+                      <path d="m9.5 12 1.65 1.65L14.75 10"></path>
+                    </svg>
+                  </span>
+                  <span class="account-shortcut-copy">
+                    <strong>Sessão</strong>
+                    <span>Revise a sessão deste navegador</span>
+                  </span>
+                </button>
+                <button type="button" class="account-shortcut-card" id="account-shortcut-admin" hidden>
+                  <span class="account-shortcut-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 7.25h14"></path>
+                      <path d="M5 12h14"></path>
+                      <path d="M5 16.75h8"></path>
+                      <circle cx="17.25" cy="16.75" r="1.75"></circle>
+                    </svg>
+                  </span>
+                  <span class="account-shortcut-copy">
+                    <strong>Painel Administrativo</strong>
+                    <span>Usuários, planos, créditos e cupons</span>
+                  </span>
+                </button>
+              </section>
+
+              <section class="account-card account-history-card account-dashboard-card" aria-labelledby="account-notifications-title">
+                <div class="account-dashboard-section-head">
+                  <div>
+                    <span class="selection-kicker" id="account-dashboard-notifications-kicker">Notificações</span>
+                    <strong id="account-notifications-title">Atualizações internas</strong>
+                  </div>
+                </div>
+                <div class="account-history-list" id="account-notifications-list" aria-live="polite"></div>
+                <p class="account-copy" id="account-notifications-empty" hidden>Quando um processamento terminar, o aviso aparece aqui.</p>
+              </section>
+            </div>
+          </section>
+
+          <section class="account-dashboard-view" data-account-dashboard-view="files" hidden>
+            <section class="account-card account-history-card account-dashboard-card account-dashboard-detail-card" aria-labelledby="account-history-title">
               <div class="account-dashboard-section-head">
                 <div>
                   <span class="selection-kicker" id="account-dashboard-files-kicker">Meus arquivos</span>
@@ -1035,98 +1106,39 @@
               <div class="account-history-list" id="account-history-list" aria-live="polite"></div>
               <p class="account-copy" id="account-history-empty" hidden>Nenhum arquivo apareceu por aqui ainda.</p>
             </section>
+          </section>
 
-            <div class="account-dashboard-bottom-grid">
-              <section class="account-card account-history-card account-dashboard-card" id="account-dashboard-usage" aria-labelledby="account-usage-title">
-                <div class="account-dashboard-section-head">
-                  <div>
-                    <span class="selection-kicker" id="account-dashboard-usage-kicker">Consumo</span>
-                    <strong id="account-usage-title">Uso por conversão</strong>
-                  </div>
+          <section class="account-dashboard-view" data-account-dashboard-view="credits" hidden>
+            <section class="account-card account-dashboard-card account-dashboard-credit-card account-dashboard-detail-card" aria-labelledby="account-dashboard-credit-title">
+              <div class="account-dashboard-section-head">
+                <div>
+                  <span class="selection-kicker" id="account-dashboard-credit-kicker">Benefícios</span>
+                  <strong id="account-dashboard-credit-title">Créditos e descontos</strong>
                 </div>
-                <div class="account-history-list" id="account-usage-list" aria-live="polite"></div>
-                <p class="account-copy" id="account-usage-empty" hidden>Seu consumo por ferramenta aparece aqui conforme você usa a conta.</p>
-              </section>
-
-              <section class="account-card account-dashboard-card account-dashboard-credit-card" id="account-dashboard-credits" aria-labelledby="account-dashboard-credit-title">
-                <div class="account-dashboard-section-head">
-                  <div>
-                    <span class="selection-kicker" id="account-dashboard-credit-kicker">Benefícios</span>
-                    <strong id="account-dashboard-credit-title">Créditos e descontos</strong>
-                  </div>
-                </div>
+              </div>
+              <div class="account-dashboard-credit-balance">
                 <span class="account-dashboard-credit-amount" aria-hidden="true">%</span>
-                <p id="account-discount-display" class="account-copy">Nenhum desconto ativo no momento.</p>
-              </section>
-
-              <section class="account-card account-history-card account-dashboard-card" aria-labelledby="account-notifications-title">
-                <div class="account-dashboard-section-head">
-                  <div>
-                    <span class="selection-kicker" id="account-dashboard-notifications-kicker">Notificações</span>
-                    <strong id="account-notifications-title">Atualizações internas</strong>
-                  </div>
+                <div>
+                  <span>Saldo atual</span>
+                  <strong id="account-credits-detail">0,00 créditos</strong>
                 </div>
-                <div class="account-history-list" id="account-notifications-list" aria-live="polite"></div>
-                <p class="account-copy" id="account-notifications-empty" hidden>Quando um processamento terminar, o aviso aparece aqui.</p>
-              </section>
-            </div>
-          </div>
+              </div>
+              <p id="account-discount-display" class="account-copy">Nenhum desconto ativo no momento.</p>
+            </section>
+          </section>
 
-          <aside class="account-dashboard-actions" aria-label="Ações da conta">
-            <article class="account-card account-dashboard-account-card">
-              <span class="account-card-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="8" r="3.25"></circle>
-                  <path d="M5.5 19c.8-3.3 3-5 6.5-5s5.7 1.7 6.5 5"></path>
-                </svg>
-              </span>
-              <span class="account-card-copy">
-                <span class="selection-kicker" id="account-dashboard-account-label">Conta</span>
-                <strong id="account-created-display">Conta ativa agora.</strong>
-                <span id="account-dashboard-account-copy">Seus dados ficam protegidos e centralizados.</span>
-              </span>
-            </article>
-
-            <button type="button" class="account-shortcut-card" id="account-shortcut-profile">
-              <span class="account-shortcut-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7.5 7.25h9"></path>
-                  <path d="M7.5 11.75h9"></path>
-                  <path d="M7.5 16.25h5.5"></path>
-                </svg>
-              </span>
-              <span class="account-shortcut-copy">
-                <strong>Dados e credenciais</strong>
-                <span>Atualize nome, email e senha</span>
-              </span>
-            </button>
-            <button type="button" class="account-shortcut-card" id="account-shortcut-settings">
-              <span class="account-shortcut-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 3.5 18.5 6v5.25c0 4-2.35 7.2-6.5 9.25-4.15-2.05-6.5-5.25-6.5-9.25V6z"></path>
-                  <path d="m9.5 12 1.65 1.65L14.75 10"></path>
-                </svg>
-              </span>
-              <span class="account-shortcut-copy">
-                <strong>Sessão</strong>
-                <span>Revise a sessão deste navegador</span>
-              </span>
-            </button>
-            <button type="button" class="account-shortcut-card" id="account-shortcut-admin" hidden>
-              <span class="account-shortcut-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 7.25h14"></path>
-                  <path d="M5 12h14"></path>
-                  <path d="M5 16.75h8"></path>
-                  <circle cx="17.25" cy="16.75" r="1.75"></circle>
-                </svg>
-              </span>
-              <span class="account-shortcut-copy">
-                <strong>Painel Administrativo</strong>
-                <span>Usuários, planos, créditos e cupons</span>
-              </span>
-            </button>
-          </aside>
+          <section class="account-dashboard-view" data-account-dashboard-view="usage" hidden>
+            <section class="account-card account-history-card account-dashboard-card account-dashboard-detail-card" aria-labelledby="account-usage-title">
+              <div class="account-dashboard-section-head">
+                <div>
+                  <span class="selection-kicker" id="account-dashboard-usage-kicker">Consumo</span>
+                  <strong id="account-usage-title">Uso por conversão</strong>
+                </div>
+              </div>
+              <div class="account-history-list" id="account-usage-list" aria-live="polite"></div>
+              <p class="account-copy" id="account-usage-empty" hidden>Seu consumo por ferramenta aparece aqui conforme você usa a conta.</p>
+            </section>
+          </section>
         </div>
 
         <p class="billing-status account-status-output" data-account-status>Sua conta está protegida.</p>

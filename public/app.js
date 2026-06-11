@@ -183,12 +183,14 @@ const accountDashboardSettingsNav = document.getElementById("account-dashboard-s
 const accountDashboardSubscriptionNav = document.getElementById("account-dashboard-subscription-nav");
 const accountDashboardAdminNav = document.getElementById("account-dashboard-admin-nav");
 const accountDashboardLogoutButton = document.getElementById("account-dashboard-logout");
-const accountDashboardNavButtons = Array.from(document.querySelectorAll("[data-account-dashboard-target]"));
+const accountDashboardNavButtons = Array.from(document.querySelectorAll("[data-account-dashboard-view-button]"));
+const accountDashboardViews = Array.from(document.querySelectorAll("[data-account-dashboard-view]"));
 const accountDashboardMain = document.getElementById("account-dashboard-main");
 const accountDashboardAvatarImage = document.getElementById("account-dashboard-avatar-image");
 const accountDashboardAvatarInitials = document.getElementById("account-dashboard-avatar-initials");
 const accountAccessDisplay = document.getElementById("account-access-display");
 const accountAccessCopy = document.getElementById("account-access-copy");
+const accountCreditsDetail = document.getElementById("account-credits-detail");
 const accountFileFilterButtons = Array.from(document.querySelectorAll("[data-account-file-filter]"));
 const accountFileCountTotal = document.getElementById("account-file-count-total");
 const accountFileCountTemporary = document.getElementById("account-file-count-temporary");
@@ -626,6 +628,12 @@ const translations = {
     "account.dashboard.kicker": "Minha conta",
     "account.dashboard.title": "Seu painel rápido",
     "account.dashboard.copy": "Gerencie seu plano, arquivos, créditos e acessos em um só lugar.",
+    "account.dashboard.filesTitle": "Arquivos e resultados",
+    "account.dashboard.filesCopy": "Acompanhe temporários, conversões concluídas, falhas e downloads disponíveis.",
+    "account.dashboard.creditsTitle": "Créditos e descontos",
+    "account.dashboard.creditsCopy": "Consulte seu saldo e os benefícios ativos na sua conta.",
+    "account.dashboard.usageTitle": "Consumo por conversão",
+    "account.dashboard.usageCopy": "Veja como seus créditos e conversões foram utilizados em cada ferramenta.",
     "account.dashboard.overview": "Visão geral",
     "account.dashboard.files": "Arquivos e resultados",
     "account.dashboard.credits": "Créditos e descontos",
@@ -819,6 +827,12 @@ const translations = {
     "account.dashboard.kicker": "My account",
     "account.dashboard.title": "Your quick dashboard",
     "account.dashboard.copy": "Manage your plan, files, credits, and access in one place.",
+    "account.dashboard.filesTitle": "Files and results",
+    "account.dashboard.filesCopy": "Review temporary files, completed conversions, failures, and available downloads.",
+    "account.dashboard.creditsTitle": "Credits and discounts",
+    "account.dashboard.creditsCopy": "Check your balance and the benefits currently active on your account.",
+    "account.dashboard.usageTitle": "Usage by conversion",
+    "account.dashboard.usageCopy": "See how credits and conversions were used by each tool.",
     "account.dashboard.overview": "Overview",
     "account.dashboard.files": "Files and results",
     "account.dashboard.credits": "Credits and discounts",
@@ -1629,6 +1643,7 @@ function applyStaticTranslations() {
   setElementText(document.getElementById("account-dashboard-access-label"), t("account.dashboard.accessLabel"));
   setElementText(document.getElementById("account-dashboard-manage-copy"), t("account.dashboard.manageCopy"));
   setElementText(document.getElementById("account-dashboard-account-copy"), t("account.dashboard.accountCopy"));
+  syncAccountDashboardView();
   setElementText(accountSwitchToLoginButton, t("account.login"));
   setElementText(accountSwitchToRegisterButton, t("account.register"));
   setElementText(document.getElementById("account-register-submit"), t("account.register"));
@@ -3285,6 +3300,64 @@ function getAccountModalFocusTarget(focus) {
   return accountOverviewCloseButton;
 }
 
+function getAccountDashboardViewCopy(viewId) {
+  if (viewId === "files") {
+    return {
+      title: t("account.dashboard.filesTitle"),
+      copy: t("account.dashboard.filesCopy")
+    };
+  }
+
+  if (viewId === "credits") {
+    return {
+      title: t("account.dashboard.creditsTitle"),
+      copy: t("account.dashboard.creditsCopy")
+    };
+  }
+
+  if (viewId === "usage") {
+    return {
+      title: t("account.dashboard.usageTitle"),
+      copy: t("account.dashboard.usageCopy")
+    };
+  }
+
+  return {
+    title: t("account.dashboard.title"),
+    copy: t("account.dashboard.copy")
+  };
+}
+
+function getActiveAccountDashboardView() {
+  return accountDashboardViews.find((view) => !view.hidden)?.dataset.accountDashboardView ?? "overview";
+}
+
+function syncAccountDashboardView(viewId = getActiveAccountDashboardView()) {
+  const normalizedView = accountDashboardViews.some((view) => view.dataset.accountDashboardView === viewId)
+    ? viewId
+    : "overview";
+  const copy = getAccountDashboardViewCopy(normalizedView);
+
+  setElementText(document.getElementById("account-overview-title"), copy.title);
+  setElementText(document.getElementById("account-dashboard-intro"), copy.copy);
+  accountDashboardViews.forEach((view) => {
+    view.hidden = view.dataset.accountDashboardView !== normalizedView;
+  });
+  accountDashboardNavButtons.forEach((button) => {
+    const isActive = button.dataset.accountDashboardViewButton === normalizedView;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+}
+
+function showAccountDashboardView(viewId) {
+  syncAccountDashboardView(viewId);
+  accountDashboardMain?.scrollTo({
+    top: 0,
+    behavior: getPreferredScrollBehavior()
+  });
+}
+
 function showAccountModal(options = {}) {
   const requestedFocus = options.focus ?? (isAccountAuthenticated() ? "overview" : "login");
   const allowedGuestFocus = new Set(["register", "login"]);
@@ -3319,11 +3392,7 @@ function showAccountModal(options = {}) {
   updateBodyScrollLock();
   renderAccountUi();
   if (modal === accountOverviewModal) {
-    accountDashboardMain?.scrollTo({ top: 0 });
-    accountDashboardNavButtons.forEach((button, index) => {
-      button.classList.toggle("is-active", index === 0);
-      button.setAttribute("aria-current", index === 0 ? "page" : "false");
-    });
+    showAccountDashboardView("overview");
   }
   if (modal === accountOverviewModal && isAccountAuthenticated()) {
     void refreshAccountWorkspaceData({ silent: true }).catch(() => undefined);
@@ -3933,6 +4002,9 @@ function renderAccountUi() {
     if (accountCreditsDisplay) {
       accountCreditsDisplay.textContent = "0,00 créditos";
     }
+    if (accountCreditsDetail) {
+      accountCreditsDetail.textContent = "0,00 créditos";
+    }
     if (accountDiscountDisplay) {
       accountDiscountDisplay.textContent = "Nenhum desconto ativo no momento.";
     }
@@ -3987,6 +4059,9 @@ function renderAccountUi() {
   }
   if (accountCreditsDisplay) {
     accountCreditsDisplay.textContent = `${wallet.creditBalance.toFixed(2).replace(".", ",")} créditos`;
+  }
+  if (accountCreditsDetail) {
+    accountCreditsDetail.textContent = `${wallet.creditBalance.toFixed(2).replace(".", ",")} créditos`;
   }
   if (accountDiscountDisplay) {
     accountDiscountDisplay.textContent = getAccountDiscountCopy();
@@ -8446,19 +8521,7 @@ accountDashboardSubscriptionNav?.addEventListener("click", () => showAccountModa
 accountDashboardAdminNav?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
 accountDashboardNavButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const target = document.getElementById(button.dataset.accountDashboardTarget ?? "");
-    if (!target) {
-      return;
-    }
-
-    accountDashboardNavButtons.forEach((item) => {
-      item.classList.toggle("is-active", item === button);
-      item.setAttribute("aria-current", item === button ? "page" : "false");
-    });
-    target.scrollIntoView({
-      behavior: getPreferredScrollBehavior(),
-      block: "start"
-    });
+    showAccountDashboardView(button.dataset.accountDashboardViewButton ?? "overview");
   });
 });
 accountFileFilterButtons.forEach((button) => {
