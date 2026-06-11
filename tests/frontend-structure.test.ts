@@ -53,4 +53,15 @@ describe("account dashboard structure", () => {
     expect(html.match(/id="account-dashboard-subscription-nav"/g)).toHaveLength(1);
     expect(html.match(/id="account-dashboard-admin-nav"/g)).toHaveLength(1);
   });
+
+  it("renders plan and credential management as full-page account surfaces", async () => {
+    const html = await loadPublicFile("index.html");
+    const styles = await loadPublicFile("styles.css");
+
+    expect(html).toContain('class="account-detail-page account-pane-modal" id="account-subscription-modal"');
+    expect(html).toContain('class="account-detail-page account-pane-modal" id="account-profile-modal"');
+    expect(html).not.toMatch(/billing-modal account-pane-modal" id="account-(subscription|profile)-modal"/);
+    expect(styles).toContain(".account-detail-page {");
+    expect(styles).toContain("height: 100dvh;");
+  });
 });

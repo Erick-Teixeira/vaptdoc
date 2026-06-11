@@ -1133,6 +1133,159 @@ body.android-fullscreen-dialogs .billing-close {
   width: min(860px, calc(100vw - 1rem));
 }
 
+.account-detail-page {
+  position: fixed;
+  inset: 0;
+  z-index: 37;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 88% 6%, rgba(24, 188, 255, 0.1), transparent 32rem),
+    radial-gradient(circle at 12% 96%, rgba(125, 56, 255, 0.09), transparent 34rem),
+    linear-gradient(145deg, var(--bg-start), var(--bg-end));
+}
+
+.account-detail-page[hidden],
+.account-detail-page [hidden] {
+  display: none !important;
+}
+
+.account-detail-shell {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  width: min(100%, 1280px);
+  height: 100%;
+  margin: 0 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding:
+    max(2.5rem, env(safe-area-inset-top))
+    clamp(1.1rem, 4vw, 4rem)
+    max(2.5rem, env(safe-area-inset-bottom));
+  scrollbar-gutter: stable;
+}
+
+.account-detail-close {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 2.85rem;
+  height: 2.85rem;
+  padding: 0;
+  border: 1px solid var(--field-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--panel-strong) 94%, transparent);
+  color: var(--muted-strong);
+  box-shadow: 0 12px 28px rgba(32, 49, 61, 0.1);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.account-detail-close:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, #6d4aff 24%, var(--field-border));
+  color: var(--text);
+}
+
+.account-detail-close svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.account-detail-header {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 52rem;
+  padding-right: 3.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.account-detail-header h2 {
+  margin: 0;
+  font-size: clamp(2.15rem, 4vw, 3.65rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.account-detail-header p {
+  max-width: 46rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+  line-height: 1.55;
+}
+
+.account-detail-shell-plan {
+  align-content: center;
+  width: min(100%, 1120px);
+}
+
+.account-detail-shell-plan .account-detail-header,
+.account-detail-shell-plan .account-subscription-stack,
+.account-detail-shell-plan > .account-status-output {
+  width: min(100%, 62rem);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.account-detail-shell-plan .account-subscription-card {
+  min-height: 24rem;
+  align-content: center;
+  gap: 1.35rem;
+  padding: clamp(1.35rem, 3vw, 2.4rem);
+  border-radius: 1.75rem;
+  box-shadow: 0 22px 60px rgba(32, 49, 61, 0.11);
+}
+
+.account-detail-shell-plan .account-popover-plan-copy {
+  gap: 0.45rem;
+}
+
+.account-detail-shell-plan .account-popover-plan-copy strong {
+  max-width: 42rem;
+  font-size: clamp(1.5rem, 3vw, 2.35rem);
+  letter-spacing: -0.035em;
+}
+
+.account-detail-shell-plan .account-popover-plan-copy p {
+  max-width: 44rem;
+  font-size: 1rem;
+}
+
+.account-detail-shell-plan .account-subscription-manage-button {
+  width: min(100%, 24rem);
+  min-height: 3.2rem;
+}
+
+.account-detail-shell-profile > .account-avatar-inline-card,
+.account-detail-shell-profile > .account-editor-grid,
+.account-detail-shell-profile > .account-status-output {
+  width: min(100%, 74rem);
+}
+
+.account-detail-shell-profile > .account-avatar-inline-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.account-detail-shell-profile .account-editor-grid {
+  gap: 1rem;
+}
+
+.account-detail-shell-profile .account-editor-card {
+  min-height: 29rem;
+  padding: clamp(1rem, 2vw, 1.4rem);
+  border-radius: 1.45rem;
+  box-shadow: 0 18px 44px rgba(32, 49, 61, 0.07);
+}
+
 .account-dashboard-page {
   position: fixed;
   inset: 0;
@@ -7055,6 +7208,32 @@ html[data-theme="dark"] .choice-chip {
 }
 
 @media (max-width: 860px) {
+  .account-detail-shell {
+    width: 100%;
+    padding:
+      max(1.35rem, env(safe-area-inset-top))
+      1rem
+      max(2rem, env(safe-area-inset-bottom));
+    scrollbar-gutter: auto;
+  }
+
+  .account-detail-close {
+    top: max(0.85rem, env(safe-area-inset-top));
+    right: max(0.85rem, env(safe-area-inset-right));
+  }
+
+  .account-detail-header {
+    padding-right: 3.2rem;
+  }
+
+  .account-detail-shell-plan {
+    align-content: start;
+  }
+
+  .account-detail-shell-plan .account-subscription-card {
+    min-height: 0;
+  }
+
   .account-dashboard-page {
     display: block;
     overflow-y: auto;
@@ -7161,6 +7340,27 @@ html[data-theme="dark"] .choice-chip {
 }
 
 @media (max-width: 620px) {
+  .account-detail-header h2 {
+    font-size: clamp(1.9rem, 10vw, 2.75rem);
+  }
+
+  .account-detail-shell-profile > .account-avatar-inline-card {
+    grid-template-columns: 1fr;
+  }
+
+  .account-detail-shell-profile .account-editor-card {
+    min-height: 0;
+  }
+
+  .account-detail-shell-plan .account-subscription-card {
+    padding: 1.1rem;
+    border-radius: 1.25rem;
+  }
+
+  .account-detail-shell-plan .account-popover-plan-copy strong {
+    font-size: clamp(1.35rem, 7vw, 1.85rem);
+  }
+
   .account-dashboard-sidebar {
     gap: 1rem;
   }

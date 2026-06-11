@@ -1147,22 +1147,20 @@
       </main>
     </section>
 
-    <div class="billing-modal account-pane-modal" id="account-subscription-modal" hidden>
-      <button type="button" class="billing-backdrop" aria-label="Fechar assinatura" data-close-account-pane="true"></button>
-
-      <section class="billing-dialog account-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="account-subscription-title">
-        <button type="button" class="billing-close" id="account-subscription-close" aria-label="Fechar">
+    <section class="account-detail-page account-pane-modal" id="account-subscription-modal" aria-labelledby="account-subscription-title" hidden>
+      <div class="account-detail-shell account-detail-shell-plan">
+        <button type="button" class="account-detail-close" id="account-subscription-close" aria-label="Voltar para Minha conta">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="m18 6-12 12"></path>
             <path d="m6 6 12 12"></path>
           </svg>
         </button>
 
-        <div class="billing-header">
+        <header class="account-detail-header">
           <span class="selection-kicker">Assinatura</span>
           <h2 id="account-subscription-title">Seu plano e benefícios</h2>
           <p>Veja o status da sua assinatura e abra o gerenciamento do plano quando quiser.</p>
-        </div>
+        </header>
 
         <div class="account-subscription-stack">
           <section class="account-popover-plan-card account-subscription-card" aria-live="polite">
@@ -1190,25 +1188,23 @@
         </div>
 
         <p class="billing-status account-status-output" data-account-status>Abra o gerenciamento da assinatura para fazer upgrade, ativar código ou revisar seu acesso.</p>
-      </section>
-    </div>
+      </div>
+    </section>
 
-    <div class="billing-modal account-pane-modal" id="account-profile-modal" hidden>
-      <button type="button" class="billing-backdrop" aria-label="Fechar dados da conta" data-close-account-pane="true"></button>
-
-      <section class="billing-dialog account-pane-dialog account-pane-wide" role="dialog" aria-modal="true" aria-labelledby="account-profile-title">
-        <button type="button" class="billing-close" id="account-profile-close" aria-label="Fechar">
+    <section class="account-detail-page account-pane-modal" id="account-profile-modal" aria-labelledby="account-profile-title" hidden>
+      <div class="account-detail-shell account-detail-shell-profile">
+        <button type="button" class="account-detail-close" id="account-profile-close" aria-label="Voltar para Minha conta">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="m18 6-12 12"></path>
             <path d="m6 6 12 12"></path>
           </svg>
         </button>
 
-        <div class="billing-header">
+        <header class="account-detail-header">
           <span class="selection-kicker">Dados e credenciais</span>
           <h2 id="account-profile-title">Atualize seu acesso</h2>
           <p>Edite seus dados pessoais e troque sua senha em um fluxo separado e sem cortes na tela.</p>
-        </div>
+        </header>
 
         <article class="account-card account-avatar-inline-card">
           <div class="account-avatar-inline-layout">
@@ -1283,8 +1279,8 @@
         </div>
 
         <p class="billing-status account-status-output" data-account-status>Atualize seus dados ou sua senha com segurança.</p>
-      </section>
-    </div>
+      </div>
+    </section>
 
     <div class="billing-modal account-pane-modal" id="account-settings-modal" hidden>
       <button type="button" class="billing-backdrop" aria-label="Fechar configurações" data-close-account-pane="true"></button>
