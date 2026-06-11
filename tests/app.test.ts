@@ -113,7 +113,7 @@ describe("app routes", () => {
     expect(script.body).toContain('document.body.dataset.pageMode === "tool" ? getToolById() : null');
   });
 
-  it("keeps profile management only inside My Account", async () => {
+  it("keeps account management in dedicated dashboard areas without overview duplication", async () => {
     const app = await createApp();
     apps.push(app);
 
@@ -137,13 +137,19 @@ describe("app routes", () => {
     expect(page.body).toContain('data-account-dashboard-view="files" hidden');
     expect(page.body).toContain('data-account-dashboard-view="credits" hidden');
     expect(page.body).toContain('data-account-dashboard-view="usage" hidden');
-    expect(page.body).toContain('id="account-shortcut-profile"');
+    expect(page.body).not.toContain('id="account-shortcut-profile"');
+    expect(page.body).toContain('id="account-dashboard-profile-nav"');
+    expect(page.body).toContain('id="account-dashboard-menu-toggle"');
+    expect(page.body).toContain('id="account-usage-chart"');
+    expect(page.body).toContain('id="account-status-donut"');
     expect(page.body).toContain("Dados e credenciais");
     expect(script.statusCode).toBe(200);
     expect(script.body).toContain('document.getElementById("account-overview-page")');
     expect(script.body).toContain("function showAccountDashboardView(viewId)");
     expect(script.body).not.toContain('accountMenuProfile?.addEventListener("click"');
-    expect(script.body).toContain('accountShortcutProfileButton?.addEventListener("click"');
+    expect(script.body).toContain('accountDashboardProfileNav?.addEventListener("click"');
+    expect(script.body).toContain("function renderAccountOverviewCharts()");
+    expect(script.body).toContain("function closeAccountPane()");
     expect(script.body).toContain('showAccountModal({ focus: "profile" })');
   });
 

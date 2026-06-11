@@ -1170,6 +1170,13 @@ body.android-fullscreen-dialogs .billing-close {
   background: color-mix(in srgb, var(--panel-strong) 90%, transparent);
 }
 
+.account-dashboard-sidebar-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .account-dashboard-identity {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1222,6 +1229,57 @@ body.android-fullscreen-dialogs .billing-close {
 .account-dashboard-identity-copy span {
   color: var(--muted);
   font-size: 0.78rem;
+}
+
+.account-dashboard-menu {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.45rem;
+}
+
+.account-dashboard-menu-toggle {
+  position: relative;
+  display: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--field-border);
+  border-radius: 0.95rem;
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.account-dashboard-menu-toggle span {
+  position: absolute;
+  width: 1.15rem;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.account-dashboard-menu-toggle span:nth-child(1) {
+  transform: translateY(-0.34rem);
+}
+
+.account-dashboard-menu-toggle span:nth-child(3) {
+  transform: translateY(0.34rem);
+}
+
+.account-dashboard-menu-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: rotate(45deg);
+}
+
+.account-dashboard-menu-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+
+.account-dashboard-menu-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: rotate(-45deg);
 }
 
 .account-dashboard-nav {
@@ -1448,17 +1506,250 @@ html[data-theme="dark"] .account-dashboard-nav-item.is-active {
 
 .account-dashboard-overview-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(19rem, 0.75fr);
   gap: 1rem;
   align-items: start;
 }
 
-.account-dashboard-overview-grid .account-dashboard-actions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.account-dashboard-overview-side {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
 }
 
-.account-dashboard-overview-grid .account-dashboard-account-card {
-  grid-column: 1 / -1;
+.account-dashboard-chart-card,
+.account-status-chart-card {
+  align-content: start;
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.account-chart-heading {
+  align-items: flex-start;
+}
+
+.account-chart-switch {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.22rem;
+  padding: 0.22rem;
+  border: 1px solid var(--field-border);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.account-chart-switch button {
+  min-height: 2rem;
+  padding: 0.38rem 0.68rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.account-chart-switch button.is-active {
+  background: var(--surface-strong);
+  color: #6545e9;
+  box-shadow: 0 6px 16px rgba(60, 49, 120, 0.1);
+}
+
+html[data-theme="dark"] .account-chart-switch button.is-active {
+  color: #c6b9ff;
+}
+
+.account-usage-chart {
+  display: grid;
+  gap: 0.72rem;
+  min-height: 17rem;
+  margin-top: 1.2rem;
+  align-content: center;
+}
+
+.account-chart-row {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 0.7fr) minmax(8rem, 1.3fr) minmax(2.8rem, auto);
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.34rem 0.45rem;
+  border: 1px solid transparent;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.account-chart-row:hover,
+.account-chart-row.is-selected {
+  transform: translateX(2px);
+  border-color: color-mix(in srgb, #6d4aff 22%, var(--panel-border));
+  background: color-mix(in srgb, #6d4aff 6%, transparent);
+}
+
+.account-chart-label {
+  overflow: hidden;
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-chart-track {
+  position: relative;
+  height: 0.62rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 14%, transparent);
+}
+
+.account-chart-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6c4cff, #47a8f2);
+  box-shadow: 0 0 16px rgba(91, 76, 255, 0.18);
+  transition: width 0.35s ease;
+}
+
+.account-chart-row strong {
+  min-width: 2.5rem;
+  color: var(--text);
+  font-size: 0.84rem;
+  text-align: right;
+}
+
+.account-chart-summary {
+  min-height: 1.35rem;
+  margin: 0.9rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.account-chart-empty {
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.account-status-chart-layout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.account-status-donut {
+  --status-ready-angle: 0deg;
+  --status-temporary-angle: 0deg;
+  --status-failed-angle: 0deg;
+  position: relative;
+  display: grid;
+  place-content: center;
+  width: 8.2rem;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, var(--panel-strong) 0 53%, transparent 54%),
+    conic-gradient(
+      #38bd75 0 var(--status-ready-angle),
+      #6d7cff var(--status-ready-angle) var(--status-temporary-angle),
+      #e16670 var(--status-temporary-angle) var(--status-failed-angle),
+      color-mix(in srgb, var(--muted) 14%, transparent) var(--status-failed-angle) 360deg
+    );
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--panel-border) 82%, transparent);
+  transition: transform 0.18s ease;
+}
+
+.account-status-donut:hover {
+  transform: scale(1.025);
+}
+
+.account-status-donut.is-empty {
+  background:
+    radial-gradient(circle at center, var(--panel-strong) 0 53%, transparent 54%),
+    conic-gradient(color-mix(in srgb, var(--muted) 14%, transparent) 0 360deg);
+}
+
+.account-status-donut span,
+.account-status-donut small {
+  position: relative;
+  z-index: 1;
+}
+
+.account-status-donut span {
+  font-size: 1.65rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.account-status-donut small {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.account-status-legend {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.account-status-legend button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0.48rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 0.8rem;
+  background: transparent;
+  color: var(--muted-strong);
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-status-legend button:hover {
+  border-color: var(--field-border);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.account-status-legend strong {
+  color: var(--text);
+}
+
+.account-status-dot {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+}
+
+.account-status-dot.is-ready {
+  background: #38bd75;
+}
+
+.account-status-dot.is-temporary {
+  background: #6d7cff;
+}
+
+.account-status-dot.is-failed {
+  background: #e16670;
 }
 
 .account-dashboard-content,
@@ -6773,6 +7064,7 @@ html[data-theme="dark"] .choice-chip {
   .account-dashboard-sidebar {
     min-height: auto;
     overflow: visible;
+    gap: 0.7rem;
     padding:
       max(1rem, env(safe-area-inset-top))
       1rem
@@ -6783,8 +7075,30 @@ html[data-theme="dark"] .choice-chip {
   }
 
   .account-dashboard-identity {
-    max-width: calc(100% - 3.8rem);
+    max-width: 100%;
     padding: 0.3rem 0;
+  }
+
+  .account-dashboard-menu-toggle {
+    display: grid;
+  }
+
+  .account-dashboard-menu {
+    display: flex;
+    max-height: 0;
+    gap: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: max-height 0.24s ease, opacity 0.18s ease, visibility 0.18s ease;
+  }
+
+  .account-dashboard-menu.is-open {
+    max-height: 46rem;
+    gap: 0.65rem;
+    padding-top: 0.35rem;
+    opacity: 1;
+    visibility: visible;
   }
 
   .account-dashboard-nav {
@@ -6804,6 +7118,7 @@ html[data-theme="dark"] .choice-chip {
 
   .account-dashboard-signout {
     margin-top: 0;
+    background: color-mix(in srgb, rgba(202, 91, 102, 0.08) 80%, transparent);
   }
 
   .account-dashboard-main {
@@ -6815,8 +7130,9 @@ html[data-theme="dark"] .choice-chip {
   }
 
   .account-dashboard-close {
-    top: max(0.85rem, env(safe-area-inset-top));
-    right: max(0.85rem, env(safe-area-inset-right));
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
   }
 
   .account-dashboard-header {
@@ -6837,6 +7153,10 @@ html[data-theme="dark"] .choice-chip {
 
   .account-dashboard-page .account-history-list {
     max-height: none;
+  }
+
+  .account-status-chart-layout {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 }
 
@@ -6914,6 +7234,24 @@ html[data-theme="dark"] .choice-chip {
     width: 100%;
     min-width: 0;
   }
+
+  .account-chart-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-chart-switch {
+    width: 100%;
+  }
+
+  .account-usage-chart {
+    min-height: 14rem;
+  }
+
+  .account-chart-row {
+    grid-template-columns: minmax(5.5rem, 0.8fr) minmax(5rem, 1.2fr) minmax(2.5rem, auto);
+    gap: 0.5rem;
+  }
 }
 
 @media (max-width: 390px) {
@@ -6932,6 +7270,24 @@ html[data-theme="dark"] .choice-chip {
 
   .account-dashboard-manage-card {
     grid-template-columns: 1fr;
+  }
+
+  .account-status-chart-layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .account-status-legend {
+    width: 100%;
+  }
+
+  .account-chart-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .account-chart-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 }
 

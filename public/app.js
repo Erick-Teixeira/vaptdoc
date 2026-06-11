@@ -175,14 +175,13 @@ const accountSettingsCloseButton = document.getElementById("account-settings-clo
 const accountVerificationCloseButton = document.getElementById("account-verification-close");
 const accountSwitchToLoginButton = document.getElementById("account-switch-to-login");
 const accountSwitchToRegisterButton = document.getElementById("account-switch-to-register");
-const accountShortcutProfileButton = document.getElementById("account-shortcut-profile");
-const accountShortcutSettingsButton = document.getElementById("account-shortcut-settings");
-const accountShortcutAdminButton = document.getElementById("account-shortcut-admin");
 const accountDashboardProfileNav = document.getElementById("account-dashboard-profile-nav");
 const accountDashboardSettingsNav = document.getElementById("account-dashboard-settings-nav");
 const accountDashboardSubscriptionNav = document.getElementById("account-dashboard-subscription-nav");
 const accountDashboardAdminNav = document.getElementById("account-dashboard-admin-nav");
 const accountDashboardLogoutButton = document.getElementById("account-dashboard-logout");
+const accountDashboardMenu = document.getElementById("account-dashboard-menu");
+const accountDashboardMenuToggle = document.getElementById("account-dashboard-menu-toggle");
 const accountDashboardNavButtons = Array.from(document.querySelectorAll("[data-account-dashboard-view-button]"));
 const accountDashboardViews = Array.from(document.querySelectorAll("[data-account-dashboard-view]"));
 const accountDashboardMain = document.getElementById("account-dashboard-main");
@@ -200,6 +199,15 @@ const accountHistoryList = document.getElementById("account-history-list");
 const accountHistoryEmpty = document.getElementById("account-history-empty");
 const accountUsageList = document.getElementById("account-usage-list");
 const accountUsageEmpty = document.getElementById("account-usage-empty");
+const accountUsageChart = document.getElementById("account-usage-chart");
+const accountUsageChartSummary = document.getElementById("account-usage-chart-summary");
+const accountChartMetricButtons = Array.from(document.querySelectorAll("[data-account-chart-metric]"));
+const accountStatusDonut = document.getElementById("account-status-donut");
+const accountStatusTotal = document.getElementById("account-status-total");
+const accountStatusReady = document.getElementById("account-status-ready");
+const accountStatusTemporary = document.getElementById("account-status-temporary");
+const accountStatusFailed = document.getElementById("account-status-failed");
+const accountStatusFilterButtons = Array.from(document.querySelectorAll("[data-account-status-filter]"));
 const accountNotificationsList = document.getElementById("account-notifications-list");
 const accountNotificationsEmpty = document.getElementById("account-notifications-empty");
 const accountRegisterForm = document.getElementById("account-register-form");
@@ -215,7 +223,6 @@ const accountPlanValue = document.getElementById("account-plan-value");
 const accountPlanCopy = document.getElementById("account-plan-copy");
 const accountNameDisplay = document.getElementById("account-name-display");
 const accountEmailDisplay = document.getElementById("account-email-display");
-const accountCreatedDisplay = document.getElementById("account-created-display");
 const accountCreditsDisplay = document.getElementById("account-credits-display");
 const accountDiscountDisplay = document.getElementById("account-discount-display");
 const accountDisplayNameInput = document.getElementById("account-display-name");
@@ -404,6 +411,9 @@ let accountWorkspaceState = {
   usage: [],
   notifications: []
 };
+let accountOverviewChartMetric = "conversions";
+let accountPaneReturnStack = [];
+let billingAccountReturnState = null;
 const themeCookieName = "vaptdoc-theme";
 const legacyThemeCookieName = "transmuta-theme";
 const favoritesStorageKey = "vaptdoc-favorites";
@@ -411,6 +421,7 @@ const legacyFavoritesStorageKey = "transmuta-favorites";
 const pendingCheckoutStorageKey = "vaptdoc-checkout-pending";
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const compactViewportQuery = window.matchMedia("(max-width: 720px)");
+const accountDashboardMobileQuery = window.matchMedia("(max-width: 860px)");
 const touchViewportQuery = window.matchMedia("(pointer: coarse)");
 const isAndroidUserAgent =
   /Android/i.test(navigator.userAgent || "") ||
@@ -650,6 +661,19 @@ const translations = {
     "account.dashboard.accessLabel": "Acesso válido até",
     "account.dashboard.manageCopy": "Atualize, cancele ou altere seu plano atual.",
     "account.dashboard.accountCopy": "Seus dados ficam protegidos e centralizados.",
+    "account.dashboard.menuOpen": "Abrir menu da conta",
+    "account.dashboard.menuClose": "Fechar menu da conta",
+    "account.dashboard.chartKicker": "Atividade",
+    "account.dashboard.chartTitle": "Conversões por ferramenta",
+    "account.dashboard.chartConversions": "Conversões",
+    "account.dashboard.chartCredits": "Créditos",
+    "account.dashboard.chartEmpty": "Seu uso por ferramenta aparecerá aqui.",
+    "account.dashboard.statusKicker": "Arquivos",
+    "account.dashboard.statusTitle": "Status dos resultados",
+    "account.dashboard.statusTotal": "Total",
+    "account.dashboard.statusReady": "Concluídos",
+    "account.dashboard.statusTemporary": "Temporários",
+    "account.dashboard.statusFailed": "Falhas",
     "account.launcher.guest": "Entrar ou criar conta",
     "account.launcher.open": "Abrir menu da conta",
     "account.register": "Criar conta",
@@ -849,6 +873,19 @@ const translations = {
     "account.dashboard.accessLabel": "Access valid until",
     "account.dashboard.manageCopy": "Upgrade, cancel, or change your current plan.",
     "account.dashboard.accountCopy": "Your account data stays protected and centralized.",
+    "account.dashboard.menuOpen": "Open account menu",
+    "account.dashboard.menuClose": "Close account menu",
+    "account.dashboard.chartKicker": "Activity",
+    "account.dashboard.chartTitle": "Conversions by tool",
+    "account.dashboard.chartConversions": "Conversions",
+    "account.dashboard.chartCredits": "Credits",
+    "account.dashboard.chartEmpty": "Your tool usage will appear here.",
+    "account.dashboard.statusKicker": "Files",
+    "account.dashboard.statusTitle": "Result status",
+    "account.dashboard.statusTotal": "Total",
+    "account.dashboard.statusReady": "Completed",
+    "account.dashboard.statusTemporary": "Temporary",
+    "account.dashboard.statusFailed": "Failed",
     "account.launcher.guest": "Sign in or create account",
     "account.launcher.open": "Open account menu",
     "account.register": "Create account",
@@ -1644,7 +1681,16 @@ function applyStaticTranslations() {
   setElementText(document.getElementById("account-dashboard-credits-label"), t("account.dashboard.creditsLabel"));
   setElementText(document.getElementById("account-dashboard-access-label"), t("account.dashboard.accessLabel"));
   setElementText(document.getElementById("account-dashboard-manage-copy"), t("account.dashboard.manageCopy"));
-  setElementText(document.getElementById("account-dashboard-account-copy"), t("account.dashboard.accountCopy"));
+  setElementText(document.getElementById("account-usage-chart-kicker"), t("account.dashboard.chartKicker"));
+  setElementText(document.getElementById("account-usage-chart-title"), t("account.dashboard.chartTitle"));
+  setElementText(document.querySelector("[data-account-chart-metric='conversions']"), t("account.dashboard.chartConversions"));
+  setElementText(document.querySelector("[data-account-chart-metric='credits']"), t("account.dashboard.chartCredits"));
+  setElementText(document.getElementById("account-status-chart-kicker"), t("account.dashboard.statusKicker"));
+  setElementText(document.getElementById("account-status-chart-title"), t("account.dashboard.statusTitle"));
+  setElementText(document.querySelector("#account-status-donut small"), t("account.dashboard.statusTotal"));
+  setElementText(document.querySelector("[data-account-status-filter='ready'] span:nth-of-type(2)"), t("account.dashboard.statusReady"));
+  setElementText(document.querySelector("[data-account-status-filter='temporary'] span:nth-of-type(2)"), t("account.dashboard.statusTemporary"));
+  setElementText(document.querySelector("[data-account-status-filter='failed'] span:nth-of-type(2)"), t("account.dashboard.statusFailed"));
   syncAccountDashboardView();
   setElementText(accountSwitchToLoginButton, t("account.login"));
   setElementText(accountSwitchToRegisterButton, t("account.register"));
@@ -1658,12 +1704,6 @@ function applyStaticTranslations() {
   setElementText(accountAvatarRemoveButton, t("account.removeAvatar"));
   setElementText(accountVerificationSubmitButton, t("account.confirmCode"));
   setElementText(accountVerificationResendButton, t("account.resendCode"));
-  setElementText(document.querySelector("#account-shortcut-profile strong"), t("account.shortcut.profile"));
-  setElementText(document.querySelector("#account-shortcut-profile .account-shortcut-copy > span"), t("account.shortcut.profileCopy"));
-  setElementText(document.querySelector("#account-shortcut-settings strong"), t("account.shortcut.settings"));
-  setElementText(document.querySelector("#account-shortcut-settings .account-shortcut-copy > span"), t("account.shortcut.settingsCopy"));
-  setElementText(document.querySelector("#account-shortcut-admin strong"), t("account.shortcut.admin"));
-  setElementText(document.querySelector("#account-shortcut-admin .account-shortcut-copy > span"), t("account.shortcut.adminCopy"));
   setLeadingText(document.querySelector("[data-account-file-filter='all']"), t("account.files.all"));
   setLeadingText(document.querySelector("[data-account-file-filter='temporary']"), t("account.files.temporary"));
   setLeadingText(document.querySelector("[data-account-file-filter='ready']"), t("account.files.ready"));
@@ -1679,6 +1719,8 @@ function applyStaticTranslations() {
   document.querySelectorAll(".billing-close").forEach((button) => button.setAttribute("aria-label", t("common.close")));
   document.querySelectorAll(".billing-backdrop").forEach((button) => button.setAttribute("aria-label", t("common.close")));
   accountOverviewCloseButton?.setAttribute("aria-label", t("common.close"));
+  syncAccountDashboardMenu(false);
+  renderAccountOverviewCharts();
   setElementText(accountLanguageTitle, t("settings.language.title"));
   setElementText(accountLanguageCopy, t("settings.language.copy"));
   setElementText(accountLanguageLabel, t("settings.language.label"));
@@ -3188,6 +3230,7 @@ function showBillingModal(options = {}) {
     return;
   }
 
+  billingAccountReturnState = getVisibleAccountPaneState();
   hideAccountMenu();
   hideAccountPaneModals();
   hideConversionModal();
@@ -3207,13 +3250,23 @@ function showBillingModal(options = {}) {
   }, 0);
 }
 
-function hideBillingModal() {
+function hideBillingModal(options = {}) {
   if (!billingModal) {
     return;
   }
 
   billingModal.hidden = true;
+  const returnState = options.restoreAccount ? billingAccountReturnState : null;
+  billingAccountReturnState = null;
   updateBodyScrollLock();
+
+  if (returnState) {
+    showAccountModal({
+      focus: returnState.focus,
+      dashboardView: returnState.dashboardView,
+      recordHistory: false
+    });
+  }
 }
 
 function promptAccountPlanAccess(tool = getToolById()) {
@@ -3354,14 +3407,61 @@ function syncAccountDashboardView(viewId = getActiveAccountDashboardView()) {
 
 function showAccountDashboardView(viewId) {
   syncAccountDashboardView(viewId);
+  syncAccountDashboardMenu(false);
   accountDashboardMain?.scrollTo({
     top: 0,
     behavior: getPreferredScrollBehavior()
   });
 }
 
+function getVisibleAccountPaneState() {
+  const paneEntries = [
+    ["register", accountRegisterModal],
+    ["login", accountLoginModal],
+    ["overview", accountOverviewModal],
+    ["subscription", accountSubscriptionModal],
+    ["profile", accountProfileModal],
+    ["settings", accountSettingsModal],
+    ["verify", accountVerificationModal],
+    ["admin", adminPanelPage]
+  ];
+  const visibleEntry = paneEntries.find(([, pane]) => pane && !pane.hidden);
+  if (!visibleEntry) {
+    return null;
+  }
+
+  return {
+    focus: visibleEntry[0],
+    dashboardView: visibleEntry[0] === "overview" ? getActiveAccountDashboardView() : undefined
+  };
+}
+
+function syncAccountDashboardMenu(open = false) {
+  if (!accountDashboardMenu || !accountDashboardMenuToggle) {
+    return;
+  }
+
+  const isMobile = accountDashboardMobileQuery.matches;
+  const isOpen = !isMobile || Boolean(open);
+  accountDashboardMenu.classList.toggle("is-open", isOpen);
+  accountDashboardMenuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  accountDashboardMenuToggle.setAttribute(
+    "aria-label",
+    isOpen ? t("account.dashboard.menuClose") : t("account.dashboard.menuOpen")
+  );
+  if ("inert" in accountDashboardMenu) {
+    accountDashboardMenu.inert = !isOpen;
+  }
+}
+
+function toggleAccountDashboardMenu() {
+  const isOpen = accountDashboardMenu?.classList.contains("is-open") ?? false;
+  syncAccountDashboardMenu(!isOpen);
+}
+
 function showAccountModal(options = {}) {
   const requestedFocus = options.focus ?? (isAccountAuthenticated() ? "overview" : "login");
+  const previousPaneState = getVisibleAccountPaneState();
   const allowedGuestFocus = new Set(["register", "login"]);
   const allowedAuthenticatedFocus = new Set(["overview", "subscription", "profile", "verify", "settings", "admin", "close"]);
   let focus = requestedFocus;
@@ -3379,6 +3479,20 @@ function showAccountModal(options = {}) {
     return;
   }
 
+  if (options.recordHistory !== false) {
+    if (previousPaneState && previousPaneState.focus !== focus) {
+      const lastReturnState = accountPaneReturnStack.at(-1);
+      const isDuplicate =
+        lastReturnState?.focus === previousPaneState.focus &&
+        lastReturnState?.dashboardView === previousPaneState.dashboardView;
+      if (!isDuplicate) {
+        accountPaneReturnStack.push(previousPaneState);
+      }
+    } else if (!previousPaneState) {
+      accountPaneReturnStack = [];
+    }
+  }
+
   hideAccountMenu();
   hideBillingModal();
   hideConversionModal();
@@ -3394,7 +3508,7 @@ function showAccountModal(options = {}) {
   updateBodyScrollLock();
   renderAccountUi();
   if (modal === accountOverviewModal) {
-    showAccountDashboardView("overview");
+    showAccountDashboardView(options.dashboardView ?? "overview");
   }
   if (modal === accountOverviewModal && isAccountAuthenticated()) {
     void refreshAccountWorkspaceData({ silent: true }).catch(() => undefined);
@@ -3411,7 +3525,28 @@ function showAccountModal(options = {}) {
 
 function hideAccountModal() {
   hideAccountPaneModals();
+  accountPaneReturnStack = [];
+  billingAccountReturnState = null;
+  syncAccountDashboardMenu(false);
   toggleAvatarActionReveal(false);
+}
+
+function closeAccountPane() {
+  hideAccountPaneModals();
+  toggleAvatarActionReveal(false);
+  syncAccountDashboardMenu(false);
+
+  const returnState = accountPaneReturnStack.pop();
+  if (!returnState) {
+    updateBodyScrollLock();
+    return;
+  }
+
+  showAccountModal({
+    focus: returnState.focus,
+    dashboardView: returnState.dashboardView,
+    recordHistory: false
+  });
 }
 
 function renderBillingOffers() {
@@ -3659,12 +3794,125 @@ async function markAccountNotificationsRead(ids) {
   return accountWorkspaceState.notifications;
 }
 
+function formatAccountChartValue(value, metric = accountOverviewChartMetric) {
+  if (metric === "credits") {
+    return Number(value ?? 0).toFixed(2).replace(".", ",");
+  }
+  return String(Number(value ?? 0));
+}
+
+function renderAccountOverviewCharts() {
+  accountChartMetricButtons.forEach((button) => {
+    const isActive = button.dataset.accountChartMetric === accountOverviewChartMetric;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+
+  if (accountUsageChart && accountUsageChartSummary) {
+    accountUsageChart.innerHTML = "";
+    const usageItems = Array.isArray(accountWorkspaceState.usage) ? accountWorkspaceState.usage : [];
+    const metricKey = accountOverviewChartMetric === "credits" ? "estimatedCreditsUsed" : "totalConversions";
+    const sortedItems = [...usageItems]
+      .sort((left, right) => Number(right?.[metricKey] ?? 0) - Number(left?.[metricKey] ?? 0))
+      .slice(0, 6);
+
+    if (!isAccountAuthenticated() || sortedItems.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "account-chart-empty";
+      empty.textContent = t("account.dashboard.chartEmpty");
+      accountUsageChart.append(empty);
+      accountUsageChartSummary.textContent = t("account.dashboard.chartEmpty");
+    } else {
+      const maximum = Math.max(...sortedItems.map((item) => Number(item?.[metricKey] ?? 0)), 1);
+      const total = sortedItems.reduce((sum, item) => sum + Number(item?.[metricKey] ?? 0), 0);
+      accountUsageChartSummary.textContent = accountOverviewChartMetric === "credits"
+        ? `${formatAccountChartValue(total, "credits")} ${t("account.dashboard.chartCredits").toLowerCase()}`
+        : `${formatAccountChartValue(total, "conversions")} ${t("account.dashboard.chartConversions").toLowerCase()}`;
+
+      sortedItems.forEach((item) => {
+        const value = Number(item?.[metricKey] ?? 0);
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "account-chart-row";
+        row.setAttribute(
+          "aria-label",
+          `${item.toolLabel}: ${formatAccountChartValue(value)} ${accountOverviewChartMetric === "credits" ? t("account.dashboard.chartCredits") : t("account.dashboard.chartConversions")}`
+        );
+
+        const label = document.createElement("span");
+        label.className = "account-chart-label";
+        label.textContent = item.toolLabel;
+
+        const track = document.createElement("span");
+        track.className = "account-chart-track";
+        const fill = document.createElement("span");
+        fill.className = "account-chart-fill";
+        fill.style.width = `${Math.max((value / maximum) * 100, value > 0 ? 5 : 0)}%`;
+        track.append(fill);
+
+        const output = document.createElement("strong");
+        output.textContent = formatAccountChartValue(value);
+
+        row.append(label, track, output);
+        row.addEventListener("click", () => {
+          accountUsageChart.querySelectorAll(".account-chart-row").forEach((chartRow) => {
+            chartRow.classList.toggle("is-selected", chartRow === row);
+          });
+          accountUsageChartSummary.textContent = accountOverviewChartMetric === "credits"
+            ? `${item.toolLabel}: ${formatAccountChartValue(value, "credits")} ${t("account.dashboard.chartCredits").toLowerCase()}`
+            : `${item.toolLabel}: ${formatAccountChartValue(value)} ${t("account.dashboard.chartConversions").toLowerCase()}`;
+        });
+        accountUsageChart.append(row);
+      });
+    }
+  }
+
+  const counts = accountWorkspaceState.files?.counts ?? {
+    total: 0,
+    temporary: 0,
+    ready: 0,
+    failed: 0
+  };
+  const total = Math.max(Number(counts.total ?? 0), 0);
+  const ready = Math.max(Number(counts.ready ?? 0), 0);
+  const temporary = Math.max(Number(counts.temporary ?? 0), 0);
+  const failed = Math.max(Number(counts.failed ?? 0), 0);
+  const divisor = total || 1;
+  const readyAngle = (ready / divisor) * 360;
+  const temporaryAngle = readyAngle + (temporary / divisor) * 360;
+  const failedAngle = temporaryAngle + (failed / divisor) * 360;
+
+  if (accountStatusTotal) {
+    accountStatusTotal.textContent = String(total);
+  }
+  if (accountStatusReady) {
+    accountStatusReady.textContent = String(ready);
+  }
+  if (accountStatusTemporary) {
+    accountStatusTemporary.textContent = String(temporary);
+  }
+  if (accountStatusFailed) {
+    accountStatusFailed.textContent = String(failed);
+  }
+  if (accountStatusDonut) {
+    accountStatusDonut.style.setProperty("--status-ready-angle", `${readyAngle}deg`);
+    accountStatusDonut.style.setProperty("--status-temporary-angle", `${temporaryAngle}deg`);
+    accountStatusDonut.style.setProperty("--status-failed-angle", `${failedAngle}deg`);
+    accountStatusDonut.classList.toggle("is-empty", total === 0);
+    accountStatusDonut.setAttribute(
+      "aria-label",
+      `${t("account.dashboard.statusTotal")}: ${total}. ${t("account.dashboard.statusReady")}: ${ready}. ${t("account.dashboard.statusTemporary")}: ${temporary}. ${t("account.dashboard.statusFailed")}: ${failed}.`
+    );
+  }
+}
+
 function renderAccountHistory() {
   if (!accountHistoryList || !accountHistoryEmpty) {
     return;
   }
 
   renderAccountHistoryFilters();
+  renderAccountOverviewCharts();
   accountHistoryList.innerHTML = "";
 
   if (!isAccountAuthenticated()) {
@@ -3767,6 +4015,7 @@ function renderAccountUsage() {
     return;
   }
 
+  renderAccountOverviewCharts();
   accountUsageList.innerHTML = "";
   if (!isAccountAuthenticated()) {
     accountUsageEmpty.hidden = false;
@@ -4019,9 +4268,6 @@ function renderAccountUi() {
         ? "Sign in to view your current access."
         : "Entre para visualizar seu acesso atual.";
     }
-    if (accountShortcutAdminButton) {
-      accountShortcutAdminButton.hidden = true;
-    }
     if (accountDashboardAdminNav) {
       accountDashboardAdminNav.hidden = true;
     }
@@ -4055,11 +4301,6 @@ function renderAccountUi() {
   if (accountEmailDisplay) {
     accountEmailDisplay.textContent = accountState.user?.email ?? "";
   }
-  if (accountCreatedDisplay) {
-    accountCreatedDisplay.textContent = accountState.user?.createdAt
-      ? `Conta criada em ${formatDateTime(accountState.user.createdAt)}`
-      : "Conta ativa agora.";
-  }
   if (accountCreditsDisplay) {
     accountCreditsDisplay.textContent = `${wallet.creditBalance.toFixed(2).replace(".", ",")} créditos`;
   }
@@ -4075,9 +4316,6 @@ function renderAccountUi() {
   }
   if (accountAccessCopy) {
     accountAccessCopy.textContent = accessSummary.copy;
-  }
-  if (accountShortcutAdminButton) {
-    accountShortcutAdminButton.hidden = !isAdmin;
   }
   if (accountDashboardAdminNav) {
     accountDashboardAdminNav.hidden = !isAdmin;
@@ -8454,10 +8692,10 @@ accessLogoutButton?.addEventListener("click", async () => {
   setStatus("Acesso premium encerrado neste navegador.", { toast: false });
 });
 
-billingCloseButton?.addEventListener("click", hideBillingModal);
+billingCloseButton?.addEventListener("click", () => hideBillingModal({ restoreAccount: true }));
 billingModal?.addEventListener("click", (event) => {
   if (event.target?.dataset?.closeBilling === "true") {
-    hideBillingModal();
+    hideBillingModal({ restoreAccount: true });
   }
 });
 [
@@ -8470,13 +8708,13 @@ billingModal?.addEventListener("click", (event) => {
   accountVerificationCloseButton,
   adminPanelCloseButton
 ].forEach((button) => {
-  button?.addEventListener("click", hideAccountModal);
+  button?.addEventListener("click", closeAccountPane);
 });
 
 accountPaneModals.forEach((modal) => {
   modal.addEventListener("click", (event) => {
     if (event.target?.dataset?.closeAccountPane === "true") {
-      hideAccountModal();
+      closeAccountPane();
     }
   });
 });
@@ -8498,10 +8736,16 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (billingModal && !billingModal.hidden) {
+      hideBillingModal({ restoreAccount: true });
+      return;
+    }
+    if (getVisibleAccountPaneState()) {
+      closeAccountPane();
+      return;
+    }
     hideConversionModal();
     hideToolHelpModal();
-    hideAccountModal();
-    hideBillingModal();
     hideAccountMenu();
   }
 });
@@ -8520,16 +8764,31 @@ pricingFreeButton?.addEventListener("click", () => {
 });
 accountSwitchToLoginButton?.addEventListener("click", () => showAccountModal({ focus: "login" }));
 accountSwitchToRegisterButton?.addEventListener("click", () => showAccountModal({ focus: "register" }));
-accountShortcutProfileButton?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
-accountShortcutSettingsButton?.addEventListener("click", () => showAccountModal({ focus: "settings" }));
-accountShortcutAdminButton?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
 accountDashboardProfileNav?.addEventListener("click", () => showAccountModal({ focus: "profile" }));
 accountDashboardSettingsNav?.addEventListener("click", () => showAccountModal({ focus: "settings" }));
 accountDashboardSubscriptionNav?.addEventListener("click", () => showAccountModal({ focus: "subscription" }));
 accountDashboardAdminNav?.addEventListener("click", () => showAccountModal({ focus: "admin" }));
+accountDashboardMenuToggle?.addEventListener("click", toggleAccountDashboardMenu);
+accountDashboardMobileQuery.addEventListener("change", () => syncAccountDashboardMenu(false));
 accountDashboardNavButtons.forEach((button) => {
   button.addEventListener("click", () => {
     showAccountDashboardView(button.dataset.accountDashboardViewButton ?? "overview");
+  });
+});
+accountChartMetricButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    accountOverviewChartMetric = button.dataset.accountChartMetric === "credits" ? "credits" : "conversions";
+    renderAccountOverviewCharts();
+  });
+});
+accountStatusFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const nextFilter = normalizeAccountFileFilter(button.dataset.accountStatusFilter);
+    accountWorkspaceState.fileFilter = nextFilter;
+    showAccountDashboardView("files");
+    void fetchAccountFiles(nextFilter, 30).catch((error) => {
+      setAccountStatus(error instanceof Error ? error.message : "Não foi possível filtrar seus arquivos.");
+    });
   });
 });
 accountFileFilterButtons.forEach((button) => {

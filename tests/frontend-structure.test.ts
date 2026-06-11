@@ -31,3 +31,26 @@ describe("admin dashboard structure", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
+
+describe("account dashboard structure", () => {
+  it("keeps overview focused on summaries and interactive charts", async () => {
+    const html = await loadPublicFile("index.html");
+
+    expect(html).toContain('id="account-usage-chart"');
+    expect(html).toContain('id="account-status-donut"');
+    expect(html).not.toContain('id="account-shortcut-profile"');
+    expect(html).not.toContain('id="account-shortcut-settings"');
+    expect(html).not.toContain('id="account-shortcut-admin"');
+  });
+
+  it("provides a mobile menu control without duplicating account destinations", async () => {
+    const html = await loadPublicFile("index.html");
+
+    expect(html).toContain('id="account-dashboard-menu-toggle"');
+    expect(html).toContain('aria-controls="account-dashboard-menu"');
+    expect(html).toContain('id="account-dashboard-menu"');
+    expect(html.match(/id="account-dashboard-profile-nav"/g)).toHaveLength(1);
+    expect(html.match(/id="account-dashboard-subscription-nav"/g)).toHaveLength(1);
+    expect(html.match(/id="account-dashboard-admin-nav"/g)).toHaveLength(1);
+  });
+});
