@@ -54,14 +54,21 @@ describe("account dashboard structure", () => {
     expect(html.match(/id="account-dashboard-admin-nav"/g)).toHaveLength(1);
   });
 
-  it("renders plan and credential management as full-page account surfaces", async () => {
+  it("keeps the plan summary modal while opening checkout and credentials as full-page surfaces", async () => {
     const html = await loadPublicFile("index.html");
     const styles = await loadPublicFile("styles.css");
+    const script = await loadPublicFile("app.js");
 
-    expect(html).toContain('class="account-detail-page account-pane-modal" id="account-subscription-modal"');
+    expect(html).toContain('class="billing-modal account-pane-modal account-subscription-modal" id="account-subscription-modal"');
     expect(html).toContain('class="account-detail-page account-pane-modal" id="account-profile-modal"');
-    expect(html).not.toMatch(/billing-modal account-pane-modal" id="account-(subscription|profile)-modal"/);
+    expect(html).toContain('class="billing-page" id="billing-modal"');
+    expect(html).not.toContain('class="billing-modal" id="billing-modal"');
+    expect(html).not.toContain('class="billing-modal account-pane-modal" id="account-profile-modal"');
     expect(styles).toContain(".account-detail-page {");
+    expect(styles).toContain(".billing-page {");
     expect(styles).toContain("height: 100dvh;");
+    expect(styles).toContain("body.android-fullscreen-dialogs .account-subscription-modal");
+    expect(script).toContain('accountSubscriptionManageButton?.addEventListener("click"');
+    expect(script).toContain("showBillingModal({ tool: getToolById() });");
   });
 });

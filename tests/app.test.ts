@@ -142,9 +142,9 @@ describe("app routes", () => {
     expect(page.body).toContain('id="account-dashboard-menu-toggle"');
     expect(page.body).toContain('id="account-usage-chart"');
     expect(page.body).toContain('id="account-status-donut"');
-    expect(page.body).toContain('class="account-detail-page account-pane-modal" id="account-subscription-modal"');
+    expect(page.body).toContain('class="billing-modal account-pane-modal account-subscription-modal" id="account-subscription-modal"');
     expect(page.body).toContain('class="account-detail-page account-pane-modal" id="account-profile-modal"');
-    expect(page.body).not.toContain('class="billing-modal account-pane-modal" id="account-subscription-modal"');
+    expect(page.body).toContain('class="billing-page" id="billing-modal"');
     expect(page.body).not.toContain('class="billing-modal account-pane-modal" id="account-profile-modal"');
     expect(page.body).toContain("Dados e credenciais");
     expect(script.statusCode).toBe(200);

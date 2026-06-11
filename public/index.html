@@ -578,19 +578,17 @@
       </button>
     </template>
 
-    <div class="billing-modal" id="billing-modal" hidden>
-      <button type="button" class="billing-backdrop" aria-label="Fechar planos" data-close-billing="true"></button>
-
-      <section class="billing-dialog" role="dialog" aria-modal="true" aria-labelledby="billing-title">
-        <button type="button" class="billing-close" id="billing-close" aria-label="Fechar">
+    <section class="billing-page" id="billing-modal" aria-labelledby="billing-title" hidden>
+      <div class="billing-page-shell">
+        <button type="button" class="account-detail-close billing-page-close" id="billing-close" aria-label="Voltar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="m18 6-12 12"></path>
             <path d="m6 6 12 12"></path>
           </svg>
         </button>
 
-        <div class="billing-header billing-header-premium">
-          <span class="selection-kicker">Monetizacao pronta</span>
+        <header class="account-detail-header billing-page-header">
+          <span class="selection-kicker">Monetização pronta</span>
           <h2 id="billing-title">Escolha seu acesso premium</h2>
           <p>Veja o valor, escolha o formato ideal e volte com o acesso liberado automaticamente.</p>
           <div class="billing-feature-row" aria-label="Vantagens do checkout">
@@ -600,14 +598,14 @@
             </span>
             <span class="billing-feature-chip">
               <span class="billing-feature-dot" aria-hidden="true"></span>
-              Ativacao automatica
+              Ativação automática
             </span>
             <span class="billing-feature-chip">
               <span class="billing-feature-dot" aria-hidden="true"></span>
               Suporte rápido
             </span>
           </div>
-        </div>
+        </header>
 
         <div class="billing-grid">
           <article class="billing-card billing-card-featured">
@@ -641,7 +639,7 @@
               <strong class="billing-price" id="billing-yearly-price">R$ 149,90</strong>
               <span class="billing-price-meta" id="billing-yearly-meta">365 dias de acesso</span>
             </div>
-            <p>Mesmo acesso premium com melhor custo para uso continuo.</p>
+            <p>Mesmo acesso premium com melhor custo para uso contínuo.</p>
             <button type="button" class="button secondary wide" id="billing-yearly-button">Abrir plano anual</button>
           </article>
 
@@ -685,8 +683,8 @@
           </div>
           <p class="billing-status" id="billing-status">Escolha um plano para abrir o checkout seguro ou ative um código.</p>
         </form>
-      </section>
-    </div>
+      </div>
+    </section>
 
     <div class="billing-modal tool-help-modal" id="tool-help-modal" hidden>
       <button type="button" class="billing-backdrop" aria-label="Fechar ajuda da ferramenta" data-close-tool-help="true"></button>
@@ -1147,20 +1145,22 @@
       </main>
     </section>
 
-    <section class="account-detail-page account-pane-modal" id="account-subscription-modal" aria-labelledby="account-subscription-title" hidden>
-      <div class="account-detail-shell account-detail-shell-plan">
-        <button type="button" class="account-detail-close" id="account-subscription-close" aria-label="Voltar para Minha conta">
+    <div class="billing-modal account-pane-modal account-subscription-modal" id="account-subscription-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Fechar Meu Plano" data-close-account-pane="true"></button>
+
+      <section class="billing-dialog account-pane-dialog account-subscription-dialog" role="dialog" aria-modal="true" aria-labelledby="account-subscription-title">
+        <button type="button" class="billing-close" id="account-subscription-close" aria-label="Fechar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="m18 6-12 12"></path>
             <path d="m6 6 12 12"></path>
           </svg>
         </button>
 
-        <header class="account-detail-header">
-          <span class="selection-kicker">Assinatura</span>
-          <h2 id="account-subscription-title">Seu plano e benefícios</h2>
-          <p>Veja o status da sua assinatura e abra o gerenciamento do plano quando quiser.</p>
-        </header>
+        <div class="billing-header account-subscription-header">
+          <span class="selection-kicker">Meu Plano</span>
+          <h2 id="account-subscription-title">Plano e benefícios</h2>
+          <p>Acompanhe seu acesso atual e abra os planos somente quando quiser fazer uma alteração.</p>
+        </div>
 
         <div class="account-subscription-stack">
           <section class="account-popover-plan-card account-subscription-card" aria-live="polite">
@@ -1186,10 +1186,8 @@
             <button type="button" class="button secondary wide account-subscription-manage-button" id="account-subscription-manage-button">Gerenciar assinatura</button>
           </section>
         </div>
-
-        <p class="billing-status account-status-output" data-account-status>Abra o gerenciamento da assinatura para fazer upgrade, ativar código ou revisar seu acesso.</p>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <section class="account-detail-page account-pane-modal" id="account-profile-modal" aria-labelledby="account-profile-title" hidden>
       <div class="account-detail-shell account-detail-shell-profile">
@@ -1201,9 +1199,9 @@
         </button>
 
         <header class="account-detail-header">
-          <span class="selection-kicker">Dados e credenciais</span>
-          <h2 id="account-profile-title">Atualize seu acesso</h2>
-          <p>Edite seus dados pessoais e troque sua senha em um fluxo separado e sem cortes na tela.</p>
+          <span class="selection-kicker">Minha conta</span>
+          <h2 id="account-profile-title">Dados e credenciais</h2>
+          <p>Gerencie sua foto, seus dados pessoais e a segurança da conta em uma área organizada.</p>
         </header>
 
         <article class="account-card account-avatar-inline-card">
