@@ -243,8 +243,9 @@ const accountVerificationExpiry = document.getElementById("account-verification-
 const accountVerificationCodeInput = document.getElementById("account-verification-code");
 const accountVerificationSubmitButton = document.getElementById("account-verification-submit");
 const accountVerificationResendButton = document.getElementById("account-verification-resend");
-const adminPanelModal = document.getElementById("admin-panel-modal");
+const adminPanelPage = document.getElementById("admin-panel-page");
 const adminPanelCloseButton = document.getElementById("admin-panel-close");
+const adminDashboardShell = document.querySelector(".admin-dashboard-shell");
 const adminStatus = document.getElementById("admin-status");
 const adminStatUsers = document.getElementById("admin-stat-users");
 const adminStatPremium = document.getElementById("admin-stat-premium");
@@ -286,6 +287,7 @@ const adminRefreshPromosButton = document.getElementById("admin-refresh-promos")
 const adminDashboardUsage = document.getElementById("admin-dashboard-usage");
 const adminTabButtons = Array.from(document.querySelectorAll("[data-admin-pane-target]"));
 const adminPanes = Array.from(document.querySelectorAll("[data-admin-pane]"));
+const adminPaneShortcutButtons = Array.from(document.querySelectorAll("[data-admin-pane-shortcut]"));
 const toolToolbarCopy = document.getElementById("tool-toolbar-copy");
 const toolEmpty = document.getElementById("tool-empty");
 const toolFaqSection = document.getElementById("tool-faq-section");
@@ -320,7 +322,7 @@ const accountPaneModals = [
   accountProfileModal,
   accountSettingsModal,
   accountVerificationModal,
-  adminPanelModal
+  adminPanelPage
 ].filter(Boolean);
 
 let tools = [];
@@ -379,7 +381,7 @@ let adminState = {
   selectedUserId: "",
   selectedUser: null,
   search: "",
-  activePane: "account"
+  activePane: "overview"
 };
 let pendingAccountVerification = null;
 let avatarActionReveal = false;
@@ -2587,7 +2589,7 @@ function applySessionPayload(payload = {}) {
       selectedUserId: "",
       selectedUser: null,
       search: "",
-      activePane: "account"
+      activePane: "overview"
     };
   }
 
@@ -3262,7 +3264,7 @@ function getAccountModalByFocus(focus) {
   }
 
   if (focus === "admin") {
-    return adminPanelModal;
+    return adminPanelPage;
   }
 
   return accountOverviewModal;
@@ -3398,6 +3400,7 @@ function showAccountModal(options = {}) {
     void refreshAccountWorkspaceData({ silent: true }).catch(() => undefined);
   }
   if (focus === "admin") {
+    setAdminPane("overview");
     void loadAdminPanel();
   }
 
@@ -4660,12 +4663,13 @@ function setAdminStatus(message, options = {}) {
 }
 
 function renderAdminPaneState() {
-  const activePane = adminState.activePane || "account";
+  const activePane = adminState.activePane || "overview";
 
   adminTabButtons.forEach((button) => {
     const isActive = button.dataset.adminPaneTarget === activePane;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-selected", isActive ? "true" : "false");
+    button.tabIndex = isActive ? 0 : -1;
   });
 
   adminPanes.forEach((pane) => {
@@ -4676,8 +4680,12 @@ function renderAdminPaneState() {
 }
 
 function setAdminPane(paneName) {
-  adminState.activePane = paneName || "account";
+  adminState.activePane = paneName || "overview";
   renderAdminPaneState();
+  adminDashboardShell?.scrollTo({
+    top: 0,
+    behavior: getPreferredScrollBehavior()
+  });
 }
 
 function formatAdminUserPlan(user) {
@@ -8819,7 +8827,40 @@ adminRefreshPromosButton?.addEventListener("click", () => {
 
 adminTabButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    setAdminPane(button.dataset.adminPaneTarget || "account");
+    setAdminPane(button.dataset.adminPaneTarget || "overview");
+  });
+
+  button.addEventListener("keydown", (event) => {
+    const currentIndex = adminTabButtons.indexOf(button);
+    if (currentIndex < 0) {
+      return;
+    }
+
+    let nextIndex = currentIndex;
+    if (event.key === "ArrowRight") {
+      nextIndex = (currentIndex + 1) % adminTabButtons.length;
+    } else if (event.key === "ArrowLeft") {
+      nextIndex = (currentIndex - 1 + adminTabButtons.length) % adminTabButtons.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = adminTabButtons.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const nextButton = adminTabButtons[nextIndex];
+    setAdminPane(nextButton?.dataset.adminPaneTarget || "overview");
+    nextButton?.focus();
+  });
+});
+
+adminPaneShortcutButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const paneName = button.dataset.adminPaneShortcut || "overview";
+    setAdminPane(paneName);
+    adminTabButtons.find((tab) => tab.dataset.adminPaneTarget === paneName)?.focus();
   });
 });
 

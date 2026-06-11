@@ -1401,22 +1401,32 @@
       </section>
     </div>
 
-    <div class="billing-modal account-pane-modal" id="admin-panel-modal" hidden>
-      <button type="button" class="billing-backdrop" aria-label="Fechar painel administrativo" data-close-account-pane="true"></button>
-
-      <section class="billing-dialog account-pane-dialog admin-pane-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-panel-title">
-        <button type="button" class="billing-close" id="admin-panel-close" aria-label="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m18 6-12 12"></path>
-            <path d="m6 6 12 12"></path>
-          </svg>
-        </button>
-
-        <div class="billing-header">
-          <span class="selection-kicker">Painel Administrativo</span>
-          <h2 id="admin-panel-title">Controle total do vaptdoc</h2>
-          <p>Gerencie usuários, planos, créditos, descontos e códigos promocionais com um painel seguro e direto.</p>
-        </div>
+    <section class="admin-dashboard-page" id="admin-panel-page" aria-labelledby="admin-panel-title" hidden>
+      <div class="admin-dashboard-shell">
+        <header class="admin-dashboard-header">
+          <div class="admin-dashboard-heading">
+            <span class="selection-kicker">Painel Administrativo</span>
+            <h2 id="admin-panel-title">Controle total do vaptdoc</h2>
+            <p>Gerencie usuários, planos, créditos, descontos e códigos promocionais com um painel seguro e direto.</p>
+          </div>
+          <div class="admin-dashboard-header-actions">
+            <button type="button" class="ghost-action admin-header-action" id="admin-refresh-users" aria-label="Atualizar dados do painel administrativo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 7v4h-4"></path>
+                <path d="M5 17v-4h4"></path>
+                <path d="M7.2 9a6 6 0 0 1 9.6-1.8L19 11"></path>
+                <path d="m5 13 2.2 3.8A6 6 0 0 0 16.8 15"></path>
+              </svg>
+              <span>Atualizar</span>
+            </button>
+            <button type="button" class="admin-dashboard-close" id="admin-panel-close" aria-label="Fechar Painel Administrativo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m18 6-12 12"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </header>
 
         <section class="admin-stats-grid" id="admin-stats-grid" aria-live="polite">
           <article class="account-card admin-stat-card">
@@ -1458,7 +1468,6 @@
                 <span class="selection-kicker">Usuários</span>
                 <strong>Busque e abra qualquer conta</strong>
               </div>
-              <button type="button" class="ghost-action" id="admin-refresh-users">Atualizar</button>
             </div>
 
             <label class="field" for="admin-user-search">
@@ -1492,7 +1501,18 @@
             </article>
 
             <div class="admin-tabbar" role="tablist" aria-label="Áreas do painel administrativo">
-              <button type="button" class="admin-tab is-active" id="admin-tab-account" data-admin-pane-target="account" aria-selected="true">
+              <button type="button" class="admin-tab is-active" id="admin-tab-overview" data-admin-pane-target="overview" aria-controls="admin-pane-overview" aria-selected="true" role="tab">
+                <span class="admin-tab-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5.5" y="5.5" width="5" height="5" rx="1"></rect>
+                    <rect x="13.5" y="5.5" width="5" height="5" rx="1"></rect>
+                    <rect x="5.5" y="13.5" width="5" height="5" rx="1"></rect>
+                    <rect x="13.5" y="13.5" width="5" height="5" rx="1"></rect>
+                  </svg>
+                </span>
+                <span>Visão geral</span>
+              </button>
+              <button type="button" class="admin-tab" id="admin-tab-account" data-admin-pane-target="account" aria-controls="admin-pane-account" aria-selected="false" role="tab">
                 <span class="admin-tab-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M7.5 7.25h9"></path>
@@ -1502,7 +1522,7 @@
                 </span>
                 <span>Conta</span>
               </button>
-              <button type="button" class="admin-tab" id="admin-tab-access" data-admin-pane-target="access" aria-selected="false">
+              <button type="button" class="admin-tab" id="admin-tab-access" data-admin-pane-target="access" aria-controls="admin-pane-access" aria-selected="false" role="tab">
                 <span class="admin-tab-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="6.5" y="10" width="11" height="8" rx="2"></rect>
@@ -1511,7 +1531,7 @@
                 </span>
                 <span>Plano e créditos</span>
               </button>
-              <button type="button" class="admin-tab" id="admin-tab-promos" data-admin-pane-target="promos" aria-selected="false">
+              <button type="button" class="admin-tab" id="admin-tab-promos" data-admin-pane-target="promos" aria-controls="admin-pane-promos" aria-selected="false" role="tab">
                 <span class="admin-tab-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="m8.5 6.5 7 7"></path>
@@ -1519,11 +1539,71 @@
                     <circle cx="15.7" cy="8.3" r="0.85"></circle>
                   </svg>
                 </span>
-                <span>Promocoes</span>
+                <span>Promoções</span>
+              </button>
+              <button type="button" class="admin-tab" id="admin-tab-activity" data-admin-pane-target="activity" aria-controls="admin-pane-activity" aria-selected="false" role="tab">
+                <span class="admin-tab-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6.5 7.5h11"></path>
+                    <path d="M6.5 12h11"></path>
+                    <path d="M6.5 16.5h7"></path>
+                  </svg>
+                </span>
+                <span>Arquivos e histórico</span>
               </button>
             </div>
 
-            <section class="admin-pane-grid" data-admin-pane="account">
+            <section class="admin-pane-grid" id="admin-pane-overview" data-admin-pane="overview" aria-labelledby="admin-tab-overview" role="tabpanel">
+              <div class="admin-overview-grid">
+                <article class="account-card admin-overview-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 15.5V8.5"></path>
+                        <path d="M12 15.5V5.5"></path>
+                        <path d="M17.5 15.5v-4"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Consumo da plataforma</strong>
+                      <span>Ferramentas mais usadas e créditos estimados.</span>
+                    </div>
+                  </div>
+                  <div class="admin-mini-list" id="admin-dashboard-usage"></div>
+                </article>
+
+                <article class="account-card admin-overview-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5.5v13"></path>
+                        <path d="M5.5 12h13"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Ações rápidas</strong>
+                      <span>Abra diretamente a área necessária para a conta selecionada.</span>
+                    </div>
+                  </div>
+                  <div class="admin-quick-actions">
+                    <button type="button" class="admin-quick-action" data-admin-pane-shortcut="access">
+                      <span>Gerenciar plano e créditos</span>
+                      <span aria-hidden="true">›</span>
+                    </button>
+                    <button type="button" class="admin-quick-action" data-admin-pane-shortcut="promos">
+                      <span>Criar ou revisar promoções</span>
+                      <span aria-hidden="true">›</span>
+                    </button>
+                    <button type="button" class="admin-quick-action" data-admin-pane-shortcut="activity">
+                      <span>Ver arquivos e histórico</span>
+                      <span aria-hidden="true">›</span>
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="admin-pane-grid" id="admin-pane-account" data-admin-pane="account" aria-labelledby="admin-tab-account" role="tabpanel" hidden>
               <div class="account-forms-grid admin-forms-grid">
                 <form class="account-card account-form admin-form-card" id="admin-user-profile-form">
                   <div class="account-card-heading">
@@ -1549,8 +1629,29 @@
                   </label>
                   <button type="submit" class="button secondary wide" id="admin-user-profile-submit">Salvar dados</button>
                 </form>
-              </div>
 
+                <article class="account-card admin-danger-card">
+                  <div class="account-card-heading">
+                    <span class="account-card-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.75 7.25h10.5"></path>
+                        <path d="M9.25 7.25V5.75h5.5v1.5"></path>
+                        <path d="m8.25 9.25.6 8.25h6.3l.6-8.25"></path>
+                      </svg>
+                    </span>
+                    <div class="account-card-copy">
+                      <strong>Zona de risco</strong>
+                      <span>Remova a conta selecionada apenas quando necessário.</span>
+                    </div>
+                  </div>
+                  <div class="admin-danger-row">
+                    <button type="button" class="ghost-action danger wide" id="admin-user-delete">Remover conta</button>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="admin-pane-grid" id="admin-pane-activity" data-admin-pane="activity" aria-labelledby="admin-tab-activity" role="tabpanel" hidden>
               <div class="admin-history-grid">
                 <article class="account-card admin-feed-card">
                   <div class="account-card-heading">
@@ -1619,7 +1720,7 @@
               </div>
             </section>
 
-            <section class="admin-pane-grid" data-admin-pane="access" hidden>
+            <section class="admin-pane-grid" id="admin-pane-access" data-admin-pane="access" aria-labelledby="admin-tab-access" role="tabpanel" hidden>
               <div class="account-forms-grid admin-forms-grid admin-forms-grid-compact">
                 <form class="account-card account-form admin-form-card" id="admin-user-plan-form">
                   <div class="account-card-heading">
@@ -1688,7 +1789,7 @@
                     </span>
                     <div class="account-card-copy">
                       <strong>Desconto</strong>
-                      <span>Aplique percentual e duracao de forma visual.</span>
+                      <span>Aplique percentual e duração de forma visual.</span>
                     </div>
                   </div>
                   <label class="field" for="admin-user-discount-percent">
@@ -1701,51 +1802,15 @@
                   </label>
                   <button type="submit" class="button secondary wide" id="admin-user-discount-submit">Salvar desconto</button>
                 </form>
-
-                <article class="account-card admin-danger-card">
-                  <div class="account-card-heading">
-                    <span class="account-card-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6.75 7.25h10.5"></path>
-                        <path d="M9.25 7.25V5.75h5.5v1.5"></path>
-                        <path d="m8.25 9.25.6 8.25h6.3l.6-8.25"></path>
-                      </svg>
-                    </span>
-                    <div class="account-card-copy">
-                      <strong>Zona de risco</strong>
-                      <span>Remova a conta selecionada apenas quando necessário.</span>
-                    </div>
-                  </div>
-                  <div class="admin-danger-row">
-                    <button type="button" class="ghost-action danger wide" id="admin-user-delete">Remover conta</button>
-                  </div>
-                </article>
               </div>
-
-              <article class="account-card admin-feed-card">
-                <div class="account-card-heading">
-                  <span class="account-card-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M6.5 15.5V8.5"></path>
-                      <path d="M12 15.5V5.5"></path>
-                      <path d="M17.5 15.5v-4"></path>
-                    </svg>
-                  </span>
-                  <div class="account-card-copy">
-                    <strong>Consumo da plataforma</strong>
-                    <span>Ferramentas mais usadas e créditos estimados.</span>
-                  </div>
-                </div>
-                <div class="admin-mini-list" id="admin-dashboard-usage"></div>
-              </article>
             </section>
 
-            <section class="admin-pane-grid" data-admin-pane="promos" hidden>
+            <section class="admin-pane-grid" id="admin-pane-promos" data-admin-pane="promos" aria-labelledby="admin-tab-promos" role="tabpanel" hidden>
               <div class="account-forms-grid admin-promo-stack">
                 <article class="account-card admin-section admin-form-card">
                   <div class="admin-section-head">
                     <div>
-                      <span class="selection-kicker">Criar promocao</span>
+                      <span class="selection-kicker">Criar promoção</span>
                       <strong>Novo código</strong>
                     </div>
                   </div>
@@ -1763,7 +1828,7 @@
                     </div>
 
                     <label class="field" for="admin-promo-description">
-                      <span>Descricao</span>
+                      <span>Descrição</span>
                       <input id="admin-promo-description" name="description" type="text" maxlength="160" placeholder="Ex.: campanha de boas-vindas" />
                     </label>
 
@@ -1835,9 +1900,9 @@
           </div>
         </section>
 
-        <p class="billing-status account-status-output" id="admin-status">Seu Painel Administrativo está pronto para gerenciar o vaptdoc.</p>
-      </section>
-    </div>
+        <p class="visually-hidden" id="admin-status" aria-live="polite">Seu Painel Administrativo está pronto para gerenciar o vaptdoc.</p>
+      </div>
+    </section>
 
     <div class="visually-hidden" id="toast-live-region" aria-live="polite" aria-atomic="true"></div>
     <div class="toast-viewport" id="toast-viewport" aria-live="off" aria-label="Avisos do site"></div>
