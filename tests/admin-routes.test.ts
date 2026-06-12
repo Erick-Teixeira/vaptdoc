@@ -123,6 +123,90 @@ describe("admin routes", () => {
     expect(dashboard.statusCode).toBe(200);
     expect(dashboard.json().dashboard.totalUsers).toBe(2);
 
+    const forbiddenCreate = await app.inject({
+      method: "POST",
+      url: "/api/admin/users",
+      headers: {
+        "content-type": "application/json",
+        cookie: userCookie,
+        ...internalClientHeaders
+      },
+      payload: {
+        displayName: "Conta bloqueada",
+        email: "bloqueada@vaptdoc.test",
+        password: "SenhaSegura123",
+        plan: "free",
+        creditBalance: 0
+      }
+    });
+    expect(forbiddenCreate.statusCode).toBe(403);
+
+    const createdAccount = await app.inject({
+      method: "POST",
+      url: "/api/admin/users",
+      headers: {
+        "content-type": "application/json",
+        cookie: ownerCookie,
+        ...internalClientHeaders
+      },
+      payload: {
+        displayName: "Nova Cliente",
+        email: "nova.cliente@vaptdoc.test",
+        password: "SenhaTemporaria123!",
+        plan: "pro",
+        accessDays: 45,
+        creditBalance: 12.5
+      }
+    });
+    expect(createdAccount.statusCode).toBe(201);
+    expect(createdAccount.json().user).toMatchObject({
+      displayName: "Nova Cliente",
+      email: "nova.cliente@vaptdoc.test",
+      wallet: {
+        creditBalance: 12.5
+      },
+      plan: {
+        plan: "pro",
+        status: "active"
+      }
+    });
+    expect(createdAccount.body).not.toContain("SenhaTemporaria123!");
+    expect(createdAccount.body).not.toContain("passwordHash");
+    expect(createdAccount.body).not.toContain("passwordSalt");
+
+    const createdAccountLogin = await app.inject({
+      method: "POST",
+      url: "/api/account/login",
+      headers: {
+        "content-type": "application/json",
+        ...internalClientHeaders
+      },
+      payload: {
+        email: "nova.cliente@vaptdoc.test",
+        password: "SenhaTemporaria123!"
+      }
+    });
+    expect(createdAccountLogin.statusCode).toBe(200);
+    expect(createdAccountLogin.json().account.user.email).toBe("nova.cliente@vaptdoc.test");
+
+    const duplicateAccount = await app.inject({
+      method: "POST",
+      url: "/api/admin/users",
+      headers: {
+        "content-type": "application/json",
+        cookie: ownerCookie,
+        ...internalClientHeaders
+      },
+      payload: {
+        displayName: "Duplicada",
+        email: "nova.cliente@vaptdoc.test",
+        password: "OutraSenhaSegura123!",
+        plan: "free",
+        creditBalance: 0
+      }
+    });
+    expect(duplicateAccount.statusCode).toBe(409);
+
     const credits = await app.inject({
       method: "POST",
       url: `/api/admin/users/${userId}/credits`,

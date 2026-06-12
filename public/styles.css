@@ -2941,7 +2941,7 @@ html[data-theme="dark"] .admin-tab-icon {
 
 .admin-tabbar {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.35rem;
   padding: 0.35rem;
   border-radius: 1.25rem;
@@ -3016,6 +3016,51 @@ html[data-theme="dark"] .admin-tab.is-active {
   align-content: start;
   min-width: 0;
   box-shadow: 0 16px 34px rgba(32, 49, 61, 0.06);
+}
+
+.admin-create-account-card {
+  gap: 1rem;
+  max-width: 68rem;
+}
+
+.admin-create-account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.admin-create-password-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
+.admin-create-password-control input {
+  min-width: 0;
+}
+
+.admin-generate-password {
+  min-height: 3rem;
+  white-space: nowrap;
+}
+
+.admin-create-account-note {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--field-border) 78%, rgba(43, 196, 119, 0.35));
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--field-bg) 91%, rgba(43, 196, 119, 0.09));
+}
+
+.admin-create-account-note strong {
+  color: var(--text);
+}
+
+.admin-create-account-note span {
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .admin-quick-actions {
@@ -7689,8 +7734,8 @@ html[data-theme="dark"] .choice-chip {
     justify-content: flex-start;
   }
 
-  .admin-tab:last-child {
-    grid-column: 1 / -1;
+  .admin-create-account-grid {
+    grid-template-columns: 1fr;
   }
 
   .admin-forms-grid-compact,
@@ -7801,6 +7846,15 @@ html[data-theme="dark"] .choice-chip {
   .admin-quick-action {
     min-height: 3rem;
     font-size: 0.88rem;
+  }
+
+  .admin-create-password-control {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-generate-password {
+    width: 100%;
+    justify-content: center;
   }
 }
 

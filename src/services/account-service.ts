@@ -442,6 +442,15 @@ export interface AdminUserProfileUpdateInput {
   displayName: string;
 }
 
+export interface AdminUserCreateInput {
+  email: string;
+  displayName: string;
+  password: string;
+  plan: AccessPlan;
+  accessDays?: number;
+  creditBalance?: number;
+}
+
 export interface AdminUserPlanUpdateInput {
   plan: AccessPlan;
   accessDays?: number;
@@ -1964,6 +1973,92 @@ export class AccountService {
       usageBreakdown: this.getUsageBreakdownForUser(userId, 12),
       recentConversions: this.getRecentConversionsForUser(userId, 12)
     };
+  }
+
+  createAdminUser(cookieHeader: string | undefined, input: AdminUserCreateInput): AdminUserDetail {
+    const admin = this.requireAdminAccess(cookieHeader);
+    const email = normalizeEmail(input.email);
+    const displayName = input.displayName.trim();
+
+    if (this.findUserByEmail(email)) {
+      throw new AppError("Esse email ja esta em uso por outra conta.", 409, "ACCOUNT_EMAIL_IN_USE");
+    }
+
+    const passwordRecord = issuePasswordRecord(input.password);
+    const userId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const plan = input.plan;
+    const accessDays = Math.max(1, Math.round(Number(input.accessDays ?? 30)));
+    const creditBalance = clampPositiveCurrency(Number(input.creditBalance ?? 0));
+    let transactionOpen = false;
+
+    try {
+      this.db.exec("BEGIN IMMEDIATE");
+      transactionOpen = true;
+      this.db.prepare(`
+        INSERT INTO users (
+          id,
+          email,
+          display_name,
+          password_hash,
+          password_salt,
+          email_verified_at,
+          created_at,
+          updated_at,
+          credit_balance
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        userId,
+        email,
+        displayName,
+        passwordRecord.passwordHash,
+        passwordRecord.passwordSalt,
+        now,
+        now,
+        now,
+        creditBalance
+      );
+
+      if (plan !== "free") {
+        const { accessStartsAt, accessExpiresAt } = this.buildExtendedPlanWindow(userId, accessDays, new Date(now));
+        this.upsertPlanRecord(userId, {
+          plan,
+          source: "code",
+          provider: "vaptdoc-admin",
+          providerPaymentId: `admin-created-${userId}`,
+          accessStartsAt,
+          accessExpiresAt
+        });
+      }
+
+      this.recordAdminAudit(admin.user.id, "admin.user.created", "user", userId, {
+        email,
+        displayName,
+        plan,
+        accessDays: plan === "free" ? 0 : accessDays,
+        creditBalance,
+        emailVerified: true
+      });
+
+      this.db.exec("COMMIT");
+      transactionOpen = false;
+    } catch (error) {
+      if (transactionOpen) {
+        try {
+          this.db.exec("ROLLBACK");
+        } catch {
+          // Preserve the original database error.
+        }
+      }
+
+      if (String(error).includes("UNIQUE constraint failed: users.email")) {
+        throw new AppError("Esse email ja esta em uso por outra conta.", 409, "ACCOUNT_EMAIL_IN_USE");
+      }
+
+      throw error;
+    }
+
+    return this.getAdminUserDetail(cookieHeader, userId);
   }
 
   updateAdminUserProfile(cookieHeader: string | undefined, userId: string, input: AdminUserProfileUpdateInput): AdminUserDetail {

@@ -15,13 +15,28 @@ describe("admin dashboard structure", () => {
 
   it("keeps each administrative area in one accessible tab panel", async () => {
     const html = await loadPublicFile("index.html");
-    const paneNames = ["overview", "account", "access", "promos", "activity"];
+    const paneNames = ["overview", "create-account", "account", "access", "promos", "activity"];
 
     for (const paneName of paneNames) {
       expect(html).toContain(`data-admin-pane-target="${paneName}"`);
       expect(html).toContain(`data-admin-pane="${paneName}"`);
       expect(html).toContain(`aria-controls="admin-pane-${paneName}"`);
     }
+  });
+
+  it("provides a complete administrative account creation form", async () => {
+    const html = await loadPublicFile("index.html");
+    const script = await loadPublicFile("app.js");
+
+    expect(html).toContain('id="admin-create-user-form"');
+    expect(html).toContain('id="admin-create-user-display-name"');
+    expect(html).toContain('id="admin-create-user-email"');
+    expect(html).toContain('id="admin-create-user-password"');
+    expect(html).toContain('id="admin-create-user-plan"');
+    expect(html).toContain('id="admin-create-user-access-days"');
+    expect(html).toContain('id="admin-create-user-credits"');
+    expect(script).toContain('fetch("/api/admin/users"');
+    expect(script).toContain("createSecureTemporaryPassword");
   });
 
   it("keeps document ids unique after the layout refactor", async () => {

@@ -270,6 +270,15 @@ const adminSelectedUserPlan = document.getElementById("admin-selected-user-plan"
 const adminSelectedUserMeta = document.getElementById("admin-selected-user-meta");
 const adminSelectedUserWallet = document.getElementById("admin-selected-user-wallet");
 const adminSelectedUserDiscount = document.getElementById("admin-selected-user-discount");
+const adminCreateUserForm = document.getElementById("admin-create-user-form");
+const adminCreateUserDisplayNameInput = document.getElementById("admin-create-user-display-name");
+const adminCreateUserEmailInput = document.getElementById("admin-create-user-email");
+const adminCreateUserPasswordInput = document.getElementById("admin-create-user-password");
+const adminCreateUserGeneratePasswordButton = document.getElementById("admin-create-user-generate-password");
+const adminCreateUserPlanInput = document.getElementById("admin-create-user-plan");
+const adminCreateUserAccessDaysInput = document.getElementById("admin-create-user-access-days");
+const adminCreateUserCreditsInput = document.getElementById("admin-create-user-credits");
+const adminCreateUserSubmitButton = document.getElementById("admin-create-user-submit");
 const adminUserProfileForm = document.getElementById("admin-user-profile-form");
 const adminUserDisplayNameInput = document.getElementById("admin-user-display-name");
 const adminUserEmailInput = document.getElementById("admin-user-email");
@@ -700,6 +709,8 @@ const translations = {
     "account.files.ready": "Concluídos",
     "account.files.failed": "Falhas",
     "admin.saveData": "Salvar dados",
+    "admin.createAccount": "Criar nova conta",
+    "admin.generatePassword": "Gerar senha",
     "admin.updatePlan": "Atualizar plano",
     "admin.saveCredits": "Salvar créditos",
     "admin.saveDiscount": "Salvar desconto",
@@ -912,6 +923,8 @@ const translations = {
     "account.files.ready": "Completed",
     "account.files.failed": "Failed",
     "admin.saveData": "Save details",
+    "admin.createAccount": "Create account",
+    "admin.generatePassword": "Generate password",
     "admin.updatePlan": "Update plan",
     "admin.saveCredits": "Save credits",
     "admin.saveDiscount": "Save discount",
@@ -1710,6 +1723,8 @@ function applyStaticTranslations() {
   setLeadingText(document.querySelector("[data-account-file-filter='failed']"), t("account.files.failed"));
   setElementText(document.getElementById("admin-refresh-users"), t("common.update"));
   setElementText(document.getElementById("admin-refresh-promos"), t("common.update"));
+  setElementText(adminCreateUserSubmitButton, t("admin.createAccount"));
+  setElementText(adminCreateUserGeneratePasswordButton, t("admin.generatePassword"));
   setElementText(document.getElementById("admin-user-profile-submit"), t("admin.saveData"));
   setElementText(document.getElementById("admin-user-plan-submit"), t("admin.updatePlan"));
   setElementText(document.getElementById("admin-user-credits-submit"), t("admin.saveCredits"));
@@ -5323,6 +5338,24 @@ async function fetchAdminUserDetail(userId) {
   return payload.user ?? null;
 }
 
+async function createAdminUser(input) {
+  const response = await fetch("/api/admin/users", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      ...internalClientHeader
+    },
+    body: JSON.stringify(input)
+  });
+  const payload = await response.json().catch(() => ({ message: "Não foi possível criar a conta." }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível criar a conta.");
+  }
+
+  return payload.user ?? null;
+}
+
 async function fetchAdminPromos() {
   const response = await fetch("/api/admin/promos", {
     credentials: "same-origin",
@@ -5336,6 +5369,47 @@ async function fetchAdminPromos() {
   }
 
   return Array.isArray(payload.promos) ? payload.promos : [];
+}
+
+function createSecureTemporaryPassword(length = 18) {
+  if (!window.crypto?.getRandomValues) {
+    throw new Error("Este navegador não oferece geração segura de senha.");
+  }
+
+  const groups = [
+    "ABCDEFGHJKLMNPQRSTUVWXYZ",
+    "abcdefghijkmnopqrstuvwxyz",
+    "23456789",
+    "!@$%*-_"
+  ];
+  const alphabet = groups.join("");
+  const randomIndex = (max) => {
+    const values = new Uint32Array(1);
+    window.crypto.getRandomValues(values);
+    return values[0] % max;
+  };
+  const characters = groups.map((group) => group[randomIndex(group.length)]);
+
+  while (characters.length < Math.max(12, length)) {
+    characters.push(alphabet[randomIndex(alphabet.length)]);
+  }
+
+  for (let index = characters.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomIndex(index + 1);
+    [characters[index], characters[swapIndex]] = [characters[swapIndex], characters[index]];
+  }
+
+  return characters.join("");
+}
+
+function syncAdminCreatePlanFields() {
+  if (!adminCreateUserAccessDaysInput) {
+    return;
+  }
+
+  const hasPremiumPlan = adminCreateUserPlanInput?.value === "pro" || adminCreateUserPlanInput?.value === "team";
+  adminCreateUserAccessDaysInput.disabled = !hasPremiumPlan;
+  adminCreateUserAccessDaysInput.required = hasPremiumPlan;
 }
 
 async function selectAdminUser(userId) {
@@ -9126,6 +9200,76 @@ adminPaneShortcutButtons.forEach((button) => {
 adminUserSearchInput?.addEventListener("input", () => {
   adminState.search = String(adminUserSearchInput.value ?? "").trim();
   void loadAdminPanel();
+});
+
+adminCreateUserPlanInput?.addEventListener("change", syncAdminCreatePlanFields);
+syncAdminCreatePlanFields();
+
+adminCreateUserGeneratePasswordButton?.addEventListener("click", () => {
+  try {
+    const password = createSecureTemporaryPassword();
+    if (adminCreateUserPasswordInput) {
+      adminCreateUserPasswordInput.type = "text";
+      adminCreateUserPasswordInput.value = password;
+      adminCreateUserPasswordInput.focus();
+      adminCreateUserPasswordInput.select();
+    }
+  } catch (error) {
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível gerar uma senha segura.");
+  }
+});
+
+adminCreateUserForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!adminCreateUserForm.reportValidity()) {
+    return;
+  }
+
+  const email = String(adminCreateUserEmailInput?.value ?? "").trim();
+  const plan = String(adminCreateUserPlanInput?.value ?? "free");
+  if (adminCreateUserSubmitButton) {
+    adminCreateUserSubmitButton.disabled = true;
+  }
+  setAdminStatus("Criando nova conta...", { toast: false });
+
+  try {
+    const user = await createAdminUser({
+      displayName: String(adminCreateUserDisplayNameInput?.value ?? "").trim(),
+      email,
+      password: String(adminCreateUserPasswordInput?.value ?? ""),
+      plan,
+      accessDays: plan === "free" ? undefined : Number(adminCreateUserAccessDaysInput?.value ?? 30),
+      creditBalance: Number(adminCreateUserCreditsInput?.value ?? 0)
+    });
+
+    adminCreateUserForm.reset();
+    if (adminCreateUserPasswordInput) {
+      adminCreateUserPasswordInput.type = "password";
+    }
+    if (adminCreateUserPlanInput) {
+      adminCreateUserPlanInput.value = "free";
+    }
+    if (adminCreateUserAccessDaysInput) {
+      adminCreateUserAccessDaysInput.value = "30";
+    }
+    if (adminCreateUserCreditsInput) {
+      adminCreateUserCreditsInput.value = "0";
+    }
+    syncAdminCreatePlanFields();
+
+    adminState.search = "";
+    adminState.selectedUserId = user?.id ?? "";
+    await loadAdminPanel();
+    setAdminPane("account");
+    adminTabButtons.find((tab) => tab.dataset.adminPaneTarget === "account")?.focus();
+    setAdminStatus(`Conta ${email} criada com sucesso.`);
+  } catch (error) {
+    setAdminStatus(error instanceof Error ? error.message : "Não foi possível criar a conta.");
+  } finally {
+    if (adminCreateUserSubmitButton) {
+      adminCreateUserSubmitButton.disabled = false;
+    }
+  }
 });
 
 adminUserProfileForm?.addEventListener("submit", async (event) => {

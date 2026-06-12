@@ -113,6 +113,15 @@ const adminUserProfileSchema = z.object({
   email: z.string().trim().email().max(160)
 });
 
+const adminUserCreateSchema = z.object({
+  displayName: z.string().trim().min(2).max(80),
+  email: z.string().trim().email().max(160),
+  password: z.string().min(8).max(128),
+  plan: z.enum(["free", "pro", "team"]).default("free"),
+  accessDays: z.coerce.number().int().min(1).max(3650).optional(),
+  creditBalance: z.coerce.number().min(0).max(100000).default(0)
+});
+
 const adminUserPlanSchema = z.object({
   plan: z.enum(["free", "pro", "team"]),
   accessDays: z.coerce.number().int().min(1).max(3650).optional()
@@ -1096,6 +1105,38 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     const query = adminUsersQuerySchema.parse(request.query ?? {});
     return {
       users: options.accountService.listAdminUsers(request.headers.cookie, query.q)
+    };
+  });
+
+  app.post("/api/admin/users", {
+    config: {
+      rateLimit: {
+        max: 12,
+        timeWindow: "1 minute"
+      }
+    },
+    schema: {
+      tags: ["admin"],
+      summary: "Cria uma nova conta pelo painel administrativo",
+      body: jsonSchemaFromZod(adminUserCreateSchema),
+      response: {
+        201: genericObjectResponseSchema
+      }
+    }
+  }, async (request, reply) => {
+    assertInternalClientRequest(request);
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+
+    if (!options.accountService) {
+      throw new AppError("O painel administrativo ainda nao esta disponivel neste ambiente.", 503, "ADMIN_UNAVAILABLE");
+    }
+
+    const payload = adminUserCreateSchema.parse(request.body ?? {});
+    const user = options.accountService.createAdminUser(request.headers.cookie, payload);
+    reply.code(201);
+    return {
+      user
     };
   });
 

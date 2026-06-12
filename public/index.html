@@ -1508,6 +1508,17 @@
                 </span>
                 <span>Visão geral</span>
               </button>
+              <button type="button" class="admin-tab" id="admin-tab-create-account" data-admin-pane-target="create-account" aria-controls="admin-pane-create-account" aria-selected="false" role="tab">
+                <span class="admin-tab-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="8" r="3"></circle>
+                    <path d="M4.5 18c.5-3 2-4.5 4.5-4.5s4 1.5 4.5 4.5"></path>
+                    <path d="M17 8v6"></path>
+                    <path d="M14 11h6"></path>
+                  </svg>
+                </span>
+                <span>Criar conta</span>
+              </button>
               <button type="button" class="admin-tab" id="admin-tab-account" data-admin-pane-target="account" aria-controls="admin-pane-account" aria-selected="false" role="tab">
                 <span class="admin-tab-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1597,6 +1608,66 @@
                   </div>
                 </article>
               </div>
+            </section>
+
+            <section class="admin-pane-grid" id="admin-pane-create-account" data-admin-pane="create-account" aria-labelledby="admin-tab-create-account" role="tabpanel" hidden>
+              <form class="account-card account-form admin-form-card admin-create-account-card" id="admin-create-user-form">
+                <div class="account-card-heading">
+                  <span class="account-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="8" r="3"></circle>
+                      <path d="M4.5 18c.5-3 2-4.5 4.5-4.5s4 1.5 4.5 4.5"></path>
+                      <path d="M17 8v6"></path>
+                      <path d="M14 11h6"></path>
+                    </svg>
+                  </span>
+                  <div class="account-card-copy">
+                    <strong>Nova conta</strong>
+                    <span>Crie um acesso verificado e pronto para uso, com plano e créditos iniciais opcionais.</span>
+                  </div>
+                </div>
+
+                <div class="admin-create-account-grid">
+                  <label class="field" for="admin-create-user-display-name">
+                    <span>Nome completo</span>
+                    <input id="admin-create-user-display-name" name="displayName" type="text" autocomplete="name" maxlength="80" required />
+                  </label>
+                  <label class="field" for="admin-create-user-email">
+                    <span>E-mail</span>
+                    <input id="admin-create-user-email" name="email" type="email" autocomplete="email" maxlength="160" required />
+                  </label>
+                  <label class="field admin-create-password-field" for="admin-create-user-password">
+                    <span>Senha inicial</span>
+                    <span class="admin-create-password-control">
+                      <input id="admin-create-user-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" spellcheck="false" required />
+                      <button type="button" class="ghost-action admin-generate-password" id="admin-create-user-generate-password" aria-label="Gerar uma senha inicial segura">Gerar senha</button>
+                    </span>
+                  </label>
+                  <label class="field" for="admin-create-user-plan">
+                    <span>Plano inicial</span>
+                    <select id="admin-create-user-plan" name="plan">
+                      <option value="free">Grátis</option>
+                      <option value="pro">Pro</option>
+                      <option value="team">Team</option>
+                    </select>
+                  </label>
+                  <label class="field" for="admin-create-user-access-days">
+                    <span>Dias de acesso premium</span>
+                    <input id="admin-create-user-access-days" name="accessDays" type="number" inputmode="numeric" min="1" max="3650" value="30" disabled />
+                  </label>
+                  <label class="field" for="admin-create-user-credits">
+                    <span>Créditos iniciais</span>
+                    <input id="admin-create-user-credits" name="creditBalance" type="number" inputmode="decimal" step="0.01" min="0" max="100000" value="0" />
+                  </label>
+                </div>
+
+                <div class="admin-create-account-note">
+                  <strong>Conta pronta para entrar</strong>
+                  <span>O e-mail será considerado verificado. Compartilhe a senha inicial por um canal seguro e oriente o usuário a alterá-la após o primeiro acesso.</span>
+                </div>
+
+                <button type="submit" class="button primary wide" id="admin-create-user-submit">Criar nova conta</button>
+              </form>
             </section>
 
             <section class="admin-pane-grid" id="admin-pane-account" data-admin-pane="account" aria-labelledby="admin-tab-account" role="tabpanel" hidden>
