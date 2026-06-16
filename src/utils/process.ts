@@ -9,6 +9,7 @@ export interface ProcessResult {
 
 export interface RunCommandOptions extends SpawnOptionsWithoutStdio {
   timeoutMs?: number;
+  maxOutputBytes?: number;
 }
 
 export async function runCommand(
@@ -17,7 +18,7 @@ export async function runCommand(
   options: RunCommandOptions = {}
 ): Promise<ProcessResult> {
   return new Promise((resolve, reject) => {
-    const { timeoutMs = 120_000, ...spawnOptions } = options;
+    const { timeoutMs = 120_000, maxOutputBytes = 2 * 1024 * 1024, ...spawnOptions } = options;
     const child = spawn(command, args, {
       ...spawnOptions,
       stdio: ["ignore", "pipe", "pipe"],
@@ -28,6 +29,7 @@ export async function runCommand(
     let stderr = "";
     let settled = false;
     let timedOut = false;
+    let outputLimitExceeded = false;
     const timeoutHandle =
       timeoutMs > 0
         ? setTimeout(() => {
@@ -50,10 +52,18 @@ export async function runCommand(
 
     child.stdout.on("data", (chunk) => {
       stdout += chunk.toString();
+      if (Buffer.byteLength(stdout) + Buffer.byteLength(stderr) > maxOutputBytes) {
+        outputLimitExceeded = true;
+        child.kill();
+      }
     });
 
     child.stderr.on("data", (chunk) => {
       stderr += chunk.toString();
+      if (Buffer.byteLength(stdout) + Buffer.byteLength(stderr) > maxOutputBytes) {
+        outputLimitExceeded = true;
+        child.kill();
+      }
     });
 
     child.on("error", (error) => {
@@ -72,6 +82,11 @@ export async function runCommand(
               "PROCESS_TIMEOUT"
             )
           );
+          return;
+        }
+
+        if (outputLimitExceeded) {
+          reject(new AppError("O processo externo excedeu o limite seguro de saída.", 500, "PROCESS_OUTPUT_LIMIT"));
           return;
         }
 

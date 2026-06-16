@@ -9,9 +9,10 @@ import type { AccessService, AccessSession } from "../services/access-service.js
 import type { BillingOfferId, BillingService } from "../services/billing-service.js";
 import type { AccountService, PublicAccountSession } from "../services/account-service.js";
 import type { UsageTracker } from "../services/usage-tracker.js";
+import type { SecurityService } from "../services/security-service.js";
 import type { ConversionGate } from "../utils/conversion-gate.js";
 import { AppError } from "../utils/errors.js";
-import { assertUploadLimits } from "../utils/file-validation.js";
+import { assertUploadContentSafety, assertUploadLimits } from "../utils/file-validation.js";
 import { getToolPath } from "../tool-paths.js";
 
 type ConversionHandler = Pick<{ convert: (payload: ConversionRequest) => Promise<ConversionResult> }, "convert">;
@@ -22,6 +23,7 @@ interface RegisterApiOptions {
   billingService?: BillingService;
   accountService?: AccountService;
   usageTracker?: UsageTracker;
+  securityService?: SecurityService;
 }
 
 const redeemSchema = z.object({
@@ -39,7 +41,8 @@ const confirmReturnSchema = z.object({
 const registerSchema = z.object({
   email: z.string().trim().email().max(160),
   displayName: z.string().trim().min(2).max(80),
-  password: z.string().min(8).max(128)
+  password: z.string().min(8).max(128),
+  turnstileToken: z.string().trim().max(4096).optional()
 });
 
 const verificationConfirmSchema = z.object({
@@ -53,6 +56,15 @@ const verificationResendSchema = z.object({
 
 const loginSchema = z.object({
   email: z.string().trim().email().max(160),
+  password: z.string().min(8).max(128),
+  turnstileToken: z.string().trim().max(4096).optional()
+});
+
+const accountSessionParamsSchema = z.object({
+  sessionId: z.string().trim().uuid()
+});
+
+const adminReauthSchema = z.object({
   password: z.string().min(8).max(128)
 });
 
@@ -267,6 +279,18 @@ function assertInternalClientRequest(request: FastifyRequest) {
   throw new AppError("Requisição rejeitada por segurança. Recarregue a página e tente novamente.", 403, "REQUEST_ORIGIN_FORBIDDEN");
 }
 
+function requireAdminElevation(request: FastifyRequest, options: RegisterApiOptions) {
+  if (!options.accountService || !options.securityService) {
+    throw new AppError("A proteção administrativa está indisponível.", 503, "ADMIN_SECURITY_UNAVAILABLE");
+  }
+  const authenticated = options.accountService.getAuthenticatedAccount(request.headers.cookie);
+  if (!authenticated?.isAdmin) {
+    throw new AppError("Acesso administrativo não autorizado.", 403, "ADMIN_FORBIDDEN");
+  }
+  options.securityService.assertAdminElevation(request.headers.cookie, authenticated.user.id);
+  return authenticated;
+}
+
 function buildPublicOrigin(request: FastifyRequest) {
   const protoHeader = request.headers["x-forwarded-proto"];
   const protocol = Array.isArray(protoHeader) ? protoHeader[0] : protoHeader;
@@ -372,7 +396,8 @@ function buildPublicClientState(
     ...accessPayload,
     account: accountSession,
     billingOffers,
-    queue: options.gate?.snapshot() ?? null
+    queue: options.gate?.snapshot() ?? null,
+    security: options.securityService?.getPublicConfig(request.headers.cookie).config ?? null
   };
 }
 
@@ -530,6 +555,10 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
   }, async (request, reply) => {
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
+    const security = options.securityService?.getPublicConfig(request.headers.cookie);
+    if (security?.setCookie) {
+      reply.header("Set-Cookie", security.setCookie);
+    }
     return buildPublicClientState(request, options);
   });
 
@@ -544,6 +573,10 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
   }, async (request, reply) => {
     reply.header("Cache-Control", "no-store");
     reply.header("Pragma", "no-cache");
+    const security = options.securityService?.getPublicConfig(request.headers.cookie);
+    if (security?.setCookie) {
+      reply.header("Set-Cookie", security.setCookie);
+    }
     return buildPublicClientState(request, options);
   });
 
@@ -760,6 +793,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     }
 
     const payload = registerSchema.parse(request.body ?? {});
+    await options.securityService?.assertHuman(payload.turnstileToken, buildRequestMetadata(request), "register");
     return options.accountService.register(payload);
   });
 
@@ -852,7 +886,19 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     }
 
     const payload = loginSchema.parse(request.body ?? {});
-    const authResult = options.accountService.login(payload, buildRequestMetadata(request));
+    const metadata = buildRequestMetadata(request);
+    options.securityService?.assertLoginAllowed(payload.email, metadata);
+    await options.securityService?.assertHuman(payload.turnstileToken, metadata, "login");
+    let authResult;
+    try {
+      authResult = options.accountService.login(payload, metadata);
+      options.securityService?.recordLoginSuccess(payload.email, metadata);
+    } catch (error) {
+      if (error instanceof AppError && error.code === "ACCOUNT_LOGIN_FAILED") {
+        options.securityService?.recordLoginFailure(payload.email, metadata);
+      }
+      throw error;
+    }
     const state = buildPublicClientState(request, options, authResult.accessSession, authResult.account);
     const cookies = appendSetCookie(undefined, [
       authResult.setCookie,
@@ -1062,6 +1108,60 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     return buildPublicClientState(request, options, getBaseFreeSession(options.accessService), buildAnonymousAccountSession());
   });
 
+  app.get("/api/account/sessions", async (request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    if (!options.accountService) {
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+    return { sessions: options.accountService.listSessions(request.headers.cookie) };
+  });
+
+  app.delete("/api/account/sessions/:sessionId", async (request, reply) => {
+    assertInternalClientRequest(request);
+    reply.header("Cache-Control", "no-store");
+    if (!options.accountService) {
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+    const params = accountSessionParamsSchema.parse(request.params ?? {});
+    const result = options.accountService.revokeSession(request.headers.cookie, params.sessionId);
+    if (result.clearCookie) {
+      reply.header("Set-Cookie", result.clearCookie);
+    }
+    return { ok: true, currentSessionRevoked: result.current };
+  });
+
+  app.delete("/api/account/sessions", async (request, reply) => {
+    assertInternalClientRequest(request);
+    reply.header("Cache-Control", "no-store");
+    if (!options.accountService) {
+      throw new AppError("A conta ainda não está disponível neste ambiente.", 503, "ACCOUNT_UNAVAILABLE");
+    }
+    return { ok: true, revoked: options.accountService.revokeOtherSessions(request.headers.cookie) };
+  });
+
+  app.post("/api/admin/reauth", {
+    config: { rateLimit: { max: 6, timeWindow: "5 minutes" } },
+    schema: {
+      tags: ["admin"],
+      summary: "Confirma a senha para ações administrativas sensíveis",
+      body: jsonSchemaFromZod(adminReauthSchema),
+      response: { 200: genericObjectResponseSchema }
+    }
+  }, async (request, reply) => {
+    assertInternalClientRequest(request);
+    if (!options.accountService || !options.securityService) {
+      throw new AppError("A proteção administrativa está indisponível.", 503, "ADMIN_SECURITY_UNAVAILABLE");
+    }
+    const payload = adminReauthSchema.parse(request.body ?? {});
+    const authenticated = options.accountService.verifyCurrentPassword(request.headers.cookie, payload.password);
+    if (!authenticated.isAdmin) {
+      throw new AppError("Acesso administrativo não autorizado.", 403, "ADMIN_FORBIDDEN");
+    }
+    const elevation = options.securityService.issueAdminElevation(authenticated.user.id);
+    reply.header("Set-Cookie", elevation.setCookie);
+    return { ok: true, expiresAt: elevation.expiresAt };
+  });
+
   app.get("/api/admin/dashboard", {
     schema: {
       tags: ["admin"],
@@ -1180,6 +1280,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const params = adminUserParamsSchema.parse(request.params ?? {});
     const payload = adminUserProfileSchema.parse(request.body ?? {});
     return {
@@ -1203,6 +1304,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const params = adminUserParamsSchema.parse(request.params ?? {});
     const payload = adminUserPlanSchema.parse(request.body ?? {});
     return {
@@ -1226,6 +1328,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const params = adminUserParamsSchema.parse(request.params ?? {});
     const payload = adminUserCreditsSchema.parse(request.body ?? {});
     return {
@@ -1249,6 +1352,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const params = adminUserParamsSchema.parse(request.params ?? {});
     const payload = adminUserDiscountSchema.parse(request.body ?? {});
     return {
@@ -1265,6 +1369,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const params = adminUserParamsSchema.parse(request.params ?? {});
     options.accountService.deleteAdminUser(request.headers.cookie, params.userId);
     return {
@@ -1302,6 +1407,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const payload = adminPromoCreateSchema.parse(request.body ?? {});
     return {
       promo: options.accountService.createAdminPromoCode(request.headers.cookie, {
@@ -1336,6 +1442,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const params = adminPromoParamsSchema.parse(request.params ?? {});
     const payload = adminPromoUpdateSchema.parse(request.body ?? {});
     return {
@@ -1352,6 +1459,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
       throw new AppError("O painel administrativo ainda não está disponível neste ambiente.", 503, "ADMIN_UNAVAILABLE");
     }
 
+    requireAdminElevation(request, options);
     const params = adminPromoParamsSchema.parse(request.params ?? {});
     options.accountService.deleteAdminPromoCode(request.headers.cookie, params.code);
     return {
@@ -1646,6 +1754,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
 
     const startedAt = performance.now();
     const { toolId, uploads, rawOptions } = await parseMultipartConversionRequest(request);
+    await assertUploadContentSafety(uploads);
     let historyId: string | null = null;
 
     try {
@@ -1728,6 +1837,7 @@ export async function registerApiRoutes(app: FastifyInstance, conversionService:
     const startedAt = performance.now();
     let historyId: string | null = null;
     const { toolId, uploads, rawOptions } = await parseMultipartConversionRequest(request);
+    await assertUploadContentSafety(uploads);
     try {
       if (!toolId || !(toolId in toolCatalog)) {
         throw new AppError("Selecione uma ferramenta valida antes de converter.", 400, "INVALID_TOOL");

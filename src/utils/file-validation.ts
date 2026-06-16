@@ -1,8 +1,14 @@
 import path from "node:path";
+import os from "node:os";
+import crypto from "node:crypto";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { fileTypeFromBuffer } from "file-type";
 import sanitizeFilename from "sanitize-filename";
+import sharp from "sharp";
 import { toolCatalog, type SupportedKind, type ToolDefinition, type ToolId } from "../catalog.js";
+import { env } from "../env.js";
 import { AppError } from "./errors.js";
+import { runCommand } from "./process.js";
 
 export interface DetectedUpload {
   kind: SupportedKind;
@@ -12,6 +18,10 @@ export interface DetectedUpload {
 export interface UploadLike {
   filename: string;
   size: number;
+}
+
+export interface InspectableUpload extends UploadLike {
+  buffer: Buffer;
 }
 
 const pdfMagic = Buffer.from("%PDF");
@@ -338,5 +348,108 @@ export function assertUploadLimits(uploads: UploadLike[], maxFileSizeBytes: numb
         "FILE_TOO_LARGE"
       );
     }
+  }
+}
+
+function inspectZipStructure(buffer: Buffer) {
+  let cursor = 0;
+  let entries = 0;
+  let totalCompressed = 0;
+  let totalUncompressed = 0;
+  const centralHeader = 0x02014b50;
+
+  while (cursor <= buffer.byteLength - 46) {
+    const offset = buffer.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]), cursor);
+    if (offset < 0) {
+      break;
+    }
+    if (buffer.readUInt32LE(offset) !== centralHeader || offset + 46 > buffer.byteLength) {
+      cursor = offset + 4;
+      continue;
+    }
+    const compressed = buffer.readUInt32LE(offset + 20);
+    const uncompressed = buffer.readUInt32LE(offset + 24);
+    const nameLength = buffer.readUInt16LE(offset + 28);
+    const extraLength = buffer.readUInt16LE(offset + 30);
+    const commentLength = buffer.readUInt16LE(offset + 32);
+    const nextOffset = offset + 46 + nameLength + extraLength + commentLength;
+    if (nextOffset > buffer.byteLength) {
+      throw new AppError("O arquivo compactado está corrompido.", 415, "ARCHIVE_INVALID");
+    }
+    entries += 1;
+    totalCompressed += compressed;
+    totalUncompressed += uncompressed;
+    cursor = nextOffset;
+  }
+
+  if (entries === 0) {
+    throw new AppError("Não foi possível validar a estrutura do arquivo compactado.", 415, "ARCHIVE_INVALID");
+  }
+  const ratio = totalUncompressed / Math.max(1, totalCompressed);
+  if (entries > env.MAX_ARCHIVE_ENTRIES || ratio > env.MAX_ARCHIVE_RATIO) {
+    throw new AppError(
+      "O arquivo compactado expande além dos limites seguros do servidor.",
+      413,
+      "ARCHIVE_EXPANSION_LIMIT"
+    );
+  }
+}
+
+async function inspectImageDimensions(buffer: Buffer) {
+  const metadata = await sharp(buffer, {
+    failOn: "error",
+    limitInputPixels: env.MAX_IMAGE_PIXELS
+  }).metadata();
+  const width = Number(metadata.width ?? 0);
+  const height = Number(metadata.height ?? 0);
+  if (!width || !height || width * height > env.MAX_IMAGE_PIXELS) {
+    throw new AppError("A imagem possui dimensões acima do limite seguro.", 413, "IMAGE_DIMENSIONS_LIMIT");
+  }
+}
+
+async function scanWithConfiguredAntivirus(upload: InspectableUpload) {
+  const scanner = String(env.MALWARE_SCAN_BIN ?? "").trim();
+  if (!scanner) {
+    if (env.MALWARE_SCAN_REQUIRED) {
+      throw new AppError("A verificação antivírus está indisponível.", 503, "MALWARE_SCANNER_UNAVAILABLE");
+    }
+    return;
+  }
+  const scanDir = path.join(os.tmpdir(), `vaptdoc-scan-${crypto.randomUUID()}`);
+  const targetPath = path.join(scanDir, sanitizeFilename(upload.filename) || "upload.bin");
+  await mkdir(scanDir, { recursive: true });
+  try {
+    await writeFile(targetPath, upload.buffer, { flag: "wx" });
+    await runCommand(scanner, ["--no-summary", targetPath], {
+      timeoutMs: 30_000,
+      windowsHide: true
+    });
+  } catch (error) {
+    if (error instanceof AppError && error.code === "PROCESS_SPAWN_FAILED" && !env.MALWARE_SCAN_REQUIRED) {
+      return;
+    }
+    throw new AppError("O arquivo não passou pela verificação de segurança.", 422, "MALWARE_SCAN_FAILED");
+  } finally {
+    await rm(scanDir, { recursive: true, force: true }).catch(() => undefined);
+  }
+}
+
+export async function assertUploadContentSafety(uploads: InspectableUpload[]) {
+  for (const upload of uploads) {
+    if (upload.buffer.subarray(0, 4).equals(zipMagic)) {
+      inspectZipStructure(upload.buffer);
+    }
+    const fileType = await fileTypeFromBuffer(upload.buffer);
+    if (fileType?.mime.startsWith("image/")) {
+      try {
+        await inspectImageDimensions(upload.buffer);
+      } catch (error) {
+        if (error instanceof AppError) {
+          throw error;
+        }
+        throw new AppError("A imagem enviada está corrompida ou não é segura.", 415, "IMAGE_INVALID");
+      }
+    }
+    await scanWithConfiguredAntivirus(upload);
   }
 }

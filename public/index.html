@@ -778,6 +778,7 @@
             <span>Senha</span>
             <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
           </label>
+          <div class="turnstile-slot" id="register-turnstile" aria-label="Verificação anti-bot" hidden></div>
           <button type="submit" class="button primary wide" id="account-register-submit">Criar conta</button>
         </form>
 
@@ -816,6 +817,7 @@
             <span>Senha</span>
             <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required />
           </label>
+          <div class="turnstile-slot" id="login-turnstile" aria-label="Verificação anti-bot" hidden></div>
           <button type="submit" class="button secondary wide" id="account-login-submit">Entrar na conta</button>
         </form>
 
@@ -1338,9 +1340,52 @@
             </div>
             <button type="button" class="ghost-action wide" id="account-logout">Sair da conta</button>
           </article>
+
+          <article class="account-card account-setting-card account-session-manager">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3.5" y="5" width="17" height="13" rx="2"></rect>
+                  <path d="M8 21h8"></path>
+                  <path d="M12 18v3"></path>
+                </svg>
+              </span>
+              <div class="account-card-copy">
+                <strong>Dispositivos conectados</strong>
+                <span>Revise e encerre acessos que você não reconhece.</span>
+              </div>
+            </div>
+            <div class="security-list" id="account-session-list" aria-live="polite"></div>
+            <button type="button" class="ghost-action wide" id="account-revoke-other-sessions">Sair dos outros dispositivos</button>
+          </article>
         </div>
 
         <p class="billing-status account-status-output" data-account-status>Suas preferências ficam salvas com segurança.</p>
+      </section>
+    </div>
+
+    <div class="billing-modal account-pane-modal" id="admin-reauth-modal" hidden>
+      <button type="button" class="billing-backdrop" aria-label="Cancelar confirmação administrativa" data-close-admin-reauth="true"></button>
+      <section class="billing-dialog account-pane-dialog admin-reauth-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-reauth-title">
+        <button type="button" class="billing-close" id="admin-reauth-close" aria-label="Cancelar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 6-12 12"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+        <div class="billing-header">
+          <span class="selection-kicker">Ação sensível</span>
+          <h2 id="admin-reauth-title">Confirme sua identidade</h2>
+          <p>Digite sua senha para liberar alterações administrativas por alguns minutos.</p>
+        </div>
+        <form class="account-card account-form account-pane-form" id="admin-reauth-form">
+          <label class="field" for="admin-reauth-password">
+            <span>Senha atual</span>
+            <input id="admin-reauth-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required />
+          </label>
+          <button type="submit" class="button primary wide">Confirmar e continuar</button>
+        </form>
+        <p class="billing-status account-status-output" id="admin-reauth-status">Sua senha não será armazenada.</p>
       </section>
     </div>
 

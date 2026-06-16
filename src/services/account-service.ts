@@ -58,6 +58,7 @@ interface AccountSessionRow {
   last_seen_at: string;
   user_agent_hash: string;
   ip_hash: string;
+  device_label: string;
 }
 
 interface AccountPlanRow {
@@ -272,6 +273,7 @@ export interface AccountServiceConfig {
   dbPath?: string;
   sessionCookieName?: string;
   sessionDays?: number;
+  adminSessionHours?: number;
   proDailyLimit?: number;
   adminOwnerEmails?: string[];
   emailService?: EmailService;
@@ -374,6 +376,15 @@ export interface AccountAuthResult {
   account: PublicAccountSession;
   setCookie: string;
   accessSession: AccessSession | null;
+}
+
+export interface AccountSessionPublic {
+  id: string;
+  current: boolean;
+  deviceLabel: string;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
 }
 
 export interface AccountVerificationChallenge {
@@ -594,6 +605,25 @@ function secureCompare(left: string, right: string) {
   const leftBuffer = Buffer.from(left, "utf8");
   const rightBuffer = Buffer.from(right, "utf8");
   return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function buildDeviceLabel(userAgent?: string) {
+  const value = String(userAgent ?? "").slice(0, 500);
+  const browser =
+    /Edg\//u.test(value) ? "Edge" :
+    /OPR\//u.test(value) ? "Opera" :
+    /Firefox\//u.test(value) ? "Firefox" :
+    /Chrome\//u.test(value) ? "Chrome" :
+    /Safari\//u.test(value) ? "Safari" :
+    "Navegador";
+  const system =
+    /Android/u.test(value) ? "Android" :
+    /iPhone|iPad/u.test(value) ? "iOS" :
+    /Windows/u.test(value) ? "Windows" :
+    /Macintosh|Mac OS/u.test(value) ? "macOS" :
+    /Linux/u.test(value) ? "Linux" :
+    "dispositivo";
+  return `${browser} em ${system}`.slice(0, 80);
 }
 
 function roundCurrency(value: number) {
@@ -822,6 +852,7 @@ export class AccountService {
   private readonly conversionInputDir: string;
   private readonly sessionCookieName: string;
   private readonly sessionDays: number;
+  private readonly adminSessionHours: number;
   private readonly proDailyLimit: number;
   private readonly adminOwnerEmails: Set<string>;
   private readonly emailService: EmailService | null;
@@ -854,6 +885,7 @@ export class AccountService {
     this.db.exec("PRAGMA busy_timeout = 3000;");
     this.sessionCookieName = config.sessionCookieName ?? "vaptdoc-user";
     this.sessionDays = Math.max(1, config.sessionDays ?? 30);
+    this.adminSessionHours = Math.max(1, Math.min(48, config.adminSessionHours ?? 8));
     this.proDailyLimit = Math.max(1, config.proDailyLimit ?? 80);
     this.adminOwnerEmails = normalizeOwnerEmails(config.adminOwnerEmails ?? []);
     this.emailService = config.emailService?.isConfigured() ? config.emailService : null;
@@ -948,6 +980,68 @@ export class AccountService {
     return this.issueAccountSession(user.id, metadata);
   }
 
+  verifyCurrentPassword(cookieHeader: string | undefined, password: string) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const row = this.requireUserRow(authenticated.user.id);
+    if (!secureCompare(hashPassword(password, row.password_salt), row.password_hash)) {
+      throw new AppError("Sua senha atual não confere.", 401, "ACCOUNT_PASSWORD_INVALID");
+    }
+    return authenticated;
+  }
+
+  listSessions(cookieHeader: string | undefined): AccountSessionPublic[] {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const currentToken = this.getSessionToken(cookieHeader);
+    const currentHash = currentToken ? hashText(currentToken) : "";
+    const rows = this.db.prepare(`
+      SELECT id, user_id, token_hash, expires_at, created_at, last_seen_at, user_agent_hash, ip_hash, device_label
+      FROM account_sessions
+      WHERE user_id = ? AND expires_at > ?
+      ORDER BY last_seen_at DESC
+    `).all(authenticated.user.id, new Date().toISOString()) as unknown as AccountSessionRow[];
+    return rows.map((row) => ({
+      id: row.id,
+      current: Boolean(currentHash && secureCompare(row.token_hash, currentHash)),
+      deviceLabel: row.device_label || "Navegador não identificado",
+      createdAt: row.created_at,
+      lastSeenAt: row.last_seen_at,
+      expiresAt: row.expires_at
+    }));
+  }
+
+  revokeSession(cookieHeader: string | undefined, sessionId: string) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const currentToken = this.getSessionToken(cookieHeader);
+    const currentHash = currentToken ? hashText(currentToken) : "";
+    const row = this.db.prepare(`
+      SELECT id, user_id, token_hash, expires_at, created_at, last_seen_at, user_agent_hash, ip_hash, device_label
+      FROM account_sessions
+      WHERE id = ? AND user_id = ?
+    `).get(sessionId, authenticated.user.id) as AccountSessionRow | undefined;
+    if (!row) {
+      throw new AppError("Sessão não encontrada.", 404, "ACCOUNT_SESSION_NOT_FOUND");
+    }
+    const current = Boolean(currentHash && secureCompare(row.token_hash, currentHash));
+    this.db.prepare("DELETE FROM account_sessions WHERE id = ? AND user_id = ?").run(sessionId, authenticated.user.id);
+    return {
+      current,
+      clearCookie: current ? this.buildClearCookie() : undefined
+    };
+  }
+
+  revokeOtherSessions(cookieHeader: string | undefined) {
+    const authenticated = this.requireAuthenticated(cookieHeader);
+    const currentToken = this.getSessionToken(cookieHeader);
+    if (!currentToken) {
+      throw new AppError("Sessão inválida.", 401, "ACCOUNT_AUTH_REQUIRED");
+    }
+    const result = this.db.prepare(`
+      DELETE FROM account_sessions
+      WHERE user_id = ? AND token_hash <> ?
+    `).run(authenticated.user.id, hashText(currentToken));
+    return Number(result.changes ?? 0);
+  }
+
   logout(cookieHeader?: string) {
     const token = this.getSessionToken(cookieHeader);
     if (token) {
@@ -990,7 +1084,7 @@ export class AccountService {
     }
 
     const session = this.db.prepare(`
-      SELECT id, user_id, token_hash, expires_at, created_at, last_seen_at, user_agent_hash, ip_hash
+      SELECT id, user_id, token_hash, expires_at, created_at, last_seen_at, user_agent_hash, ip_hash, device_label
       FROM account_sessions
       WHERE token_hash = ?
     `).get(hashText(token)) as AccountSessionRow | undefined;
@@ -1587,6 +1681,7 @@ export class AccountService {
       SET password_hash = ?, password_salt = ?, updated_at = ?
       WHERE id = ?
     `).run(payload.passwordHash, payload.passwordSalt, new Date().toISOString(), authenticated.user.id);
+    this.revokeOtherSessions(cookieHeader);
   }
 
   async resendVerification(input: AccountVerificationRequestInput, cookieHeader?: string) {
@@ -2548,6 +2643,7 @@ export class AccountService {
         last_seen_at TEXT NOT NULL,
         user_agent_hash TEXT NOT NULL,
         ip_hash TEXT NOT NULL,
+        device_label TEXT NOT NULL DEFAULT 'Navegador não identificado',
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
@@ -2702,6 +2798,7 @@ export class AccountService {
     this.ensureConversionHistoryColumn("output_content_type", "TEXT");
     this.ensureConversionHistoryColumn("output_size_bytes", "INTEGER");
     this.ensureConversionHistoryColumn("provider", "TEXT");
+    this.ensureAccountSessionColumn("device_label", "TEXT NOT NULL DEFAULT 'Navegador não identificado'");
     this.ensureIndexes();
     this.db.prepare("UPDATE users SET email_verified_at = created_at WHERE email_verified_at IS NULL").run();
   }
@@ -2741,12 +2838,25 @@ export class AccountService {
     this.db.exec(`ALTER TABLE account_conversion_history ADD COLUMN ${columnName} ${definition}`);
   }
 
+  private ensureAccountSessionColumn(columnName: string, definition: string) {
+    const columns = this.db.prepare("PRAGMA table_info(account_sessions)").all() as Array<{ name: string }>;
+    if (columns.some((column) => column.name === columnName)) {
+      return;
+    }
+    this.db.exec(`ALTER TABLE account_sessions ADD COLUMN ${columnName} ${definition}`);
+  }
+
   private issueAccountSession(userId: string, metadata: AccountRequestMetadata): AccountAuthResult {
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + this.sessionDays * 24 * 60 * 60 * 1000);
+    const user = this.requireUserRow(userId);
+    const sessionDurationMs = this.isAdminEmail(user.email)
+      ? this.adminSessionHours * 60 * 60 * 1000
+      : this.sessionDays * 24 * 60 * 60 * 1000;
+    const expiresAt = new Date(now.getTime() + sessionDurationMs);
     const token = crypto.randomBytes(32).toString("base64url");
     const userAgentHash = hashText(String(metadata.userAgent ?? ""));
     const ipHash = hashText(String(metadata.ip ?? ""));
+    const deviceLabel = buildDeviceLabel(metadata.userAgent);
 
     this.db.prepare(`
       INSERT INTO account_sessions (
@@ -2757,8 +2867,9 @@ export class AccountService {
         created_at,
         last_seen_at,
         user_agent_hash,
-        ip_hash
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ip_hash,
+        device_label
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       crypto.randomUUID(),
       userId,
@@ -2767,7 +2878,8 @@ export class AccountService {
       now.toISOString(),
       now.toISOString(),
       userAgentHash,
-      ipHash
+      ipHash,
+      deviceLabel
     );
 
     const account = this.getPublicSessionForUser(userId);

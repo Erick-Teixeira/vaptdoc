@@ -16,6 +16,7 @@ import { createBillingService, type BillingService } from "./services/billing-se
 import { createAccountService, type AccountService } from "./services/account-service.js";
 import { ConversionJobService } from "./services/conversion-job-service.js";
 import { createEmailService } from "./services/email-service.js";
+import { createSecurityService, type SecurityService } from "./services/security-service.js";
 import { UsageTracker } from "./services/usage-tracker.js";
 import { ConversionGate } from "./utils/conversion-gate.js";
 import { AppError, isAppError } from "./utils/errors.js";
@@ -29,6 +30,7 @@ interface AppOptions {
   billingService?: BillingService;
   accountService?: AccountService;
   usageTracker?: UsageTracker;
+  securityService?: SecurityService;
 }
 
 export async function createApp(options: AppOptions = {}) {
@@ -48,18 +50,42 @@ export async function createApp(options: AppOptions = {}) {
     env.MERCADOPAGO_ACCESS_TOKEN
   ]);
 
+  if (env.NODE_ENV === "production") {
+    const missingSecrets = [
+      !String(env.ACCESS_TOKEN_SECRET).trim() && "ACCESS_TOKEN_SECRET",
+      !String(env.BILLING_STATE_SECRET).trim() && "BILLING_STATE_SECRET"
+    ].filter(Boolean);
+    if (missingSecrets.length > 0) {
+      throw new Error(`Configuração de produção incompleta: ${missingSecrets.join(", ")}.`);
+    }
+    if (accessSecretConfig.usedFallback || billingStateSecretConfig.usedFallback) {
+      throw new Error("Segredos fracos ou reutilizados não são aceitos em produção.");
+    }
+    if (
+      env.ACCESS_TOKEN_SECRET === env.BILLING_STATE_SECRET ||
+      env.ACCESS_TOKEN_SECRET === env.BACKUP_ENCRYPTION_KEY ||
+      (env.BACKUP_ENCRYPTION_KEY && env.BILLING_STATE_SECRET === env.BACKUP_ENCRYPTION_KEY)
+    ) {
+      throw new Error("Use segredos distintos para sessão, billing e backups.");
+    }
+    if (env.MALWARE_SCAN_REQUIRED && !String(env.MALWARE_SCAN_BIN).trim()) {
+      throw new Error("MALWARE_SCAN_REQUIRED exige MALWARE_SCAN_BIN.");
+    }
+  }
+
   await app.register(helmet, {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", "https://challenges.cloudflare.com"],
         imgSrc: ["'self'", "data:"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://challenges.cloudflare.com"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         frameAncestors: ["'none'"],
+        frameSrc: ["'self'", "https://challenges.cloudflare.com"],
         formAction: ["'self'"]
       }
     },
@@ -135,10 +161,26 @@ export async function createApp(options: AppOptions = {}) {
   const accountService = options.accountService ?? createAccountService({
     dataDir: env.DATA_DIR,
     sessionDays: env.ACCOUNT_SESSION_DAYS,
+    adminSessionHours: env.ADMIN_SESSION_HOURS,
     proDailyLimit: env.PRO_DAILY_LIMIT,
     adminOwnerEmails: env.ADMIN_OWNER_EMAILS.split(/[,\n]/g),
     emailService
   });
+  const securityService = options.securityService ?? createSecurityService({
+    dbPath: accountService.getDbPath(),
+    secret: accessSecretConfig.value,
+    publicAppUrl: env.PUBLIC_APP_URL,
+    allowedOrigins: env.SECURITY_ALLOWED_ORIGINS.split(/[,\n]/g),
+    turnstileSiteKey: env.TURNSTILE_SITE_KEY,
+    turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
+    turnstileAllowedHostnames: env.TURNSTILE_ALLOWED_HOSTNAMES.split(/[,\n]/g),
+    turnstileRequired: env.TURNSTILE_REQUIRED,
+    loginFailureLimit: env.LOGIN_FAILURE_LIMIT,
+    loginLockMinutes: env.LOGIN_LOCK_MINUTES,
+    adminElevationMinutes: env.ADMIN_ELEVATION_MINUTES,
+    nodeEnv: env.NODE_ENV
+  });
+  securityService.assertConfiguration();
   const usageTracker = options.usageTracker ?? new UsageTracker();
   const conversionGate = new ConversionGate(env.MAX_CONCURRENT_CONVERSIONS, env.MAX_PENDING_CONVERSIONS);
   const conversionJobService = new ConversionJobService({
@@ -211,7 +253,9 @@ export async function createApp(options: AppOptions = {}) {
     env.CONVERTAPI_TOKEN,
     env.OCR_SPACE_API_KEY,
     env.BREVO_API_KEY,
-    env.SMTP_PASS
+    env.SMTP_PASS,
+    env.TURNSTILE_SECRET_KEY,
+    env.BACKUP_ENCRYPTION_KEY
   ]
     .map((value) => String(value ?? "").trim())
     .filter((value) => value.length >= 8);
@@ -292,7 +336,19 @@ export async function createApp(options: AppOptions = {}) {
     }
   });
 
-  app.get("/health", async (request, reply) => {
+  app.get("/health", async (_request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    return {
+      status: "ok",
+      service: "vaptdoc"
+    };
+  });
+
+  app.get("/api/admin/system/health", async (request, reply) => {
+    const authenticated = accountService.getAuthenticatedAccount(request.headers.cookie);
+    if (!authenticated?.isAdmin) {
+      return reply.code(404).send({ message: "Recurso não encontrado." });
+    }
     const integrationHealth =
       typeof (conversionService as { getHealthSnapshot?: () => Promise<unknown> }).getHealthSnapshot === "function"
         ? await (conversionService as { getHealthSnapshot: () => Promise<unknown> }).getHealthSnapshot()
@@ -310,6 +366,7 @@ export async function createApp(options: AppOptions = {}) {
         conversionCacheTtlSeconds: env.CONVERSION_CACHE_TTL_SECONDS
       },
       queue: conversionGate.snapshot(),
+      security: securityService.getMetrics(),
       integrations: {
         ilovePdf: integrationHealth && typeof integrationHealth === "object" ? (integrationHealth as { ilovePdf?: unknown }).ilovePdf : {
           configured: false,
@@ -332,7 +389,13 @@ export async function createApp(options: AppOptions = {}) {
     };
   });
 
-  app.get("/documentation/json", async (_request, reply) => {
+  app.get("/documentation/json", async (request, reply) => {
+    if (env.NODE_ENV === "production") {
+      const authenticated = accountService.getAuthenticatedAccount(request.headers.cookie);
+      if (!authenticated?.isAdmin) {
+        return reply.code(404).send({ message: "Recurso não encontrado." });
+      }
+    }
     reply.header("Cache-Control", "no-store").type("application/json; charset=utf-8");
     return app.swagger();
   });
@@ -354,12 +417,26 @@ export async function createApp(options: AppOptions = {}) {
     };
   });
 
+  app.addHook("preHandler", async (request) => {
+    if (env.NODE_ENV === "test" && !request.headers.origin && !request.headers["x-csrf-token"]) {
+      return;
+    }
+    securityService.assertMutationRequest({
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      protocol: request.protocol,
+      host: String(request.headers.host ?? request.hostname)
+    });
+  });
+
   await registerApiRoutes(app, conversionService, {
     gate: conversionGate,
     accessService,
     billingService,
     accountService,
-    usageTracker
+    usageTracker,
+    securityService
   });
 
   app.addHook("onSend", async (request, reply) => {
@@ -376,6 +453,7 @@ export async function createApp(options: AppOptions = {}) {
 
   app.addHook("onClose", async () => {
     conversionJobService.stop();
+    securityService.close();
     accountService.close();
   });
 

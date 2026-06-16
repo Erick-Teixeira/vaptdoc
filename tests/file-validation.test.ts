@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { assertToolCompatibility, detectUpload } from "../src/utils/file-validation.js";
+import { assertToolCompatibility, assertUploadContentSafety, detectUpload } from "../src/utils/file-validation.js";
 
 function makeZipLikeBuffer(...entries: string[]) {
   return Buffer.concat([Buffer.from([0x50, 0x4b, 0x03, 0x04]), Buffer.from(entries.join("\n"), "utf8")]);
+}
+
+function makeCentralDirectoryEntry(compressed: number, uncompressed: number) {
+  const header = Buffer.alloc(46);
+  header.writeUInt32LE(0x02014b50, 0);
+  header.writeUInt32LE(compressed, 20);
+  header.writeUInt32LE(uncompressed, 24);
+  return Buffer.concat([Buffer.from([0x50, 0x4b, 0x03, 0x04]), header]);
 }
 
 describe("file validation", () => {
@@ -58,5 +66,16 @@ describe("file validation", () => {
 
   it("rejects 3mf for the public 3d converter catalog", () => {
     expect(() => assertToolCompatibility("3d-convert", ["3mf"])).toThrow(/nao aceita/i);
+  });
+
+  it("rejects archive expansion bombs before conversion", async () => {
+    const archive = makeCentralDirectoryEntry(1, 10_000);
+    await expect(assertUploadContentSafety([{
+      filename: "arquivo.docx",
+      size: archive.byteLength,
+      buffer: archive
+    }])).rejects.toMatchObject({
+      code: "ARCHIVE_EXPANSION_LIMIT"
+    });
   });
 });

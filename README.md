@@ -116,6 +116,7 @@ transmuta-lab/
 - [Integracoes externas](docs/INTEGRATIONS.md)
 - [Deploy e ambiente](docs/DEPLOYMENT.md)
 - [Handover e Codex de Desenvolvimento](docs/HANDOVER_CODEX.md)
+- [Relatorio de hardening de seguranca](docs/SECURITY_HARDENING_2026-06.md)
 - [Contribuindo](CONTRIBUTING.md)
 - [Seguranca operacional](SECURITY.md)
 
@@ -226,6 +227,15 @@ MAX_PENDING_CONVERSIONS=
 ```env
 ACCESS_TOKEN_SECRET=
 ACCOUNT_SESSION_DAYS=
+ADMIN_SESSION_HOURS=
+ADMIN_ELEVATION_MINUTES=
+LOGIN_FAILURE_LIMIT=
+LOGIN_LOCK_MINUTES=
+SECURITY_ALLOWED_ORIGINS=
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+TURNSTILE_ALLOWED_HOSTNAMES=
+TURNSTILE_REQUIRED=
 FREE_DAILY_LIMIT=
 PRO_DAILY_LIMIT=
 PRO_ACCESS_DAYS=
@@ -275,7 +285,52 @@ LIBREOFFICE_BIN=
 PDFTOPPM_BIN=
 TESSERACT_BIN=
 FFMPEG_BIN=
+MALWARE_SCAN_BIN=
+MALWARE_SCAN_REQUIRED=
+MAX_IMAGE_PIXELS=
+MAX_ARCHIVE_ENTRIES=
+MAX_ARCHIVE_RATIO=
 ```
+
+### Backups criptografados
+
+```env
+BACKUP_ENCRYPTION_KEY=
+```
+
+## Seguranca operacional
+
+O backend aplica controles de seguranca no limite da API, nao apenas no frontend:
+
+- CSRF assinado em cookie `vaptdoc-csrf` e header `X-CSRF-Token` para metodos mutaveis.
+- Validacao de origem para impedir chamadas cross-site fora de `PUBLIC_APP_URL` e `SECURITY_ALLOWED_ORIGINS`.
+- Bloqueio progressivo de login por e-mail/IP via `LOGIN_FAILURE_LIMIT` e `LOGIN_LOCK_MINUTES`.
+- Turnstile opcional para cadastro e login. Defina `TURNSTILE_REQUIRED=true`, `TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` para exigir anti-bot em producao.
+- Sessoes administrativas mais curtas via `ADMIN_SESSION_HOURS`.
+- Mutacoes administrativas sensiveis exigem reautenticacao temporaria via `ADMIN_ELEVATION_MINUTES`.
+- `/health` publico retorna apenas status basico; diagnostico detalhado fica em `/api/admin/system/health`.
+- Swagger JSON fica protegido em producao e so abre para administradores autenticados.
+
+### Verificacao de uploads
+
+Uploads sao validados por tipo real, tamanho e propriedades de conteudo antes da conversao:
+
+- `MAX_FILE_SIZE_MB` limita o tamanho bruto.
+- `MAX_IMAGE_PIXELS` limita imagens gigantes e evita decompression bombs.
+- `MAX_ARCHIVE_ENTRIES` e `MAX_ARCHIVE_RATIO` reduzem risco em arquivos ZIP/Office/PDF empacotados.
+- `MALWARE_SCAN_BIN` permite plugar um scanner externo, como ClamAV. Se `MALWARE_SCAN_REQUIRED=true`, o servidor falha ao iniciar sem scanner configurado.
+
+### Backups
+
+Os scripts de backup criam arquivos criptografados e verificaveis:
+
+```bash
+npm run backup:create
+npm run backup:verify -- --file backups/arquivo.vaptdoc-backup
+npm run backup:restore -- --file backups/arquivo.vaptdoc-backup --target data-restaurado
+```
+
+Use uma chave forte e exclusiva em `BACKUP_ENCRYPTION_KEY`. Nao reutilize `ACCESS_TOKEN_SECRET` ou `BILLING_STATE_SECRET`.
 
 ## Fluxos importantes
 

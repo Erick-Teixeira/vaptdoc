@@ -212,10 +212,19 @@ const accountNotificationsList = document.getElementById("account-notifications-
 const accountNotificationsEmpty = document.getElementById("account-notifications-empty");
 const accountRegisterForm = document.getElementById("account-register-form");
 const accountLoginForm = document.getElementById("account-login-form");
+const registerTurnstile = document.getElementById("register-turnstile");
+const loginTurnstile = document.getElementById("login-turnstile");
 const accountProfileForm = document.getElementById("account-profile-form");
 const accountPasswordForm = document.getElementById("account-password-form");
 const accountVerificationForm = document.getElementById("account-verification-form");
 const accountLogoutButton = document.getElementById("account-logout");
+const accountSessionList = document.getElementById("account-session-list");
+const accountRevokeOtherSessionsButton = document.getElementById("account-revoke-other-sessions");
+const adminReauthModal = document.getElementById("admin-reauth-modal");
+const adminReauthForm = document.getElementById("admin-reauth-form");
+const adminReauthPassword = document.getElementById("admin-reauth-password");
+const adminReauthClose = document.getElementById("admin-reauth-close");
+const adminReauthStatus = document.getElementById("admin-reauth-status");
 const accountUpgradeButton = document.getElementById("account-upgrade-button");
 const accountSubscriptionManageButton = document.getElementById("account-subscription-manage-button");
 const accountStatusOutputs = Array.from(document.querySelectorAll("[data-account-status]"));
@@ -423,6 +432,11 @@ let accountWorkspaceState = {
 let accountOverviewChartMetric = "conversions";
 let accountPaneReturnStack = [];
 let billingAccountReturnState = null;
+let csrfToken = "";
+let turnstileConfig = { enabled: false, siteKey: "" };
+let turnstileScriptPromise = null;
+const turnstileWidgetIds = new Map();
+let adminReauthResolver = null;
 const themeCookieName = "vaptdoc-theme";
 const legacyThemeCookieName = "transmuta-theme";
 const favoritesStorageKey = "vaptdoc-favorites";
@@ -438,6 +452,55 @@ const isAndroidUserAgent =
 const internalClientHeader = {
   "X-Vaptdoc-Client": "web"
 };
+const nativeFetch = window.fetch.bind(window);
+
+function readCookieValue(name) {
+  const prefix = `${encodeURIComponent(name)}=`;
+  const item = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(prefix));
+  if (!item) {
+    return "";
+  }
+  try {
+    return decodeURIComponent(item.slice(prefix.length));
+  } catch {
+    return item.slice(prefix.length);
+  }
+}
+
+async function secureFetch(input, init = {}) {
+  const requestUrl = new URL(typeof input === "string" || input instanceof URL ? input : input.url, window.location.href);
+  const method = String(init.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+  const sameOrigin = requestUrl.origin === window.location.origin;
+  const unsafe = !["GET", "HEAD", "OPTIONS"].includes(method);
+  const nextInit = { ...init };
+
+  if (sameOrigin && unsafe) {
+    const headers = new Headers(init.headers ?? (input instanceof Request ? input.headers : undefined));
+    const currentToken = csrfToken || readCookieValue("vaptdoc-csrf");
+    if (currentToken) {
+      headers.set("X-CSRF-Token", currentToken);
+    }
+    nextInit.headers = headers;
+  }
+
+  let response = await nativeFetch(input, nextInit);
+  const isAdminMutation =
+    sameOrigin &&
+    unsafe &&
+    requestUrl.pathname.startsWith("/api/admin/") &&
+    requestUrl.pathname !== "/api/admin/reauth";
+
+  if (isAdminMutation && response.status === 401 && !init.__vaptdocRetried) {
+    const payload = await response.clone().json().catch(() => null);
+    if (payload?.code === "ADMIN_REAUTH_REQUIRED") {
+      await requestAdminElevation();
+      response = await nativeFetch(input, { ...nextInit, __vaptdocRetried: true });
+    }
+  }
+  return response;
+}
+
+window.fetch = secureFetch;
 const browserThemeColors = {
   light: "#7d38ff",
   dark: "#5d31c7"
@@ -2611,7 +2674,167 @@ function isManagedCheckoutEnabled() {
   return Boolean(accessSession?.billing?.checkoutEnabled);
 }
 
+function closeAdminReauth(result = false) {
+  if (!adminReauthModal) {
+    adminReauthResolver?.(result);
+    adminReauthResolver = null;
+    return;
+  }
+  adminReauthModal.hidden = true;
+  adminReauthPassword.value = "";
+  document.body.classList.remove("modal-open");
+  adminReauthResolver?.(result);
+  adminReauthResolver = null;
+}
+
+function requestAdminElevation() {
+  if (!adminReauthModal || !adminReauthForm) {
+    return Promise.reject(new Error("A confirmação administrativa não está disponível."));
+  }
+  if (adminReauthResolver) {
+    return Promise.reject(new Error("A confirmação administrativa já está em andamento."));
+  }
+  adminReauthModal.hidden = false;
+  document.body.classList.add("modal-open");
+  adminReauthStatus.textContent = "Sua senha não será armazenada.";
+  window.setTimeout(() => adminReauthPassword?.focus(), 40);
+  return new Promise((resolve, reject) => {
+    adminReauthResolver = (success) => {
+      if (success) {
+        resolve(true);
+      } else {
+        reject(new Error("A confirmação administrativa foi cancelada."));
+      }
+    };
+  });
+}
+
+function loadTurnstileScript() {
+  if (!turnstileConfig.enabled || !turnstileConfig.siteKey) {
+    return Promise.resolve(null);
+  }
+  if (window.turnstile) {
+    return Promise.resolve(window.turnstile);
+  }
+  if (turnstileScriptPromise) {
+    return turnstileScriptPromise;
+  }
+  turnstileScriptPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", () => resolve(window.turnstile), { once: true });
+    script.addEventListener("error", () => reject(new Error("Não foi possível carregar a verificação anti-bot.")), { once: true });
+    document.head.append(script);
+  });
+  return turnstileScriptPromise;
+}
+
+async function renderTurnstileWidget(container, action) {
+  if (!container) {
+    return;
+  }
+  container.hidden = !turnstileConfig.enabled;
+  if (!turnstileConfig.enabled) {
+    return;
+  }
+  const turnstile = await loadTurnstileScript();
+  if (!turnstile || turnstileWidgetIds.has(action)) {
+    return;
+  }
+  const widgetId = turnstile.render(container, {
+    sitekey: turnstileConfig.siteKey,
+    action,
+    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+    "response-field": false
+  });
+  turnstileWidgetIds.set(action, widgetId);
+}
+
+function getTurnstileResponse(action) {
+  if (!turnstileConfig.enabled) {
+    return undefined;
+  }
+  const widgetId = turnstileWidgetIds.get(action);
+  return widgetId === undefined ? "" : String(window.turnstile?.getResponse(widgetId) ?? "");
+}
+
+function resetTurnstile(action) {
+  const widgetId = turnstileWidgetIds.get(action);
+  if (widgetId !== undefined) {
+    window.turnstile?.reset(widgetId);
+  }
+}
+
+async function refreshAccountSessions() {
+  if (!accountSessionList || !isAccountAuthenticated()) {
+    return [];
+  }
+  const response = await fetch("/api/account/sessions", { credentials: "same-origin" });
+  const payload = await response.json().catch(() => ({ sessions: [] }));
+  if (!response.ok) {
+    throw new Error(payload.message ?? "Não foi possível carregar os dispositivos conectados.");
+  }
+  const sessions = Array.isArray(payload.sessions) ? payload.sessions : [];
+  accountSessionList.replaceChildren();
+  for (const session of sessions) {
+    const item = document.createElement("article");
+    item.className = "security-list-item";
+    const copy = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = `${session.deviceLabel || "Navegador"}${session.current ? " · este dispositivo" : ""}`;
+    const meta = document.createElement("span");
+    meta.textContent = `Atividade: ${formatDateTime(session.lastSeenAt)} · expira ${formatDateTime(session.expiresAt)}`;
+    copy.append(title, meta);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ghost-action";
+    button.textContent = session.current ? "Sair daqui" : "Encerrar";
+    button.setAttribute("aria-label", `Encerrar sessão em ${session.deviceLabel || "dispositivo"}`);
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        const revokeResponse = await fetch(`/api/account/sessions/${encodeURIComponent(session.id)}`, {
+          method: "DELETE",
+          credentials: "same-origin",
+          headers: internalClientHeader
+        });
+        const revokePayload = await revokeResponse.json().catch(() => ({}));
+        if (!revokeResponse.ok) {
+          throw new Error(revokePayload.message ?? "Não foi possível encerrar a sessão.");
+        }
+        if (revokePayload.currentSessionRevoked) {
+          await refreshAccessSession();
+          hideAccountModal();
+        } else {
+          await refreshAccountSessions();
+        }
+        setAccountStatus("Sessão encerrada com segurança.", { toast: true, tone: "success" });
+      } catch (error) {
+        setAccountStatus(error instanceof Error ? error.message : "Não foi possível encerrar a sessão.", { toast: true, tone: "error" });
+      } finally {
+        button.disabled = false;
+      }
+    });
+    item.append(copy, button);
+    accountSessionList.append(item);
+  }
+  return sessions;
+}
+
 function applySessionPayload(payload = {}) {
+  if (payload.security?.csrfToken) {
+    csrfToken = String(payload.security.csrfToken);
+  }
+  if (payload.security?.turnstile) {
+    turnstileConfig = {
+      enabled: Boolean(payload.security.turnstile.enabled),
+      siteKey: String(payload.security.turnstile.siteKey ?? "")
+    };
+    void renderTurnstileWidget(registerTurnstile, "register").catch(() => undefined);
+    void renderTurnstileWidget(loginTurnstile, "login").catch(() => undefined);
+  }
   accessSession = {
     ...accessSession,
     ...payload,
@@ -3531,6 +3754,17 @@ function showAccountModal(options = {}) {
   if (focus === "admin") {
     setAdminPane("overview");
     void loadAdminPanel();
+  }
+  if (focus === "settings" && isAccountAuthenticated()) {
+    void refreshAccountSessions().catch((error) => {
+      setAccountStatus(error instanceof Error ? error.message : "Não foi possível carregar os dispositivos conectados.");
+    });
+  }
+  if (focus === "register") {
+    void renderTurnstileWidget(registerTurnstile, "register").catch(() => undefined);
+  }
+  if (focus === "login") {
+    void renderTurnstileWidget(loginTurnstile, "login").catch(() => undefined);
   }
 
   window.setTimeout(() => {
@@ -8920,6 +9154,66 @@ accountLogoutButton?.addEventListener("click", async () => {
     setAccountStatus(error instanceof Error ? error.message : "Não foi possível sair da conta.");
   }
 });
+
+accountRevokeOtherSessionsButton?.addEventListener("click", async () => {
+  accountRevokeOtherSessionsButton.disabled = true;
+  try {
+    const response = await fetch("/api/account/sessions", {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: internalClientHeader
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.message ?? "Não foi possível encerrar as outras sessões.");
+    }
+    await refreshAccountSessions();
+    setAccountStatus(`${Number(payload.revoked ?? 0)} outra(s) sessão(ões) encerrada(s).`, {
+      toast: true,
+      tone: "success"
+    });
+  } catch (error) {
+    setAccountStatus(error instanceof Error ? error.message : "Não foi possível encerrar as outras sessões.", {
+      toast: true,
+      tone: "error"
+    });
+  } finally {
+    accountRevokeOtherSessionsButton.disabled = false;
+  }
+});
+
+adminReauthForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const password = String(new FormData(adminReauthForm).get("password") ?? "");
+  adminReauthStatus.textContent = "Confirmando sua identidade...";
+  try {
+    const response = await fetch("/api/admin/reauth", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        ...internalClientHeader
+      },
+      body: JSON.stringify({ password })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.message ?? "Não foi possível confirmar sua identidade.");
+    }
+    closeAdminReauth(true);
+  } catch (error) {
+    adminReauthStatus.textContent = error instanceof Error ? error.message : "Não foi possível confirmar sua identidade.";
+    adminReauthPassword?.focus();
+    adminReauthPassword?.select();
+  }
+});
+
+adminReauthClose?.addEventListener("click", () => closeAdminReauth(false));
+adminReauthModal?.addEventListener("click", (event) => {
+  if (event.target?.dataset?.closeAdminReauth === "true") {
+    closeAdminReauth(false);
+  }
+});
 accountDashboardLogoutButton?.addEventListener("click", async () => {
   try {
     await logoutAccount();
@@ -8937,13 +9231,15 @@ accountRegisterForm?.addEventListener("submit", async (event) => {
   const input = {
     displayName: String(formData.get("displayName") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim(),
-    password: String(formData.get("password") ?? "")
+    password: String(formData.get("password") ?? ""),
+    turnstileToken: getTurnstileResponse("register")
   };
 
   setAccountStatus("Enviando o código para confirmar sua conta...", { toast: false });
 
   try {
     const payload = await registerAccount(input);
+    resetTurnstile("register");
     setPendingVerification(payload.verification, {
       successMessage: "Conta confirmada com sucesso.",
       nextFocus: "overview"
@@ -8961,13 +9257,15 @@ accountLoginForm?.addEventListener("submit", async (event) => {
   const formData = new FormData(accountLoginForm);
   const input = {
     email: String(formData.get("email") ?? "").trim(),
-    password: String(formData.get("password") ?? "")
+    password: String(formData.get("password") ?? ""),
+    turnstileToken: getTurnstileResponse("login")
   };
 
   setAccountStatus("Entrando na sua conta...", { toast: false });
 
   try {
     await loginAccount(input);
+    resetTurnstile("login");
     accountLoginForm.reset();
     setAccountStatus("Conta carregada com sucesso.", { toast: false });
     setStatus("Conta conectada com sucesso.", { toast: false });

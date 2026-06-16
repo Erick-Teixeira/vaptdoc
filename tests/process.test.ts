@@ -59,4 +59,20 @@ describe("runCommand", () => {
       vi.useRealTimers();
     }
   });
+
+  it("terminates a process that emits excessive output", async () => {
+    const child = new MockChildProcess();
+    spawnMock.mockReturnValue(child);
+    const { runCommand } = await import("../src/utils/process.js");
+    const promise = runCommand("fake-command", ["--noisy"], {
+      timeoutMs: 2_000,
+      maxOutputBytes: 8
+    });
+    const assertion = expect(promise).rejects.toMatchObject({
+      code: "PROCESS_OUTPUT_LIMIT"
+    });
+    child.stdout.write("0123456789");
+    await assertion;
+    expect(child.kill).toHaveBeenCalled();
+  });
 });

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import sharp from "sharp";
 import { createApp } from "../src/app.js";
 import { createAccessService } from "../src/services/access-service.js";
 import { UsageTracker } from "../src/services/usage-tracker.js";
@@ -204,14 +205,10 @@ describe("app routes", () => {
 
     expect(health.statusCode).toBe(200);
     expect(health.json().service).toBe("vaptdoc");
-    expect(health.json().limits.maxFileSizeMB).toBeGreaterThan(0);
-    expect(health.json().limits.conversionCacheTtlSeconds).toBeGreaterThanOrEqual(0);
-    expect(health.json().queue).toBeDefined();
-    expect(health.json().queue.maxConcurrent).toBeGreaterThan(0);
-    expect(health.json().integrations).toBeDefined();
-    expect(health.json().integrations.ilovePdf).toBeDefined();
-    expect(health.json().integrations.aspose3d).toBeDefined();
-    expect(health.json().integrations.email.provider).toBeDefined();
+    expect(health.json()).toEqual({
+      status: "ok",
+      service: "vaptdoc"
+    });
     expect(ready.statusCode).toBe(200);
     expect(ready.json().status).toBe("ready");
   });
@@ -484,6 +481,14 @@ describe("app routes", () => {
       } as never
     });
     apps.push(app);
+    const jpegBuffer = await sharp({
+      create: {
+        width: 1,
+        height: 1,
+        channels: 3,
+        background: "#ffffff"
+      }
+    }).jpeg().toBuffer();
 
     const multipart = buildMultipartBody({
       toolId: "jpg-to-png",
@@ -492,7 +497,7 @@ describe("app routes", () => {
         {
           filename: "foto.jpg",
           contentType: "image/jpeg",
-          buffer: Buffer.from([0xff, 0xd8, 0xff, 0xdb])
+          buffer: jpegBuffer
         }
       ]
     });
@@ -515,7 +520,7 @@ describe("app routes", () => {
         {
           filename: "foto-2.jpg",
           contentType: "image/jpeg",
-          buffer: Buffer.from([0xff, 0xd8, 0xff, 0xdb])
+          buffer: jpegBuffer
         }
       ]
     });

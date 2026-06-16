@@ -6547,6 +6547,59 @@ html[data-theme="dark"] .choice-chip {
   }
 }
 
+.turnstile-slot {
+  min-height: 65px;
+  display: grid;
+  place-items: center;
+}
+
+.turnstile-slot[hidden] {
+  display: none;
+}
+
+.account-session-manager {
+  grid-column: 1 / -1;
+}
+
+.security-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+.security-list-item:last-child {
+  border-bottom: 0;
+}
+
+.security-list-item > div {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.security-list-item span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.admin-reauth-dialog {
+  max-width: 31rem;
+}
+
+@media (max-width: 640px) {
+  .security-list-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .security-list-item .ghost-action {
+    width: 100%;
+  }
+}
+
 @keyframes progressShimmer {
   0% {
     background-position: 200% 0;

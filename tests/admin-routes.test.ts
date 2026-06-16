@@ -207,12 +207,27 @@ describe("admin routes", () => {
     });
     expect(duplicateAccount.statusCode).toBe(409);
 
+    const elevation = await app.inject({
+      method: "POST",
+      url: "/api/admin/reauth",
+      headers: {
+        "content-type": "application/json",
+        cookie: ownerCookie,
+        ...internalClientHeaders
+      },
+      payload: {
+        password: "SenhaSegura123"
+      }
+    });
+    expect(elevation.statusCode).toBe(200);
+    const elevatedOwnerCookie = createCookieHeader(ownerCookie, elevation.headers["set-cookie"]);
+
     const credits = await app.inject({
       method: "POST",
       url: `/api/admin/users/${userId}/credits`,
       headers: {
         "content-type": "application/json",
-        cookie: ownerCookie,
+        cookie: elevatedOwnerCookie,
         ...internalClientHeaders
       },
       payload: {
@@ -228,7 +243,7 @@ describe("admin routes", () => {
       url: `/api/admin/users/${userId}/discount`,
       headers: {
         "content-type": "application/json",
-        cookie: ownerCookie,
+        cookie: elevatedOwnerCookie,
         ...internalClientHeaders
       },
       payload: {
@@ -244,7 +259,7 @@ describe("admin routes", () => {
       url: "/api/admin/promos",
       headers: {
         "content-type": "application/json",
-        cookie: ownerCookie,
+        cookie: elevatedOwnerCookie,
         ...internalClientHeaders
       },
       payload: {
